@@ -1,0 +1,13 @@
+<ion-row lines="none" class="ion-no-padding ion-align-items-center">
+  <ion-col size="3">
+    <ion-row class="ion-justify-content-center">
+      <ion-avatar>
+        <airgap-identicon [address]="address"></airgap-identicon>
+      </ion-avatar>
+      <airgap-currency-symbol [symbol]="symbol" *ngIf="hasSymbol" class="symbol--icon"></airgap-currency-symbol>
+    </ion-row>
+  </ion-col>
+  <ion-col size="9">
+    <airgap-labeled-details position="stacked" [label]="label" [details]="address" [selectable]="true"></airgap-labeled-details>
+  </ion-col>
+</ion-row>

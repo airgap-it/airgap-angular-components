@@ -13,6 +13,12 @@
     "@angular/core": "^10.0.2",
     "@angular/platform-browser": "^9.1.2",
     "@angular/platform-browser-dynamic": "^9.1.2",
+    "@download/blockies": "^1.0.3",
+    "@ionic/angular": "^5.2.3",
+    "@ngx-translate/core": "^13.0.0",
+    "airgap-coin-lib": "^0.8.8",
+    "bignumber.js": "^9.0.0",
+    "myetherwallet-blockies": "^0.1.1",
     "rxjs": "^6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "^0.10.3"
