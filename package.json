@@ -5,6 +5,7 @@
     "ng": "ng",
     "build": "lerna run build",
     "test": "lerna run test",
+    "test-ci": "lerna run test-ci",
     "lint": "eslint 'packages/core/src/**/*.ts' 'packages/ng-rx/src/**/*.ts'",
     "e2e": "lerna run e2e"
   },
@@ -41,9 +42,14 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~3.3.0",
     "karma-jasmine-html-reporter": "^1.5.0",
+    "karma-phantomjs2-launcher": "^0.5.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-spec-reporter": "0.0.32",
+    "karma-webpack": "^4.0.2",
     "lerna": "^3.22.1",
     "ng-packagr": "^10.0.0",
     "protractor": "~7.0.0",
+    "puppeteer": "^5.1.0",
     "ts-node": "~8.3.0",
     "tslint": "^6.1.2",
     "typescript": "~3.9.5"
