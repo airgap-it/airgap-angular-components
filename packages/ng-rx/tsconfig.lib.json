@@ -4,6 +4,9 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/ng-rx",
   },
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "test/test.ts",
     "**/*.spec.ts"

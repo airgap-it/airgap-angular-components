@@ -43,7 +43,7 @@
         }
       }
     },
-    "ngRx": {
+    "ng-rx": {
       "projectType": "library",
       "root": "packages/ng-rx",
       "sourceRoot": "packages/ng-rx/src",
@@ -82,6 +82,5 @@
           }
         }
       }
-    }},
-  "defaultProject": "core"
+    }}
 }

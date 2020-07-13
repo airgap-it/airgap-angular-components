@@ -1,11 +1,18 @@
 {
   "name": "ng-rx",
   "version": "0.0.1",
+  "scripts": {
+    "ng": "ng",
+    "build": "ng build ng-rx",
+    "test": "ng test ng-rx",
+    "e2e": "ng e2e ng-rx"
+  },
   "dependencies": {
     "@angular/common": "^10.0.2",
     "@angular/core": "^10.0.2",
     "@angular/platform-browser": "^9.1.2",
     "@angular/platform-browser-dynamic": "^9.1.2",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "zone.js": "^0.10.3"
   }
 }

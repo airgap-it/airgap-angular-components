@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core'
 
 @Component({
   selector: 'lib-ngRx',
@@ -7,14 +7,6 @@ import { Component, OnInit } from '@angular/core';
       ng-rx works!
     </p>
   `,
-  styles: [
-  ]
+  styles: []
 })
-export class NgRxComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-}
+export class NgRxComponent {}

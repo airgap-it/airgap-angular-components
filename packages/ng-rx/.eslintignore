@@ -1,4 +1,3 @@
-#
 .history
 .dockerignore
 .DS_Store
@@ -6,6 +5,7 @@
 .nyc_output
 .prettierignore
 .prettierrc
+.eslintrc.js
 coverage
 dist
 node_modules
