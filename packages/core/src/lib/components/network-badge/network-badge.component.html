@@ -1,0 +1,7 @@
+<ion-row class="ion-justify-content-center">
+  <ng-container *ngIf="networkInfo && networkInfo.type !== networkType.MAINNET" class="ion-no-padding" lines="none" slot="start">
+    Network:
+    <ion-badge class="badge__margin" color="danger">{{ networkInfo.name }}</ion-badge>
+    <ion-badge *ngIf="networkInfo.type === networkType.CUSTOM" class="badge__margin">{{ networkInfo.rpcUrl }}</ion-badge>
+  </ng-container>
+</ion-row>
