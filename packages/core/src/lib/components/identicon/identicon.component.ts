@@ -29,7 +29,7 @@ export class IdenticonComponent {
     }
   }
 
-  public identicon?: string
+  public identicon: string | undefined
 
   private b582int(v: string): string {
     let rv = new BigNumber(0)

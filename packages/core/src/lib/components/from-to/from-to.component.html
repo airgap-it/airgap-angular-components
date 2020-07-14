@@ -1,4 +1,5 @@
 <ng-container *ngIf="transaction">
   <airgap-labeled-address *ngFor="let address of transaction.from" [address]="address" label="from"></airgap-labeled-address>
+  
   <airgap-labeled-address *ngFor="let address of transaction.to" [address]="address" label="to"></airgap-labeled-address>
 </ng-container>

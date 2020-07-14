@@ -51,6 +51,7 @@ module.exports = {
     'no-param-reassign': 'error',
     '@typescript-eslint/no-parameter-properties': 'off',
     '@typescript-eslint/no-require-imports': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
     '@typescript-eslint/no-this-alias': 'error',
     '@typescript-eslint/no-unnecessary-qualifier': 'error',
     '@typescript-eslint/no-unnecessary-type-arguments': 'error',

@@ -13,14 +13,7 @@
           "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
             "tsConfig": "packages/core/tsconfig.lib.json",
-            "project": "packages/core/ng-package.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "packages/core/src/assets",
-                "output": "core/assets"
-              }
-            ]
+            "project": "packages/core/ng-package.json"
           },
           "configurations": {
             "production": {

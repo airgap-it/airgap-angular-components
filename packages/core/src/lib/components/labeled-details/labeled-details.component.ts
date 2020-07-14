@@ -7,13 +7,13 @@ import { Component, Input } from '@angular/core'
 })
 export class LabeledDetailsComponent {
   @Input()
-  public readonly label: string
+  public readonly label: string | undefined
 
   @Input()
-  public readonly details: string
+  public readonly details: string | undefined
 
   @Input()
-  public readonly position?: 'fixed' | 'floating' | 'stacked'
+  public readonly position: 'fixed' | 'floating' | 'stacked' | undefined
 
   @Input()
   public readonly selectable: boolean = false

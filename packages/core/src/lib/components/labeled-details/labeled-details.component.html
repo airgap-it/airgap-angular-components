@@ -1,4 +1,4 @@
-<ion-label position="position" class="ion-text-uppercase">{{ label | translate }}</ion-label>
-<div>
+<ion-label *ngIf="label" position="position" class="ion-text-uppercase">{{ label | translate }}</ion-label>
+<div *ngIf="details">
   <span [ngClass]="selectable ? 'text-selectable' : ''" class="typography--mono">{{ details | translate }}</span>
 </div>

@@ -7,7 +7,7 @@ import { AfterViewInit, Component, Input, OnChanges } from '@angular/core'
 })
 export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
-  public readonly symbol: string
+  public readonly symbol: string | undefined
 
   public symbolURL: string = './assets/symbols/generic-coin.svg'
 
@@ -20,12 +20,14 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   }
 
   private loadImage(): void {
-    const imageURL: string = `./assets/symbols/${this.symbol.toLowerCase()}.svg`
-    const img: HTMLImageElement = new Image()
+    if (this.symbol !== undefined) {
+      const imageURL: string = `./assets/symbols/${this.symbol.toLowerCase()}.svg`
+      const img: HTMLImageElement = new Image()
 
-    img.onload = () => {
-      this.symbolURL = imageURL
+      img.onload = () => {
+        this.symbolURL = imageURL
+      }
+      img.src = imageURL
     }
-    img.src = imageURL
   }
 }
