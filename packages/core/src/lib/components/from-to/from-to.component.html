@@ -31,7 +31,7 @@
         <ion-label>Transaction Details</ion-label>
         <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" slot="end"></ion-toggle>
       </ion-item>
-      <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.details | json }}</pre>
+      <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
     </ion-col>
   </ion-row>
 </ng-container>

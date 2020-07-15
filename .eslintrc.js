@@ -73,7 +73,31 @@ module.exports = {
     '@typescript-eslint/unified-signatures': 'error',
     'arrow-body-style': ['error', 'as-needed'],
     'arrow-parens': ['off', 'as-needed'],
-    '@typescript-eslint/naming-convention': 'warn',
+    '@typescript-eslint/naming-convention': [
+      'warn',
+      {
+        selector: 'default',
+        format: ['camelCase'],
+        leadingUnderscore: 'allow',
+        trailingUnderscore: 'allow',
+      },
+    
+      {
+        selector: 'variable',
+        format: ['camelCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
+        trailingUnderscore: 'allow',
+      },
+    
+      {
+        selector: 'typeLike',
+        format: ['PascalCase'],
+      },
+      { 
+        selector: "enumMember", 
+        format: ["PascalCase"]
+      }
+    ],
     'class-methods-use-this': 'off',
     'comma-dangle': 'off',
     complexity: 'error',
@@ -166,7 +190,7 @@ module.exports = {
         next: 'return'
       }
     ],
-    'prefer-arrow/prefer-arrow-functions': 'error',
+    'prefer-arrow/prefer-arrow-functions': 'off',
     'prefer-const': 'error',
     'prefer-object-spread': 'off',
     '@typescript-eslint/prefer-readonly': 'error',

@@ -4,8 +4,11 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
     "types": [
-      "jasmine"
-    ]
+      "jasmine",
+      "node"
+    ],
+    "strict": false,
+    "noImplicitAny": false
   },
   "files": [
     "test/test.ts"

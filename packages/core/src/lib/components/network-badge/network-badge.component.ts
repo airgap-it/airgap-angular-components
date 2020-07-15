@@ -1,6 +1,7 @@
 import { Component, Input, AfterViewInit } from '@angular/core'
 import { ProtocolNetwork, NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { NetworkInfo, getNetworkInfo } from '../../utils/network'
+import { NetworkInfo } from '../../types/NetworkInfo'
+import { getNetworkInfo } from '../../utils/network'
 
 @Component({
   selector: 'airgap-network-badge',
