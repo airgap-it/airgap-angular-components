@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core'
-import { AmountConverterPipe } from './amount-converter/amount-converter.pipe'
+import { AmountConverterPipe } from './amount-converter/amount-converter.pipe';
+import { FeeConverterPipe } from './fee-converter.pipe'
 
 @NgModule({
-  declarations: [AmountConverterPipe],
+  declarations: [AmountConverterPipe, FeeConverterPipe],
   imports: [],
   exports: []
 })

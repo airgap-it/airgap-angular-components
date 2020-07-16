@@ -4,12 +4,12 @@ import { ICoinProtocol } from 'airgap-coin-lib'
 import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ProtocolsService } from '../../services/protocols/protocols.service'
 
+type AmountConverterValue = BigNumber | string | number | null | undefined
+
 interface AmountConverterArgs {
   protocol: ICoinProtocol | ProtocolSymbols | undefined
   maxDigits?: number
 }
-
-type AmountConverterValue = BigNumber | string | number | null | undefined
 
 interface AmountConverterNumberFormat {
   decimalSeparator: string
