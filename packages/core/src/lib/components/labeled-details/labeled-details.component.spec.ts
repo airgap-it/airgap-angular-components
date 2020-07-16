@@ -1,16 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 
+import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { LabeledDetailsComponent } from './labeled-details.component'
 
 describe('LabeledDetailsComponent', () => {
   let component: LabeledDetailsComponent
   let fixture: ComponentFixture<LabeledDetailsComponent>
 
+  let testBedUtils: TestBedUtils
+
   beforeEach(async(() => {
+    testBedUtils = new TestBedUtils()
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    TestBed.configureTestingModule({
-      declarations: [LabeledDetailsComponent]
-    }).compileComponents()
+    TestBed.configureTestingModule(
+      testBedUtils.moduleDef({
+        declarations: [LabeledDetailsComponent]
+      })
+    ).compileComponents()
   }))
 
   beforeEach(() => {

@@ -3,7 +3,7 @@
 
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -19,11 +19,13 @@ module.exports = function (config) {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, '../../coverage/core'),
-      reports: ['html', 'lcovonly', 'text-summary'],
+      reports: ['text', 'lcovonly'],
       fixWebpackSourcePaths: true
     },
-    reporters: ['progress', 'spec', 'coverage-istanbul'],
+    specReporter: {
+      suppressSkipped: false // do not print information about skipped tests
+    },
+    reporters: ['spec', 'coverage-istanbul'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -35,6 +37,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox']
       }
     },
-    singleRun: false,
-  });
-};
+    singleRun: false
+  })
+}
+

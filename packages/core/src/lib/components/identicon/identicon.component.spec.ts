@@ -1,16 +1,22 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 
+import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { IdenticonComponent } from './identicon.component'
 
 describe('IdenticonComponent', () => {
   let component: IdenticonComponent
   let fixture: ComponentFixture<IdenticonComponent>
 
+  let testBedUtils: TestBedUtils
+
   beforeEach(async(() => {
+    testBedUtils = new TestBedUtils()
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    TestBed.configureTestingModule({
-      declarations: [IdenticonComponent]
-    }).compileComponents()
+    TestBed.configureTestingModule(
+      testBedUtils.moduleDef({
+        declarations: [IdenticonComponent]
+      })
+    ).compileComponents()
   }))
 
   beforeEach(() => {
