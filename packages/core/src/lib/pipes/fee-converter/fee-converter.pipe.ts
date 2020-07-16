@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core'
 import BigNumber from 'bignumber.js'
 import { ICoinProtocol } from 'airgap-coin-lib'
 import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { ProtocolsService } from 'src/lib/services/protocols/protocols.service'
+import { ProtocolService } from '../../services/protocol/protocol.service'
 
 type FeeConverterValue = BigNumber | string | number | null | undefined
 
@@ -15,7 +15,7 @@ interface FeeConverterArgs {
 })
 export class FeeConverterPipe implements PipeTransform {
 
-  constructor(private readonly protocolsService: ProtocolsService) {}
+  constructor(private readonly protocolsService: ProtocolService) {}
 
   public transform(value: FeeConverterValue, args: FeeConverterArgs): string {
     if (args.protocol === undefined || value === null || value === undefined) {

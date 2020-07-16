@@ -1,7 +1,7 @@
 import { Component, Input, AfterViewInit } from '@angular/core'
 import { ProtocolNetwork, NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { NetworkInfo } from '../../types/NetworkInfo'
-import { getNetworkInfo } from '../../utils/network'
+import { NetworkInfo } from '../../types'
+import { getProtocolNetworkInfo } from '../../utils'
 
 @Component({
   selector: 'airgap-network-badge',
@@ -17,7 +17,7 @@ export class NetworkBadgeComponent implements AfterViewInit {
 
   public ngAfterViewInit(): void {
     if (this.network) {
-      this.networkInfo = getNetworkInfo(this.network)
+      this.networkInfo = getProtocolNetworkInfo(this.network)
     }
   }
 }

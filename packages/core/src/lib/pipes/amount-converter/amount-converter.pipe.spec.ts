@@ -1,22 +1,22 @@
 import BigNumber from 'bignumber.js'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { ProtocolsService } from '../../services/protocols/protocols.service'
+import { ProtocolService } from '../../services/protocol/protocol.service'
 import { AmountConverterPipe } from './amount-converter.pipe'
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
 
 describe('AmountConverter Pipe', () => {
-  let protocolsService: ProtocolsService
+  let protocolService: ProtocolService
   let amountConverterPipe: AmountConverterPipe
 
   beforeAll(async () => {
-    protocolsService = new ProtocolsService()
-    await protocolsService.waitReady()
+    protocolService = new ProtocolService()
+    protocolService.init()
   })
 
   beforeEach(() => {
-    amountConverterPipe = new AmountConverterPipe(protocolsService)
+    amountConverterPipe = new AmountConverterPipe(protocolService)
   })
 
   describe('format number with commas', () => {

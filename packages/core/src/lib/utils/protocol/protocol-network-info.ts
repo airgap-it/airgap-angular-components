@@ -1,7 +1,7 @@
 import { NetworkType, ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { NetworkInfo } from '../../types/NetworkInfo'
+import { NetworkInfo } from '../../types/protocol/ProtocolNetworkInfo'
 
-export function getNetworkInfo(network: ProtocolNetwork): NetworkInfo {
+export function getProtocolNetworkInfo(network: ProtocolNetwork): NetworkInfo {
   const splits: string[] = network.identifier.split('-')
   
   return {

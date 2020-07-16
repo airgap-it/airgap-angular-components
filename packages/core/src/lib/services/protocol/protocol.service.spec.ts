@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing'
 
-import { ProtocolsService } from './protocols.service'
+import { ProtocolService } from './protocol.service'
 
 describe('ProtocolsService', () => {
-  let service: ProtocolsService
+  let service: ProtocolService
 
   beforeEach(() => {
     TestBed.configureTestingModule({})
-    service = TestBed.inject(ProtocolsService)
+    service = TestBed.inject(ProtocolService)
   })
 
   it('should be created', () => {

@@ -1,14 +1,18 @@
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { ProtocolsService } from '../../services/protocols/protocols.service'
+import { ProtocolService } from '../../services/protocol/protocol.service'
 import { FeeConverterPipe } from './fee-converter.pipe'
 
 describe('FeeConverter Pipe', () => {
   let feeConverterPipe: FeeConverterPipe
-  let protocolsService: ProtocolsService
+  let protocolService: ProtocolService
+
+  beforeAll(() => {
+    protocolService = new ProtocolService()
+    protocolService.init()
+  })
 
   beforeEach(() => {
-    protocolsService = new ProtocolsService()
-    feeConverterPipe = new FeeConverterPipe(protocolsService)
+    feeConverterPipe = new FeeConverterPipe(protocolService)
   })
 
   it('should display very small ETH number to a non-scientific string representation', () => {
