@@ -15,8 +15,8 @@
     </ion-col>
     <ion-col size="9" class="ion-padding-bottom">
       <airgap-labeled-details *ngIf="transaction.extra && transaction.extra.type" class="ion-padding-bottom" position="stacked" label="type" [details]="transaction.extra.type"></airgap-labeled-details>
-      <airgap-labeled-details class="ion-padding-bottom" position="stacked" label="amount" [details]="transaction.amount"></airgap-labeled-details>
-      <airgap-labeled-details *ngIf="transaction.fee" [ngClass]="transaction.timestamp || transaction.data ? 'ion-padding-bottom' : ''" position="stacked" label="fee" [details]="transaction.fee"></airgap-labeled-details>
+      <airgap-labeled-details class="ion-padding-bottom" position="stacked" label="amount" [details]="transactionAmount"></airgap-labeled-details>
+      <airgap-labeled-details *ngIf="transaction.fee" [ngClass]="transaction.timestamp || transaction.data ? 'ion-padding-bottom' : ''" position="stacked" label="fee" [details]="transactionFee"></airgap-labeled-details>
       <airgap-labeled-details *ngIf="transaction.status" class="ion-padding-bottom" position="stacked" label="status" [details]="transaction.status"></airgap-labeled-details>
       <airgap-labeled-details *ngIf="transaction.timestamp" [ngClass]="transaction.data ? 'ion-padding-bottom' : ''" position="stacked" label="time" [details]="transaction.timestamp"></airgap-labeled-details>
       <airgap-labeled-details *ngIf="transaction.data" [ngClass]="transaction.data ? 'ion-padding-bottom' : ''" position="stacked" label="data" [details]="transaction.data"></airgap-labeled-details>
