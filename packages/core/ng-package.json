@@ -6,8 +6,5 @@
   },
   "assets": [
     "src/assets"
-  ],
-  "whitelistedNonPeerDependencies": [
-    "."
   ]
 }

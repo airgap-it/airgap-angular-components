@@ -5,6 +5,6 @@ import { FeeConverterPipe } from './fee-converter/fee-converter.pipe'
 @NgModule({
   declarations: [AmountConverterPipe, FeeConverterPipe],
   imports: [],
-  exports: []
+  exports: [AmountConverterPipe, FeeConverterPipe]
 })
 export class PipesModule {}

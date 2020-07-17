@@ -2,12 +2,21 @@
  * Public API Surface of core
  */
 
-export * from './lib/core.service'
-export * from './lib/core.component'
-export * from './lib/core.module'
+export * from './lib/airgap-common-core.module'
 
 export * from './lib/components/components.module'
+export * from './lib/components/currency-symbol/currency-symbol.component'
+export * from './lib/components/from-to/from-to.component'
+export * from './lib/components/identicon/identicon.component'
+export * from './lib/components/labeled-address/labeled-address.component'
+export * from './lib/components/labeled-details/labeled-details.component'
+export * from './lib/components/network-badge/network-badge.component'
+
 export * from './lib/pipes/pipes.module'
+export * from './lib/pipes/amount-converter/amount-converter.pipe'
+export * from './lib/pipes/fee-converter/fee-converter.pipe'
+
+export * from './lib/services/protocol/protocol.service'
 
 export * from './lib/utils'
 

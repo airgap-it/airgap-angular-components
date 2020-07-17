@@ -13,6 +13,6 @@ import { NetworkBadgeComponent } from './network-badge/network-badge.component'
 @NgModule({
   declarations: [FromToComponent, IdenticonComponent, LabeledDetailsComponent, LabeledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent],
   imports: [CommonModule, IonicModule, TranslateModule],
-  exports: []
+  exports: [FromToComponent, IdenticonComponent, LabeledDetailsComponent, LabeledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent]
 })
 export class ComponentsModule {}
