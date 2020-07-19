@@ -1,12 +1,9 @@
-import { NgModule } from '@angular/core';
-import { NgRxComponent } from './ng-rx.component';
-
-
+import { NgModule } from '@angular/core'
+import { NgRxComponent } from './ng-rx.component'
 
 @NgModule({
   declarations: [NgRxComponent],
-  imports: [
-  ],
+  imports: [],
   exports: [NgRxComponent]
 })
-export class NgRxModule { }
+export class NgRxModule {}

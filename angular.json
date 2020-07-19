@@ -24,9 +24,9 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "packages/core/src/test.ts",
+            "main": "packages/core/test/test.ts",
             "tsConfig": "packages/core/tsconfig.spec.json",
-            "karmaConfig": "packages/core/karma.conf.js"
+            "karmaConfig": "karma.conf.js"
           }
         },
         "lint": {
@@ -43,7 +43,7 @@
         }
       }
     },
-    "ngRx": {
+    "ng-rx": {
       "projectType": "library",
       "root": "packages/ng-rx",
       "sourceRoot": "packages/ng-rx/src",
@@ -64,9 +64,9 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "packages/ng-rx/src/test.ts",
+            "main": "packages/ng-rx/test/test.ts",
             "tsConfig": "packages/ng-rx/tsconfig.spec.json",
-            "karmaConfig": "packages/ng-rx/karma.conf.js"
+            "karmaConfig": "karma.conf.js"
           }
         },
         "lint": {
@@ -82,6 +82,5 @@
           }
         }
       }
-    }},
-  "defaultProject": "core"
+    }}
 }
