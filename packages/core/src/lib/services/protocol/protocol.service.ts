@@ -86,7 +86,9 @@ export class ProtocolService {
 
   public getProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork, supportedOnly: boolean = true): ICoinProtocol | undefined {
     try {
-      return typeof protocolOrIdentifier === 'string' ? this.getProtocolByIdentifier(protocolOrIdentifier, network, supportedOnly) : protocolOrIdentifier
+      return typeof protocolOrIdentifier === 'string' 
+        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, supportedOnly) 
+        : protocolOrIdentifier
     } catch (error) {
       return undefined
     }
@@ -103,7 +105,7 @@ export class ProtocolService {
       throw new ProtocolNotSupported()
     }
 
-    return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => b.identifier.length - a.identifier.length)[0]
+    return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
   }
 
   public getSubProtocolsByIdentifier(identifier: ProtocolSymbols, network?: ProtocolNetwork, activeOnly: boolean = true): ICoinSubProtocol[] {
