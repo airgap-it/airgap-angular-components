@@ -13,8 +13,8 @@ export class LabeledDetailsComponent {
   public readonly details: string | undefined
 
   @Input()
-  public readonly position: 'fixed' | 'floating' | 'stacked' | undefined
+  public readonly selectable: boolean = false
 
   @Input()
-  public readonly selectable: boolean = false
+  public readonly capitalize: boolean = false
 }

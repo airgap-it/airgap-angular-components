@@ -19,17 +19,17 @@ export class FromToComponent {
     return this.amountConverterPipe.transform(this.transaction?.amount, { protocol: this.transaction?.protocolIdentifier })
   }
 
-  public get transactionFee(): string {
-    return this.amountConverterPipe.transform(this.transaction?.fee, { protocol: this.transaction?.protocolIdentifier })
+  public get transactionFee(): string | undefined {
+    return this.transaction?.fee !== undefined ? this.amountConverterPipe.transform(this.transaction.fee, { protocol: this.transaction?.protocolIdentifier }) : undefined
   }
 
-  public get transactionTimestamp(): string {
-    return this.transaction !== undefined && this.transaction.timestamp !== undefined
+  public get transactionTimestamp(): string | undefined {
+    return this.transaction?.timestamp !== undefined
       ? moment.unix(this.transaction.timestamp).calendar(null, {
           sameDay: '[Today at] HH:mm',
           sameElse: 'HH:mm [on] LL'
         })
-      : ''
+      : undefined
   }
 
   constructor(private readonly amountConverterPipe: AmountConverterPipe) {}
