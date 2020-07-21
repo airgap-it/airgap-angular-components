@@ -21,7 +21,7 @@ export class AirGapTranslateLoader implements TranslateLoader {
       }
     ]
 
-    this.translateResources = externalResources.concat(commonResources)
+    this.translateResources = commonResources.concat(externalResources)
   }
 
   public getTranslation(lang: string): Observable<any> {
