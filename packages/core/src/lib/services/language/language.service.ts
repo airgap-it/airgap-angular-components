@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { TranslateService } from '@ngx-translate/core'
+import { SupportedLanguage } from '../../types/SupportedLanguage'
 
-export type SupportedLanguage = 'en' | 'de' | 'es' | 'zh-cn'
 export interface LanguageServiceConfig {
   supportedLanguages: SupportedLanguage | SupportedLanguage[]
   defaultLanguage: SupportedLanguage

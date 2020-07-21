@@ -12,7 +12,7 @@ export * from './lib/components/network-badge/network-badge.component'
 export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 
-export * from './lib/locale/AirGapTranslateLoader'
+export * from './lib/translation/AirGapTranslateLoader'
 
 export * from './lib/pipes/pipes.module'
 export * from './lib/pipes/amount-converter/amount-converter.pipe'
@@ -21,6 +21,8 @@ export * from './lib/pipes/fee-converter/fee-converter.pipe'
 export * from './lib/services/language/language.service'
 export * from './lib/services/protocol/protocol.service'
 
-export * from './lib/types'
-export * from './lib/utils'
+export * from './lib/types/SupportedLanguage'
+export * from './lib/types/Token'
+
+export * from './lib/utils/not-initialized'
 

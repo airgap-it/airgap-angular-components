@@ -5,8 +5,9 @@ import { ProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
 import { isNetworkEqual } from 'airgap-coin-lib/dist/utils/Network'
 import { EthereumERC20ProtocolOptions, EthereumProtocolNetwork, EthereumERC20ProtocolConfig } from 'airgap-coin-lib/dist/protocols/ethereum/EthereumProtocolOptions'
-import { createNotInitialized, getProtocolAndNetworkIdentifier } from '../..//utils'
-import { Token } from '../../types'
+import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
+import { createNotInitialized } from '../../utils/not-initialized'
+import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 
 interface SubProtocolsMap {

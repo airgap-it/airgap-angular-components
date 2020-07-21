@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { Token } from '../../types'
+import { Token } from '../../types/Token'
 
 export const ethTokens: Token[] = [
   {
