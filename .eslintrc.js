@@ -94,8 +94,8 @@ module.exports = {
         format: ['PascalCase'],
       },
       { 
-        selector: "enumMember", 
-        format: ["PascalCase"]
+        selector: 'enumMember', 
+        format: ['PascalCase', 'UPPER_CASE']
       }
     ],
     'class-methods-use-this': 'off',
@@ -208,7 +208,7 @@ module.exports = {
         rules: {
           ban: [true, 'fit', 'fdescribe', 'xit', 'xdescribe'],
           encoding: true,
-          'import-blacklist': [true, 'rxjs', 'rxjs/Rx', 'lodash'],
+          'import-blacklist': [true, 'rxjs/Rx', 'lodash'],
           'jsdoc-format': true,
           'match-default-export-name': true,
           'no-boolean-literal-compare': true,
