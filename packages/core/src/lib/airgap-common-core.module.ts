@@ -5,7 +5,10 @@ import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.p
 
 @NgModule({
   declarations: [],
-  imports: [ComponentsModule, PipesModule],
+  imports: [
+    ComponentsModule, 
+    PipesModule
+  ],
   exports: [ComponentsModule, PipesModule],
   providers: [AmountConverterPipe]
 })
