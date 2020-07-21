@@ -7,13 +7,13 @@ import { PipesModule } from '../pipes/pipes.module'
 import { CurrencySymbolComponent } from './currency-symbol/currency-symbol.component'
 import { FromToComponent } from './from-to/from-to.component'
 import { IdenticonComponent } from './identicon/identicon.component'
-import { LabeledAddressComponent } from './labeled-address/labeled-address.component'
-import { LabeledDetailsComponent } from './labeled-details/labeled-details.component'
 import { NetworkBadgeComponent } from './network-badge/network-badge.component'
+import { TitledAddressComponent } from './titled-address/titled-address.component'
+import { TitledTextComponent } from './titled-text/titled-text.component'
 
 @NgModule({
-  declarations: [FromToComponent, IdenticonComponent, LabeledDetailsComponent, LabeledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent],
+  declarations: [FromToComponent, IdenticonComponent, TitledTextComponent, TitledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent],
   imports: [CommonModule, IonicModule, TranslateModule, PipesModule],
-  exports: [FromToComponent, IdenticonComponent, LabeledDetailsComponent, LabeledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent]
+  exports: [FromToComponent, IdenticonComponent, TitledTextComponent, TitledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent]
 })
 export class ComponentsModule {}

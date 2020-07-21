@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core'
 
 @Component({
-  selector: 'airgap-labeled-address',
-  templateUrl: './labeled-address.component.html',
-  styleUrls: ['./labeled-address.component.scss']
+  selector: 'airgap-titled-address',
+  templateUrl: './titled-address.component.html',
+  styleUrls: ['./titled-address.component.scss']
 })
-export class LabeledAddressComponent {
+export class TitledAddressComponent {
   @Input()
-  public readonly label: string | undefined
+  public readonly title: string | undefined
 
   @Input()
   public readonly address: string | undefined

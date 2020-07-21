@@ -1,11 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
-import { LabeledAddressComponent } from './labeled-address.component'
+import { TitledTextComponent } from './titled-text.component'
 
-describe('LabeledAddressComponent', () => {
-  let component: LabeledAddressComponent
-  let fixture: ComponentFixture<LabeledAddressComponent>
+describe('TitledTextComponent', () => {
+  let component: TitledTextComponent
+  let fixture: ComponentFixture<TitledTextComponent>
 
   let testBedUtils: TestBedUtils
 
@@ -14,13 +14,13 @@ describe('LabeledAddressComponent', () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
-        declarations: [LabeledAddressComponent]
+        declarations: [TitledTextComponent]
       })
     ).compileComponents()
   }))
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LabeledAddressComponent)
+    fixture = TestBed.createComponent(TitledTextComponent)
     component = fixture.componentInstance
     fixture.detectChanges()
   })
