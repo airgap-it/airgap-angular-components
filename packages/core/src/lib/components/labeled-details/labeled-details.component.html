@@ -1,9 +1,7 @@
-<div class="ion-padding-bottom">
-  <ion-label *ngIf="label" class="ion-text-uppercase">{{ label }}</ion-label>
-  <div *ngIf="details">
-    <span 
-      [ngClass]="{ 'text-selectable': selectable, 'ion-text-capitalize': capitalize }" 
-      class="typography--mono"
-    >{{ details }}</span>
-  </div>
+<ion-label *ngIf="label" class="ion-text-uppercase">{{ label }}</ion-label>
+<div *ngIf="details">
+  <span 
+    [ngClass]="{ 'text-selectable': selectable, 'ion-text-capitalize': capitalize }" 
+    class="typography--mono"
+  >{{ details }}</span>
 </div>

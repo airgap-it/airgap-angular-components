@@ -1,7 +1,7 @@
 <ng-container *ngIf="transaction">
   <airgap-labeled-address *ngFor="let address of transaction.from" [address]="address" label="from"></airgap-labeled-address>
 
-  <ion-row class="ion-align-items-center">
+  <ion-row class="ion-align-items-center ion-padding-top ion-padding-bottom">
     <ion-col size="3" class="ion-no-padding">
       <ion-row class="ion-justify-content-center">
         <div class="line"></div>
@@ -9,24 +9,27 @@
     </ion-col>
     <ion-col size="9">
       <airgap-labeled-details 
-        *ngIf="transaction.extra && transaction.extra.type" 
+        *ngIf="transaction.extra && transaction.extra.type"
+        class="ion-padding-bottom"
         label="type"
         [details]="transaction.extra.type"
       ></airgap-labeled-details>
 
       <airgap-labeled-details 
         label="amount" 
+        class="ion-padding-bottom"
         [details]="transactionAmount"
       ></airgap-labeled-details>
 
       <airgap-labeled-details 
-        *ngIf="transactionFee" 
-        label="fee" 
+        *ngIf="transactionFee"
+        label="fee"
         [details]="transactionFee"
       ></airgap-labeled-details>
 
       <airgap-labeled-details 
         *ngIf="transaction.status" 
+        class="ion-padding-top"
         label="status" 
         [details]="transaction.status"
         [capitalize]="true"
@@ -35,12 +38,14 @@
 
       <airgap-labeled-details 
         *ngIf="transactionTimestamp" 
+        class="ion-padding-top"
         label="time" 
         [details]="transactionTimestamp"
       ></airgap-labeled-details>
 
       <airgap-labeled-details 
         *ngIf="transaction.data" 
+        class="ion-padding-top"
         label="data" 
         [details]="transaction.data"
       ></airgap-labeled-details>

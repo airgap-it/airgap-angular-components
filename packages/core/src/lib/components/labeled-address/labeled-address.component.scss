@@ -1,3 +1,7 @@
+:host {
+  display: block;
+}
+
 ion-avatar {
   width: 48px;
   height: 48px;
@@ -6,6 +10,7 @@ ion-avatar {
     height: 48px;
   }
 }
+
 .symbol--icon {
   position: absolute;
   height: 24px;
