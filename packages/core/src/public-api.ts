@@ -12,7 +12,7 @@ export * from './lib/components/network-badge/network-badge.component'
 export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 
-export * from './lib/translation/AirGapTranslateLoader'
+export * from './lib/translation/AirGapCommonTranslateLoader'
 
 export * from './lib/pipes/pipes.module'
 export * from './lib/pipes/amount-converter/amount-converter.pipe'
