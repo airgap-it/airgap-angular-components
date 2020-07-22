@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core'
 import { SupportedLanguage } from '../../types/SupportedLanguage'
 
 export interface LanguageServiceConfig {
-  supportedLanguages: SupportedLanguage | SupportedLanguage[]
+  supportedLanguages: SupportedLanguage[]
   defaultLanguage: SupportedLanguage
   useBrowserLanguage?: boolean
 }
@@ -22,12 +22,12 @@ export class LanguageService {
 
   public async init(
     config: LanguageServiceConfig = {
-      supportedLanguages: LanguageService.defaultLanguage,
+      supportedLanguages: [LanguageService.defaultLanguage],
       defaultLanguage: LanguageService.defaultLanguage,
       useBrowserLanguage: true
     }
   ): Promise<void> {
-    const supportedLanguages: SupportedLanguage[] = Array.isArray(config.supportedLanguages) ? config.supportedLanguages : [config.supportedLanguages]
+    const supportedLanguages: SupportedLanguage[] = config.supportedLanguages
     const defaultLanguage: SupportedLanguage = config.defaultLanguage
     const useBrowserLanguage: boolean = config.useBrowserLanguage ?? true
 
