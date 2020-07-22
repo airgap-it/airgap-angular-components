@@ -2,6 +2,8 @@ import { Component, Input } from '@angular/core'
 import { createIcon } from '@download/blockies'
 import { BigNumber } from 'bignumber.js'
 import { toDataUrl } from 'myetherwallet-blockies'
+import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { ProtocolService } from '../../services/protocol/protocol.service'
 
 @Component({
   selector: 'airgap-identicon',
@@ -17,9 +19,9 @@ export class IdenticonComponent {
       return
     }
 
-    if (value.startsWith('ak_')) {
+    if (this.protocolService.isAddressOfProtocol(MainProtocolSymbols.AE, value)) {
       this.identicon = createIcon({ seed: value }).toDataURL()
-    } else if (value.startsWith('tz') || value.startsWith('kt')) {
+    } else if (this.protocolService.isAddressOfProtocol(MainProtocolSymbols.XTZ, value)) {
       this.identicon = createIcon({
         seed: `0${this.b582int(value)}`,
         spotcolor: '#000'
@@ -30,6 +32,8 @@ export class IdenticonComponent {
   }
 
   public identicon: string | undefined
+
+  constructor(private readonly protocolService: ProtocolService) {}
 
   private b582int(v: string): string {
     let rv = new BigNumber(0)

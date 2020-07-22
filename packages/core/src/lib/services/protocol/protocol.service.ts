@@ -122,6 +122,16 @@ export class ProtocolService {
     return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter((subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined) as ICoinSubProtocol[]
   }
 
+  public isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): boolean {
+    try {
+      const protocol: ICoinProtocol = this.getProtocolByIdentifier(protocolSymbol)
+
+      return address.match(protocol.addressValidationPattern) !== null
+    } catch {
+      return false
+    }
+  }
+
   private getDefaultPassiveProtocols(): ICoinProtocol[] {
     return []
   }
