@@ -26,6 +26,7 @@
     "bignumber.js": "^9.0.0",
     "moment": "^2.27.0",
     "myetherwallet-blockies": "^0.1.1",
+    "ngx-moment": "^5.0.0",
     "rxjs": "^6.6.0",
     "zone.js": "^0.10.3"
   }

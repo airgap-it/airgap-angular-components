@@ -62,6 +62,7 @@
     "moment": "^2.27.0",
     "myetherwallet-blockies": "^0.1.1",
     "ng-packagr": "^10.0.0",
+    "ngx-moment": "^5.0.0",
     "prettier": "^2.0.5",
     "protractor": "~7.0.0",
     "puppeteer": "^5.1.0",
