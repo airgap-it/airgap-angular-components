@@ -5,7 +5,6 @@ import { SupportedLanguage } from '../../types/SupportedLanguage'
 export interface LanguageServiceConfig {
   supportedLanguages: SupportedLanguage | SupportedLanguage[]
   defaultLanguage: SupportedLanguage
-  useLanguage?: SupportedLanguage
   useBrowserLanguage?: boolean
 }
 
@@ -28,27 +27,29 @@ export class LanguageService {
       useBrowserLanguage: true
     }
   ): Promise<void> {
-    let supportedLanguages: SupportedLanguage[] = Array.isArray(config.supportedLanguages) ? config.supportedLanguages : [config.supportedLanguages]
-    const defaultLanguage: SupportedLanguage = config.defaultLanguage ?? LanguageService.defaultLanguage
-    const useLanguage: SupportedLanguage = config.useLanguage ?? defaultLanguage
+    const supportedLanguages: SupportedLanguage[] = Array.isArray(config.supportedLanguages) ? config.supportedLanguages : [config.supportedLanguages]
+    const defaultLanguage: SupportedLanguage = config.defaultLanguage
+    const useBrowserLanguage: boolean = config.useBrowserLanguage ?? true
 
-    if (supportedLanguages.length === 0) {
-      // eslint-disable-next-line no-console
-      console.log(`LanguageService: no supported languages provided, using ${defaultLanguage}.`)
-      supportedLanguages = [defaultLanguage]
+    if (supportedLanguages.find((supported: SupportedLanguage) => supported === defaultLanguage) === undefined) {
+      supportedLanguages.push(defaultLanguage)
     }
 
     this.translateService.addLangs(supportedLanguages)
     this.translateService.setDefaultLang(defaultLanguage)
 
-    const language: string = config.useBrowserLanguage 
+    const language: string = useBrowserLanguage
       ? this.translateService.getBrowserLang().toLowerCase()
-      : useLanguage
+      : defaultLanguage
 
     return this.translateService.use(language).toPromise()
   }
 
   public async changeLanguage(language: SupportedLanguage): Promise<void> {
     return this.translateService.use(language).toPromise()
+  }
+
+  public isLanguageSupported(language: string): boolean {
+    return this.supportedLanguages.find((supported: string) => supported === language) !== undefined
   }
 }
