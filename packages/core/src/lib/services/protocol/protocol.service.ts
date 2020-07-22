@@ -41,7 +41,16 @@ export class ProtocolService {
 
   private _passiveSubProtocols: SubProtocolsMap | undefined
   private _activeSubProtocols: SubProtocolsMap | undefined
-  
+
+  public get isInitialized(): boolean {
+    return (
+      this._passiveProtocols !== undefined &&
+      this._activeProtocols !== undefined &&
+      this._passiveSubProtocols !== undefined &&
+      this._activeSubProtocols !== undefined
+    )
+  }
+
   public get passiveProtocols(): ICoinProtocol[] {
     return this._passiveProtocols ?? notInitialized()
   }
@@ -59,6 +68,13 @@ export class ProtocolService {
   }
 
   public init(config?: ProtocolServiceConfig): void {
+    if (this.isInitialized) {
+      // eslint-disable-next-line no-console
+      console.log('[ProtocolService] already initialized')
+
+      return
+    }
+
     this._passiveProtocols = config?.passiveProtocols ?? this.getDefaultPassiveProtocols()
     this._activeProtocols = config?.activeProtocols ?? this.getDefaultActiveProtocols()
 
@@ -85,10 +101,14 @@ export class ProtocolService {
     this.removeSubProtocolDuplicates()
   }
 
-  public getProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork, supportedOnly: boolean = true): ICoinProtocol | undefined {
+  public getProtocol(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    network?: ProtocolNetwork,
+    supportedOnly: boolean = true
+  ): ICoinProtocol | undefined {
     try {
-      return typeof protocolOrIdentifier === 'string' 
-        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, supportedOnly) 
+      return typeof protocolOrIdentifier === 'string'
+        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, supportedOnly)
         : protocolOrIdentifier
     } catch (error) {
       return undefined
@@ -100,7 +120,9 @@ export class ProtocolService {
     const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.activeProtocols.concat(this.passiveProtocols))
       .map((protocol: ICoinProtocol) => [protocol, ...(protocol.subProtocols ?? [])])
       .reduce((flatten: ICoinProtocol[], toFlatten: ICoinProtocol[]) => flatten.concat(toFlatten), [])
-      .filter((protocol: ICoinProtocol) => protocol.identifier.startsWith(identifier) && isNetworkEqual(protocol.options.network, targetNetwork))
+      .filter(
+        (protocol: ICoinProtocol) => protocol.identifier.startsWith(identifier) && isNetworkEqual(protocol.options.network, targetNetwork)
+      )
 
     if (filtered.length === 0) {
       throw new ProtocolNotSupported()
@@ -109,17 +131,25 @@ export class ProtocolService {
     return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
   }
 
-  public getSubProtocolsByIdentifier(identifier: ProtocolSymbols, network?: ProtocolNetwork, activeOnly: boolean = true): ICoinSubProtocol[] {
+  public getSubProtocolsByIdentifier(
+    identifier: ProtocolSymbols,
+    network?: ProtocolNetwork,
+    activeOnly: boolean = true
+  ): ICoinSubProtocol[] {
     const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(identifier, targetNetwork)
 
-    const subProtocolMap: SubProtocolsMap = activeOnly ? this.activeSubProtocols : this.mergeSubProtocolMaps(this.activeSubProtocols, this.passiveSubProtocols)
+    const subProtocolMap: SubProtocolsMap = activeOnly
+      ? this.activeSubProtocols
+      : this.mergeSubProtocolMaps(this.activeSubProtocols, this.passiveSubProtocols)
 
     if (subProtocolMap[protocolAndNetworkIdentifier] === undefined) {
       return []
     }
 
-    return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter((subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined) as ICoinSubProtocol[]
+    return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter(
+      (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
+    ) as ICoinSubProtocol[]
   }
 
   public isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): boolean {
@@ -157,22 +187,25 @@ export class ProtocolService {
     return [
       [new TezosProtocol(), new TezosKtProtocol()],
       [new TezosProtocol(), new TezosBTC()],
-      ...ethTokens.map((token: Token) => [
-        new EthereumProtocol(),
-        new GenericERC20(
-          new EthereumERC20ProtocolOptions(
-            new EthereumProtocolNetwork(),
-            new EthereumERC20ProtocolConfig(
-              token.symbol,
-              token.name,
-              token.marketSymbol,
-              token.identifier as SubProtocolSymbols,
-              token.contractAddress,
-              token.decimals
+      ...ethTokens.map(
+        (token: Token) =>
+          [
+            new EthereumProtocol(),
+            new GenericERC20(
+              new EthereumERC20ProtocolOptions(
+                new EthereumProtocolNetwork(),
+                new EthereumERC20ProtocolConfig(
+                  token.symbol,
+                  token.name,
+                  token.marketSymbol,
+                  token.identifier as SubProtocolSymbols,
+                  token.contractAddress,
+                  token.decimals
+                )
+              )
             )
-          )
-        )
-      ] as [EthereumProtocol, GenericERC20])
+          ] as [EthereumProtocol, GenericERC20]
+      )
     ]
   }
 
@@ -200,7 +233,10 @@ export class ProtocolService {
     return subProtocolMap
   }
 
-  private mergeSubProtocolMaps(first: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap, second: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap): SubProtocolsMap {
+  private mergeSubProtocolMaps(
+    first: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap,
+    second: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap
+  ): SubProtocolsMap {
     if (Array.isArray(first) && Array.isArray(second)) {
       return this.createSubProtocolMap(first.concat(second))
     }
@@ -210,16 +246,20 @@ export class ProtocolService {
 
     const mergedMap: SubProtocolsMap = {}
 
-    Object.entries(firstMap).concat(Object.entries(secondMap)).forEach(([protocolAndNetworkIdentifier, subProtocols]: [string, { [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol }]) => {
-      if (mergedMap[protocolAndNetworkIdentifier] === undefined) {
-        mergedMap[protocolAndNetworkIdentifier] = subProtocols
-      } else {
-        mergedMap[protocolAndNetworkIdentifier] = {
-          ...mergedMap[protocolAndNetworkIdentifier],
-          ...subProtocols
+    Object.entries(firstMap)
+      .concat(Object.entries(secondMap))
+      .forEach(
+        ([protocolAndNetworkIdentifier, subProtocols]: [string, { [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol }]) => {
+          if (mergedMap[protocolAndNetworkIdentifier] === undefined) {
+            mergedMap[protocolAndNetworkIdentifier] = subProtocols
+          } else {
+            mergedMap[protocolAndNetworkIdentifier] = {
+              ...mergedMap[protocolAndNetworkIdentifier],
+              ...subProtocols
+            }
+          }
         }
-      }
-    })
+      )
 
     return mergedMap
   }
@@ -241,17 +281,20 @@ export class ProtocolService {
     const filtered: SubProtocolsMap = {}
 
     passiveEntries.forEach(([protocolAndNetworkIdentifier, subProtocolIdentifier]: [string, SubProtocolSymbols]) => {
-      if (this.activeSubProtocols[protocolAndNetworkIdentifier] === undefined || this.activeSubProtocols[protocolAndNetworkIdentifier][subProtocolIdentifier] === undefined) {
+      if (
+        this.activeSubProtocols[protocolAndNetworkIdentifier] === undefined ||
+        this.activeSubProtocols[protocolAndNetworkIdentifier][subProtocolIdentifier] === undefined
+      ) {
         if (filtered[protocolAndNetworkIdentifier] === undefined) {
           filtered[protocolAndNetworkIdentifier] = {}
         }
 
-        filtered[protocolAndNetworkIdentifier][subProtocolIdentifier] = this.passiveSubProtocols[protocolAndNetworkIdentifier][subProtocolIdentifier]
+        filtered[protocolAndNetworkIdentifier][subProtocolIdentifier] = this.passiveSubProtocols[protocolAndNetworkIdentifier][
+          subProtocolIdentifier
+        ]
       }
     })
 
     this._passiveSubProtocols = filtered
   }
-
-  
 }
