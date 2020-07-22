@@ -12,7 +12,10 @@ interface TranslateResource {
 export class AirGapTranslateLoader implements TranslateLoader {
   private readonly translateResources: TranslateResource[]
 
-  constructor(private readonly httpClient: HttpClient, resources: TranslateResource | TranslateResource[]) {
+  constructor(
+    private readonly httpClient: HttpClient,
+    resources: TranslateResource | TranslateResource[] = { prefix: './assets/i18n/', suffix: '.json' }
+  ) {
     const externalResources: TranslateResource[] = Array.isArray(resources) ? resources : [resources]
     const commonResources: TranslateResource[] = [
       {
@@ -32,7 +35,7 @@ export class AirGapTranslateLoader implements TranslateLoader {
         return this.httpClient.get(resourcePath).pipe(
           catchError((error) => {
             // eslint-disable-next-line no-console
-            console.warn(`CommonTranslateLoader: could not load translation file ${resourcePath}: ${error}`)
+            console.warn(`[CommonTranslateLoader:getTranslation] could not load translation file ${resourcePath}: ${error}`)
 
             return of({})
           })
