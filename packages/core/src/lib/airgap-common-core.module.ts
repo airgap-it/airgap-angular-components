@@ -19,7 +19,6 @@ export function createTranslateLoader(httpClient: HttpClient): AirGapCommonTrans
         useFactory: createTranslateLoader,
         deps: [HttpClient]
       },
-      extend: true,
       isolate: false
     }),
     ComponentsModule, 
