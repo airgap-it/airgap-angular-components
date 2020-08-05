@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core'
 import { TranslateService } from '@ngx-translate/core'
 import { SupportedLanguage } from '../../types/SupportedLanguage'
@@ -42,10 +43,15 @@ export class LanguageService {
       ? this.translateService.getBrowserLang().toLowerCase()
       : defaultLanguage
 
-    return this.translateService.use(language).toPromise()
+    return this.changeLanguage(language)
   }
 
-  public async changeLanguage(language: SupportedLanguage): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  public loadTranslation(language: string, translation: any, merge: boolean = true): void {
+    this.translateService.setTranslation(language, translation, merge)
+  }
+
+  public async changeLanguage(language: string): Promise<void> {
     return this.translateService.use(language).toPromise()
   }
 
