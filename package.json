@@ -31,7 +31,7 @@
     "@angular/router": "^9.1.7",
     "@download/blockies": "^1.0.3",
     "@ionic/angular": "^5.2.3",
-    "@ngx-translate/core": "^11.0.1",
+    "@ngx-translate/core": "^12.0.0",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",

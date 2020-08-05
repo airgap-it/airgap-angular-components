@@ -8,6 +8,7 @@ import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.p
   declarations: [],
   imports: [
     TranslateModule.forChild({
+      extend: true,
       isolate: false
     }),
     ComponentsModule, 
