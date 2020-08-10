@@ -33,30 +33,39 @@ export class AmountConverterPipe implements PipeTransform {
   constructor(private readonly protocolsService: ProtocolService) {}
 
   public transform(value: AmountConverterValue, args: AmountConverterArgs): string {
-    if (value === null || value === undefined || args.protocol === undefined) {
-      return ''
+    if (args.protocol === undefined || !args.protocol) {
+      throw new Error('Invalid protocol')
+    }
+
+    if (!(typeof value === 'string' || typeof value === 'number' || BigNumber.isBigNumber(value))) {
+      throw new Error('Invalid amount')
+    }
+
+    if (typeof args.maxDigits !== 'number') {
+      throw new Error('Invalid maxDigits')
     }
 
     const protocol: ICoinProtocol | undefined = this.protocolsService.getProtocol(args.protocol)
-    const amount = protocol !== undefined ? this.transformValueOnly(value, { protocol, maxDigits: args.maxDigits }) : undefined
-
-    return amount !== undefined && protocol !== undefined ? `${amount} ${protocol.symbol}` : ''
-  }
-
-  public transformValueOnly(value: AmountConverterValue, args: AmountConverterArgs): string | undefined {
-    const protocol: ICoinProtocol | undefined = args.protocol !== undefined ? this.protocolsService.getProtocol(args.protocol) : undefined
-
-    if (protocol === undefined || value === null || value === undefined) {
-      return undefined
+    if (protocol === undefined) {
+      throw new Error('Protocol not supported')
     }
 
-    const maxDigits: number = args.maxDigits ?? AmountConverterPipe.defaultMaxDigits
+    const amount = this.transformValueOnly(value, protocol, args.maxDigits)
+
+    return `${amount} ${protocol.symbol}`
+  }
+
+  public transformValueOnly(
+    value: string | number | BigNumber,
+    protocol: ICoinProtocol,
+    maxDigits: number = AmountConverterPipe.defaultMaxDigits
+  ): string | undefined {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
 
     const amount = new BN(value).shiftedBy(-1 * protocol.decimals).decimalPlaces(protocol.decimals, BigNumber.ROUND_FLOOR)
     if (amount.isNaN() || isNaN(maxDigits)) {
-      return undefined
+      throw new Error('Invalid amount')
     }
 
     return this.formatBigNumber(amount, maxDigits)
@@ -83,7 +92,7 @@ export class AmountConverterPipe implements PipeTransform {
 
     for (let i = 0; i < UNIT_ABBREVIATIONS.length; i++) {
       suffix = UNIT_ABBREVIATIONS[i]
-      
+
       if (abbreviated.toFixed().length <= Math.max(maxDigits, 3)) {
         break
       }
