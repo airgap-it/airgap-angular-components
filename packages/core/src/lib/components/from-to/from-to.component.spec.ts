@@ -14,7 +14,7 @@ describe('FromToComponent', () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
-        declarations: [FromToComponent]
+        declarations: []
       })
     ).compileComponents()
   }))

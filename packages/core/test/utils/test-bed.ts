@@ -10,12 +10,7 @@ import { PipesModule } from '../../src/lib/pipes/pipes.module'
 export class TestBedUtils {
   public moduleDef(moduleMedatada: TestModuleMetadata, useIonicOnlyTestBed: boolean = false): TestModuleMetadata {
     const mandatoryDeclarations: any[] = []
-    const mandatoryImports: any[] = [
-      CommonModule,
-      IonicModule,
-      ComponentsModule,
-      TranslateModule
-    ]
+    const mandatoryImports: any[] = [CommonModule, IonicModule, ComponentsModule, TranslateModule.forRoot()]
     const mandatoryProviders: any[] = []
 
     if (!useIonicOnlyTestBed) {

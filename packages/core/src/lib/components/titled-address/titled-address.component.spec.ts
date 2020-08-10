@@ -14,7 +14,7 @@ describe('TitledAddressComponent', () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
-        declarations: [TitledAddressComponent]
+        declarations: []
       })
     ).compileComponents()
   }))
