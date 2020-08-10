@@ -6,6 +6,7 @@
     "build": "ng build core",
     "test": "ng test core",
     "test:ci": "ng test core --code-coverage --watch=false",
+    "test:lerna": "ng test core --watch=false",
     "lint": "npx eslint 'src/**/*.ts'",
     "lint:ci": "npx eslint 'src/**/*.ts' -f json -o ngrx_lintReport.json || true",
     "lint:fix": "npx eslint 'src/**/*/ts' --fix",

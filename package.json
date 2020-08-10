@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "build": "lerna run build",
-    "test": "lerna run test",
+    "test": "lerna run test:lerna",
     "test:ci": "lerna run test:ci",
     "lint": "lerna run lint",
     "lint:ci": "lerna run lint:ci && cat packages/**/*_lintReport.json > lintReport.json",
