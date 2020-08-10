@@ -5,8 +5,10 @@
     "ng": "ng",
     "build": "lerna run build",
     "test": "lerna run test",
-    "test-ci": "lerna run test-ci",
-    "lint": "eslint 'packages/core/src/**/*.ts' 'packages/ng-rx/src/**/*.ts'",
+    "test:ci": "lerna run test:ci",
+    "lint": "lerna run lint",
+    "lint:ci": "lerna run lint:ci && cat packages/**/*_lintReport.json > lintReport.json",
+    "lint:fix": "lerna run lint:fix",
     "e2e": "lerna run e2e"
   },
   "private": true,
