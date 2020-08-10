@@ -1,10 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "module": "esnext",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
@@ -12,8 +10,8 @@
     "importHelpers": true,
     "downlevelIteration": true, // To enable [].entries()
     "target": "es5",
-    "typeRoots": ["node_modules/@types"],
     "lib": ["es2018", "dom"],
+    "skipLibCheck": true,
     /* Strict Type-Checking Options */
     "strict": true /* Enable all strict type-checking options. */,
     "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
@@ -30,6 +28,7 @@
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */
   },
   "angularCompilerOptions": {
+    "enableIvy": false,
     "strictInjectionParameters": true,
     "fullTemplateTypeCheck": true
   },

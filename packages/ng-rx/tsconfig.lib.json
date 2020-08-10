@@ -2,7 +2,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": "./",
     "outDir": "../../out-tsc/ng-rx",
+    "typeRoots": [
+      "../../node_modules/@types",
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src/**/*.ts"

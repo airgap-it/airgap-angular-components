@@ -1,0 +1,13 @@
+{
+  "from-to": {
+    "type_label": "Type",
+    "amount_label": "Amount",
+    "fee_label": "Fee",
+    "time_label": "Time",
+    "data_label": "Data",
+    "status_label": "Status",
+    "from_label": "From",
+    "to_label": "To",
+    "transaction-details_label": "Display extra transaction details"
+  }
+}

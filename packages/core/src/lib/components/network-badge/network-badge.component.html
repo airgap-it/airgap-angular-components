@@ -1,0 +1,4 @@
+<ion-item *ngIf="network && network.type !== networkType.MAINNET" class="ion-no-padding" lines="none">
+  <ion-badge class="badge__margin" color="danger">{{ network.name }}</ion-badge>
+  <ion-badge *ngIf="network.type === networkType.CUSTOM" class="badge__margin">{{ network.rpcUrl }}</ion-badge>
+</ion-item>
