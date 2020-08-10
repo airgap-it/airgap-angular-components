@@ -7,7 +7,7 @@ import { ProtocolService } from '../../services/protocol/protocol.service'
 type FeeConverterValue = BigNumber | string | number | null | undefined
 
 interface FeeConverterArgs {
-  protocol: ICoinProtocol | ProtocolSymbols | undefined
+  protocol: ICoinProtocol | ProtocolSymbols | undefined | null
 }
 
 @Pipe({
