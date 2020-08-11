@@ -24,6 +24,10 @@ WORKDIR /libs
 # copy sources
 COPY . /libs
 
+# set permissions
+RUN chmod +x ./npm-ci-publish-beta-only.sh
+RUN chmod +x ./npm-ci-publish.sh
+
 # install dependencies
 RUN npm install 
 
