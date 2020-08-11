@@ -23,7 +23,11 @@ module.exports = function (config) {
       reports: ['html', 'lcovonly', 'text-summary'],
       fixWebpackSourcePaths: true
     },
-    reporters: ['progress', 'spec', 'coverage-istanbul'],
+    specReporter: {
+      suppressSkipped: false // do not print information about skipped tests
+    },
+    failOnEmptyTestSuite: false,
+    reporters: ['spec', 'coverage-istanbul'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -32,7 +36,7 @@ module.exports = function (config) {
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
+        flags: ['--headless', '--no-sandbox']
       }
     },
     singleRun: false,
