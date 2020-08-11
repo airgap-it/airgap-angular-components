@@ -8,7 +8,11 @@
       "../../node_modules/@types",
       "node_modules/@types",
       "src/typings"
-    ]
+    ],
+    "paths": {
+      "rxjs": ["../../node_modules/rxjs"],
+      "rxjs/*": ["../../node_modules/rxjs/*"]
+    }
   },
   "include": [
     "src/**/*.ts"
