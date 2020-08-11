@@ -13,8 +13,8 @@
   },
   "private": true,
   "dependencies": {
-    "@airgap/common-components-core": "file:packages/core",
-    "ng-rx": "file:packages/ng-rx"
+    "@airgap/angular-core": "file:packages/core",
+    "@airgap/angular-ngrx": "file:packages/ng-rx"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.5",
