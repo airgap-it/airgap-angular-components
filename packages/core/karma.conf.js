@@ -20,7 +20,12 @@ module.exports = function (config) {
     },
     coverageIstanbulReporter: {
       reports: ['text', 'lcovonly'],
-      fixWebpackSourcePaths: true
+      fixWebpackSourcePaths: true,
+      'report-config': {
+        lcovonly: {
+          file: 'core_lcov.info'
+        }
+      }
     },
     specReporter: {
       suppressSkipped: false // do not print information about skipped tests

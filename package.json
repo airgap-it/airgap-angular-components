@@ -7,7 +7,7 @@
     "test": "lerna run test:lerna --stream",
     "test:ci": "lerna run test:ci --stream",
     "lint": "lerna run lint --stream",
-    "lint:ci": "lerna run lint:ci --stream && cat packages/**/*_lintReport.json > lintReport.json",
+    "lint:ci": "lerna run lint:ci --stream",
     "lint:fix": "lerna run lint:fix --stream",
     "e2e": "lerna run e2e --stream"
   },
