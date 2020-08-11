@@ -5,7 +5,11 @@
     "ng": "ng",
     "build": "ng build ng-rx",
     "test": "ng test ng-rx",
-    "test-ci": "ng test ng-rx --code-coverage --watch=false",
+    "test:ci": "ng test ng-rx --code-coverage --watch=false",
+    "test:lerna": "ng test ng-rx --watch=false",
+    "lint": "npx eslint 'src/**/*.ts'",
+    "lint:ci": "npx eslint 'src/**/*.ts' -f json -o ngrx_lintReport.json || true",
+    "lint:fix": "npx eslint 'src/**/*/ts' --fix",
     "e2e": "ng e2e ng-rx"
   },
   "dependencies": {
