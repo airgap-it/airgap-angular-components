@@ -1,0 +1,11 @@
+#
+.history
+.dockerignore
+.DS_Store
+.gitignore
+.nyc_output
+.prettierignore
+.prettierrc
+coverage
+dist
+node_modules
