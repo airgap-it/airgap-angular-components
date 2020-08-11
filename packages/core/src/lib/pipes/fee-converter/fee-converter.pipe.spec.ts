@@ -22,7 +22,7 @@ describe('FeeConverter Pipe', () => {
   it('should display a normal ETH number to a non-scientific string representation', () => {
     expect(
       feeConverterPipe.transform('1000000000000000000', {
-        protocol: MainProtocolSymbols.ETH 
+        protocol: MainProtocolSymbols.ETH
       })
     ).toEqual('1 ETH')
   })
@@ -30,49 +30,67 @@ describe('FeeConverter Pipe', () => {
   it('should display a big ETH number to a non-scientific string representation', () => {
     expect(
       feeConverterPipe.transform('10000000000000000000000000000000000', {
-        protocol: MainProtocolSymbols.ETH 
+        protocol: MainProtocolSymbols.ETH
       })
     ).toEqual('10000000000000000 ETH')
   })
 
   it('should return a valid amount if value is 0', () => {
-    expect(feeConverterPipe.transform('0', { protocol: MainProtocolSymbols.ETH  })).toEqual('0 ETH')
+    expect(feeConverterPipe.transform('0', { protocol: MainProtocolSymbols.ETH })).toEqual('0 ETH')
   })
 
   it('should return an empty string for non-numeric value', () => {
-    expect(feeConverterPipe.transform('test', { protocol: MainProtocolSymbols.ETH  })).toEqual('')
+    try {
+      feeConverterPipe.transform('test', { protocol: MainProtocolSymbols.ETH })
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid fee amount')
+    }
   })
 
-  it('should return an empty string when protocolIdentifier is not set', () => {
-    expect(feeConverterPipe.transform('1', { protocol: undefined })).toEqual('')
+  it('should return an error when protocolIdentifier is not set', () => {
+    try {
+      feeConverterPipe.transform('1', { protocol: undefined })
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid protocol')
+    }
   })
 
   it('should return an empty string when protocolIdentifier unknown', () => {
-    expect(
+    try {
       feeConverterPipe.transform('1', {
-        protocol: MainProtocolSymbols.ETH 
+        protocol: 'unknown-protocol' as any
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Protocol not supported')
+    }
   })
 
   function getTest(args) {
     it(`Test with: ${JSON.stringify(args)}`, () => {
       expect(
-        feeConverterPipe.transform(args.value, {
-          protocol: MainProtocolSymbols.ETH 
-        })
+        (() => {
+          try {
+            const result = feeConverterPipe.transform(args.value, {
+              protocol: args.protocol
+            })
+
+            return result
+          } catch (error) {
+            return error.toString()
+          }
+        })()
       ).toEqual(args.expected)
     })
   }
 
   function makeTests(argsArray) {
-    argsArray.forEach(v => {
+    argsArray.forEach((v) => {
       getTest(v)
     })
   }
 
   const truthyProtocolIdentifiers = [
-    { value: '1', protocolIdentifier: 'btc', expected: '0.00000001 BTC' },
+    { value: '1', protocol: MainProtocolSymbols.BTC, expected: '0.00000001 BTC' },
     {
       value: '1',
       protocol: MainProtocolSymbols.ETH,
@@ -82,24 +100,24 @@ describe('FeeConverter Pipe', () => {
   makeTests(truthyProtocolIdentifiers)
 
   const falsyValues = [
-    { value: false, protocol: MainProtocolSymbols.ETH, expected: '' },
+    { value: false, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid fee amount' },
     { value: 0, protocol: MainProtocolSymbols.ETH, expected: '0 ETH' },
-    { value: '', protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: null, protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: undefined, protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: NaN, protocol: MainProtocolSymbols.ETH, expected: '' }
+    { value: '', protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid fee amount' },
+    { value: null, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid fee amount' },
+    { value: undefined, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid fee amount' },
+    { value: NaN, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid fee amount' }
   ]
   makeTests(falsyValues)
 
   const falsyProtocolIdentifiers = [
-    { value: '1', protocol: false, expected: '' },
-    { value: '1', protocol: 0, expected: '' },
-    { value: '1', protocol: '', expected: '' },
-    { value: '1', protocol: null, expected: '' },
-    { value: '1', protocol: undefined, expected: '' },
-    { value: '1', protocol: NaN, expected: '' },
-    { value: '1', protocol: 'test', expected: '' },
-    { value: '1', protocol: 'asdf', expected: '' }
+    { value: '1', protocol: false, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: 0, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: '', expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: null, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: undefined, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: NaN, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: 'test', expected: 'Error: Protocol not supported' },
+    { value: '1', protocol: 'asdf', expected: 'Error: Protocol not supported' }
   ]
   makeTests(falsyProtocolIdentifiers)
 })

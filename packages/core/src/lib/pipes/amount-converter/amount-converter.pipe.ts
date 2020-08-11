@@ -7,7 +7,7 @@ import { ProtocolService } from '../../services/protocol/protocol.service'
 type AmountConverterValue = BigNumber | string | number | null | undefined
 
 interface AmountConverterArgs {
-  protocol: ICoinProtocol | ProtocolSymbols | undefined
+  protocol: ICoinProtocol | ProtocolSymbols | undefined | null
   maxDigits?: number
 }
 
@@ -17,7 +17,11 @@ interface AmountConverterNumberFormat {
   groupSize: number
 }
 
-const UNIT_ABBREVIATIONS: string[] = ['', 'K', 'M']
+const FORMAT_UNITS: Record<string, string> = {
+  [1e3]: 'K',
+  [1e6]: 'M'
+}
+const SUPPORTED_FORMAT_DECIMAL_SIZES: string[] = Object.keys(FORMAT_UNITS)
 
 @Pipe({
   name: 'amountConverter'
@@ -33,31 +37,42 @@ export class AmountConverterPipe implements PipeTransform {
   constructor(private readonly protocolsService: ProtocolService) {}
 
   public transform(value: AmountConverterValue, args: AmountConverterArgs): string {
-    if (value === null || value === undefined || args.protocol === undefined) {
-      return ''
+    if (!args.protocol) {
+      throw new Error('Invalid protocol')
+    }
+
+    if (!(typeof value === 'string' || typeof value === 'number' || BigNumber.isBigNumber(value))) {
+      throw new Error('Invalid amount')
+    }
+
+    if (typeof args.maxDigits !== 'number') {
+      throw new Error('Invalid maxDigits')
     }
 
     const protocol: ICoinProtocol | undefined = this.protocolsService.getProtocol(args.protocol)
-    const amount = protocol !== undefined ? this.transformValueOnly(value, { protocol, maxDigits: args.maxDigits }) : undefined
+    if (protocol === undefined) {
+      throw new Error('Protocol not supported')
+    }
 
-    return amount !== undefined && protocol !== undefined ? `${amount} ${protocol.symbol}` : ''
+    const amount = this.transformValueOnly(value, protocol, args.maxDigits)
+
+    return `${amount} ${protocol.symbol}`
   }
 
-  public transformValueOnly(value: AmountConverterValue, args: AmountConverterArgs): string | undefined {
-    const protocol: ICoinProtocol | undefined = args.protocol !== undefined ? this.protocolsService.getProtocol(args.protocol) : undefined
-
-    if (protocol === undefined || value === null || value === undefined) {
-      return undefined
-    }
-
-    const maxDigits: number = args.maxDigits ?? AmountConverterPipe.defaultMaxDigits
+  public transformValueOnly(
+    value: string | number | BigNumber,
+    protocol: ICoinProtocol,
+    maxDigits: number = AmountConverterPipe.defaultMaxDigits
+  ): string | undefined {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
+    const valueBN = new BN(value)
 
-    const amount = new BN(value).shiftedBy(-1 * protocol.decimals).decimalPlaces(protocol.decimals, BigNumber.ROUND_FLOOR)
-    if (amount.isNaN() || isNaN(maxDigits)) {
-      return undefined
+    if (valueBN.isNaN() || isNaN(maxDigits)) {
+      throw new Error('Invalid amount')
     }
+
+    const amount = valueBN.shiftedBy(-1 * protocol.decimals).decimalPlaces(protocol.decimals, BigNumber.ROUND_FLOOR)
 
     return this.formatBigNumber(amount, maxDigits)
   }
@@ -78,19 +93,22 @@ export class AmountConverterPipe implements PipeTransform {
   }
 
   public abbreviateNumber(value: BigNumber, maxDigits: number): string {
+    if (maxDigits === 0) {
+      return value.toFormat()
+    }
+    
     let abbreviated: BigNumber = value
-    let suffix: string | undefined
+    let suffix: string = ''
 
-    for (let i = 0; i < UNIT_ABBREVIATIONS.length; i++) {
-      suffix = UNIT_ABBREVIATIONS[i]
-      
-      if (abbreviated.toFixed().length <= Math.max(maxDigits, 3)) {
-        break
-      }
+    let nextDecimalsIndex: number = 0
+    while (abbreviated.toFixed().length > Math.max(maxDigits, 3) && nextDecimalsIndex < SUPPORTED_FORMAT_DECIMAL_SIZES.length) {
+      const decimals: BigNumber = new BigNumber(SUPPORTED_FORMAT_DECIMAL_SIZES[nextDecimalsIndex])
+      abbreviated = value.dividedToIntegerBy(decimals)
+      suffix = FORMAT_UNITS[decimals.toString()]
 
-      abbreviated = (abbreviated.isInteger() ? abbreviated : abbreviated.integerValue()).dividedToIntegerBy(1000)
+      nextDecimalsIndex++
     }
 
-    return suffix !== undefined ? `${value.toFormat()}${suffix}` : ''
+    return `${abbreviated.toFormat()}${suffix}`
   }
 }

@@ -19,11 +19,19 @@ module.exports = function (config) {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, '../../coverage/ng-rx'),
-      reports: ['html', 'lcovonly', 'text-summary'],
-      fixWebpackSourcePaths: true
+      reports: ['text', 'lcovonly'],
+      fixWebpackSourcePaths: true,
+      'report-config': {
+        lcovonly: {
+          file: 'ngrx_lcov.info'
+        }
+      }
     },
-    reporters: ['progress', 'spec', 'coverage-istanbul'],
+    specReporter: {
+      suppressSkipped: false // do not print information about skipped tests
+    },
+    failOnEmptyTestSuite: false,
+    reporters: ['spec', 'coverage-istanbul'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -32,7 +40,7 @@ module.exports = function (config) {
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
+        flags: ['--headless', '--no-sandbox']
       }
     },
     singleRun: false,

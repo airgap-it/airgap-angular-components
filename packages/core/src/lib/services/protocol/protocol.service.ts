@@ -1,16 +1,36 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ProtocolNotSupported, AeternityProtocol, BitcoinProtocol, EthereumProtocol, GroestlcoinProtocol, TezosProtocol, CosmosProtocol, PolkadotProtocol, KusamaProtocol, ICoinSubProtocol, TezosKtProtocol, TezosBTC, GenericERC20 } from 'airgap-coin-lib'
+import {
+  ICoinProtocol,
+  ProtocolNotSupported,
+  AeternityProtocol,
+  BitcoinProtocol,
+  EthereumProtocol,
+  GroestlcoinProtocol,
+  TezosProtocol,
+  CosmosProtocol,
+  PolkadotProtocol,
+  KusamaProtocol,
+  ICoinSubProtocol,
+  TezosKtProtocol,
+  TezosBTC,
+  GenericERC20
+} from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { ProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
 import { isNetworkEqual } from 'airgap-coin-lib/dist/utils/Network'
-import { EthereumERC20ProtocolOptions, EthereumProtocolNetwork, EthereumERC20ProtocolConfig } from 'airgap-coin-lib/dist/protocols/ethereum/EthereumProtocolOptions'
+import {
+  EthereumERC20ProtocolOptions,
+  EthereumProtocolNetwork,
+  EthereumERC20ProtocolConfig
+} from 'airgap-coin-lib/dist/protocols/ethereum/EthereumProtocolOptions'
+import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { createNotInitialized } from '../../utils/not-initialized'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 
-interface SubProtocolsMap {
+export interface SubProtocolsMap {
   [key: string]: {
     [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol
   }
@@ -104,11 +124,11 @@ export class ProtocolService {
   public getProtocol(
     protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
     network?: ProtocolNetwork,
-    supportedOnly: boolean = true
+    activeOnly: boolean = true
   ): ICoinProtocol | undefined {
     try {
       return typeof protocolOrIdentifier === 'string'
-        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, supportedOnly)
+        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, activeOnly)
         : protocolOrIdentifier
     } catch (error) {
       return undefined
@@ -137,15 +157,12 @@ export class ProtocolService {
     activeOnly: boolean = true
   ): ICoinSubProtocol[] {
     const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(identifier, targetNetwork)
+    const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
+    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolMap: SubProtocolsMap = activeOnly
       ? this.activeSubProtocols
       : this.mergeSubProtocolMaps(this.activeSubProtocols, this.passiveSubProtocols)
-
-    if (subProtocolMap[protocolAndNetworkIdentifier] === undefined) {
-      return []
-    }
 
     return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter(
       (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
@@ -266,8 +283,10 @@ export class ProtocolService {
 
   private removeProtocolDuplicates(): void {
     // if a protocol has been set as passive and active, it's considered active
-    const activeIdentifiers: string[] = this.activeProtocols.map((protocol: ICoinProtocol) => protocol.identifier)
-    this._passiveProtocols = this.passiveProtocols.filter((protocol: ICoinProtocol) => !activeIdentifiers.includes(protocol.identifier))
+    const activeIdentifiers: string[] = this.activeProtocols.map(getProtocolAndNetworkIdentifier)
+    this._passiveProtocols = this.passiveProtocols.filter(
+      (protocol: ICoinProtocol) => !activeIdentifiers.includes(getProtocolAndNetworkIdentifier(protocol))
+    )
   }
 
   private removeSubProtocolDuplicates(): void {

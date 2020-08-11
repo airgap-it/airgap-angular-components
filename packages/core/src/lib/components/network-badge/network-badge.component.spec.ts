@@ -14,7 +14,7 @@ describe('NetworkBadgeComponent', () => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
-        declarations: [NetworkBadgeComponent]
+        declarations: []
       })
     ).compileComponents()
   }))

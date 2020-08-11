@@ -120,67 +120,84 @@ describe('AmountConverter Pipe', () => {
   })
 
   it('should return an empty string when protocol is not set', () => {
-    expect(
+    try {
       amountConverterPipe.transform('1', {
         protocol: undefined,
         maxDigits: 0
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid protocol')
+    }
   })
 
   it('should handle values that are not a number', () => {
-    expect(
+    try {
       amountConverterPipe.transform('test', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid amount')
+    }
   })
 
   it('should handle values that are undefined', () => {
-    expect(
+    try {
       amountConverterPipe.transform(undefined, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid amount')
+    }
   })
 
   it('should handle values that are null', () => {
-    expect(
+    try {
       amountConverterPipe.transform(null, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid amount')
+    }
   })
 
   it('should handle values that are empty object', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const value: any = {}
-    expect(
+    try {
       amountConverterPipe.transform(value, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
-    ).toEqual('')
+    } catch (error) {
+      expect(error.toString()).toEqual('Error: Invalid amount')
+    }
   })
 
-  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function getTest(args) {
     it(`Test with: ${JSON.stringify(args)}`, () => {
       expect(
-        amountConverterPipe.transform(args.value, {
-          protocol: args.protocol,
-          maxDigits: 0
-        })
+        (() => {
+          try {
+            const result = amountConverterPipe.transform(args.value, {
+              protocol: args.protocol,
+              maxDigits: 0
+            })
+
+            return result
+          } catch (error) {
+            return error.toString()
+          }
+        })()
       ).toEqual(args.expected)
     })
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function makeTests(argsArray) {
-    argsArray.forEach(v => {
+    argsArray.forEach((v) => {
       getTest(v)
     })
   }
@@ -196,24 +213,24 @@ describe('AmountConverter Pipe', () => {
   makeTests(truthyprotocols)
 
   const falsyValues = [
-    { value: false, protocol: MainProtocolSymbols.ETH, expected: '' },
+    { value: false, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid amount' },
     { value: 0, protocol: MainProtocolSymbols.ETH, expected: '0 ETH' },
-    { value: '', protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: null, protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: undefined, protocol: MainProtocolSymbols.ETH, expected: '' },
-    { value: NaN, protocol: MainProtocolSymbols.ETH, expected: '' }
+    { value: '', protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid amount' },
+    { value: null, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid amount' },
+    { value: undefined, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid amount' },
+    { value: NaN, protocol: MainProtocolSymbols.ETH, expected: 'Error: Invalid amount' }
   ]
   makeTests(falsyValues)
 
   const falsyprotocols = [
-    { value: '1', protocol: false, expected: '' },
-    { value: '1', protocol: 0, expected: '' },
-    { value: '1', protocol: '', expected: '' },
-    { value: '1', protocol: null, expected: '' },
-    { value: '1', protocol: undefined, expected: '' },
-    { value: '1', protocol: NaN, expected: '' },
-    { value: '1', protocol: 'test', expected: '' },
-    { value: '1', protocol: 'asdf', expected: '' }
+    { value: '1', protocol: false, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: 0, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: '', expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: null, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: undefined, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: NaN, expected: 'Error: Invalid protocol' },
+    { value: '1', protocol: 'test', expected: 'Error: Protocol not supported' },
+    { value: '1', protocol: 'asdf', expected: 'Error: Protocol not supported' }
   ]
   makeTests(falsyprotocols)
 })
