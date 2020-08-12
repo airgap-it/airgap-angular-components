@@ -1,6 +1,11 @@
 {
+  "version": "0.0.1-beta.0",
   "packages": [
     "packages/*"
   ],
-  "version": "0.0.1-beta.0"
+  "command": {
+    "publish": {
+      "ignoreChanges": ["*.sh", "*.md"]
+    }
+  }
 }
