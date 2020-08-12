@@ -1,6 +1,9 @@
 {
   "name": "@airgap/angular-ngrx",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "ng": "ng",
     "build": "ng build ng-rx",

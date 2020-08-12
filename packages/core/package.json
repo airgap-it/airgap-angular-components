@@ -1,6 +1,9 @@
 {
   "name": "@airgap/angular-core",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "ng": "ng",
     "build": "ng build core",

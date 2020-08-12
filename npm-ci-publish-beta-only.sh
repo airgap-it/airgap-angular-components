@@ -6,7 +6,6 @@ VERSION=$(node -pe 'JSON.parse(process.argv[1]).version.indexOf("beta")' "$(cat 
 if [ "$VERSION" = "-1" ]
 then
   echo "cannot publish non-beta version"
-  npx lerna --version
 else
   echo "version is beta, using --dist-tag next"
   npx lerna publish from-package --dist-tag next --yes
