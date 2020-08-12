@@ -25,5 +25,8 @@
     "@angular/platform-browser-dynamic": "^10.0.8",
     "rxjs": "^6.6.2",
     "zone.js": "^0.10.3"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
