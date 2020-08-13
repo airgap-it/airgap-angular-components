@@ -180,13 +180,28 @@ export class ProtocolService {
     return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
   }
 
-  public getSubProtocolsByIdentifier(
-    identifier: ProtocolSymbols,
+  public getSubProtocolByIdentifier(
+    identifier: SubProtocolSymbols,
+    network?: ProtocolNetwork,
+    activeOnly: boolean = true
+  ): ICoinSubProtocol | undefined {
+    const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
+    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(mainIdentifier, network).network
+    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+
+    const subProtocolMap: SubProtocolsMap = activeOnly
+      ? this.activeSubProtocols
+      : this.supportedSubProtocols
+
+    return (subProtocolMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+  }
+
+  public getSubProtocolsByMainIdentifier(
+    mainIdentifier: MainProtocolSymbols,
     network?: ProtocolNetwork,
     activeOnly: boolean = true
   ): ICoinSubProtocol[] {
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
+    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(mainIdentifier, network).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolMap: SubProtocolsMap = activeOnly

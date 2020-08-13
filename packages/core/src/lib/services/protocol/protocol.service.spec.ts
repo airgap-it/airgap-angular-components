@@ -18,7 +18,8 @@ import {
   TezosProtocolNetworkExtras,
   TezosProtocolOptions,
   TezosUSDProtocolConfig,
-  TezosBTCProtocolConfig
+  TezosBTCProtocolConfig,
+  TezosKtProtocol
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols, SubProtocolSymbols, ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
@@ -335,47 +336,72 @@ describe('ProtocolsService', () => {
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(SubProtocolSymbols.XTZ_BTC)
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC)
 
-      expect(foundSubProtocols.length).toBe(1)
-      expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
     })
 
     it('should find a sub protocol by a main protocol identifier', () => {
       service.init({
-        activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [new TezosProtocol(), new TezosKtProtocol()]
+        ]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(MainProtocolSymbols.XTZ)
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ)
+      const foundSubIdentifiers = foundSubProtocols.map((protocol: ICoinSubProtocol) => protocol.identifier)
 
-      expect(foundSubProtocols.length).toBe(1)
-      expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubIdentifiers.length).toBe(2)
+      expect(foundSubIdentifiers.sort()).toEqual([SubProtocolSymbols.XTZ_BTC, SubProtocolSymbols.XTZ_KT].sort())
     })
 
-    it('should not find a sub protocol by an identifier if not active', () => {
+    it('should not find a sub protocol by a sub identifier if not active', () => {
       service.init({
         activeSubProtocols: [],
         passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(SubProtocolSymbols.XTZ_BTC)
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC)
+
+      expect(foundSubProtocol).toBeUndefined()
+    })
+
+    it('should find a passive protocol by a sub identifier if specified', () => {
+      service.init({
+        activeSubProtocols: [],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+      })
+
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, undefined, false)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+    })
+
+    it('should not find a passive protocol by a main identifier if not active', () => {
+      service.init({
+        activeSubProtocols: [],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+      })
+
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ)
 
       expect(foundSubProtocols.length).toBe(0)
     })
 
-    it('should find a passive protocol by an identifier if specified', () => {
+    it('should find a passive protocol by a main identifier if specified', () => {
       service.init({
         activeSubProtocols: [],
         passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(SubProtocolSymbols.XTZ_BTC, undefined, false)
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ, undefined, false)
 
       expect(foundSubProtocols.length).toBe(1)
       expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)
     })
 
-    it('should find a sub protocol by an identifier and network', () => {
+    it('should find a sub protocol by a sub identifier and network', () => {
       service.init({
         activeSubProtocols: [
           [new TezosProtocol(), new TezosBTC()],
@@ -386,19 +412,46 @@ describe('ProtocolsService', () => {
         ]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
+    })
+
+    it('should not find a sub protocol by a sub identifier if network does not match', () => {
+      service.init({
+        activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+      })
+
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+
+      expect(foundSubProtocol).toBeUndefined()
+    })
+
+    it('should find a sub protocol by a main identifier and network', () => {
+      service.init({
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [
+            new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
+            new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))
+          ]
+        ]
+      })
+
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
 
       expect(foundSubProtocols.length).toBe(1)
       expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)
       expect(foundSubProtocols[0].options.network).toBe(tezosTestnet)
     })
 
-    it('should not find a sub protocol by an identifier if network does not match', () => {
+    it('should not find a sub protocol by a main identifier if network does not match', () => {
       service.init({
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundSubProtocols = service.getSubProtocolsByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
 
       expect(foundSubProtocols.length).toBe(0)
     })
