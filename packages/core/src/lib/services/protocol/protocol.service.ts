@@ -30,6 +30,10 @@ import { createNotInitialized } from '../../utils/not-initialized'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 
+export const activeEthTokens: Set<string> = new Set([
+  'eth-erc20-xchf'
+])
+
 export interface SubProtocolsMap {
   [key: string]: {
     [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol
@@ -56,6 +60,9 @@ const notInitialized = createNotInitialized('ProtocolService', 'Call `init` firs
   providedIn: 'root'
 })
 export class ProtocolService {
+  private _supportedProtocols: ICoinProtocol[] | undefined
+  private _supportedSubProtocols: SubProtocolsMap | undefined
+
   private _passiveProtocols: ICoinProtocol[] | undefined
   private _activeProtocols: ICoinProtocol[] | undefined
 
@@ -71,12 +78,34 @@ export class ProtocolService {
     )
   }
 
+  public get supportedProtocols(): ICoinProtocol[] {
+    if (this._supportedProtocols === undefined) {
+      const passiveProtocols: ICoinProtocol[] = this._passiveProtocols ?? notInitialized()
+      const activeProtocols: ICoinProtocol[] = this._activeProtocols ?? notInitialized()
+
+      this._supportedProtocols = passiveProtocols.concat(activeProtocols)
+    }
+
+    return this._supportedProtocols
+  }
+
   public get passiveProtocols(): ICoinProtocol[] {
     return this._passiveProtocols ?? notInitialized()
   }
 
   public get activeProtocols(): ICoinProtocol[] {
     return this._activeProtocols ?? notInitialized()
+  }
+
+  public get supportedSubProtocols(): SubProtocolsMap {
+    if (this._supportedSubProtocols === undefined) {
+      const passiveSubProtocols: SubProtocolsMap = this._passiveSubProtocols ?? notInitialized()
+      const activeSubProtocols: SubProtocolsMap = this._activeSubProtocols ?? notInitialized()
+
+      this._supportedSubProtocols = this.mergeSubProtocolMaps(passiveSubProtocols, activeSubProtocols)
+    }
+
+    return this._supportedSubProtocols
   }
 
   public get passiveSubProtocols(): SubProtocolsMap {
@@ -137,7 +166,7 @@ export class ProtocolService {
 
   public getProtocolByIdentifier(identifier: ProtocolSymbols, network?: ProtocolNetwork, activeOnly: boolean = true): ICoinProtocol {
     const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.activeProtocols.concat(this.passiveProtocols))
+    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.supportedProtocols)
       .map((protocol: ICoinProtocol) => [protocol, ...(protocol.subProtocols ?? [])])
       .reduce((flatten: ICoinProtocol[], toFlatten: ICoinProtocol[]) => flatten.concat(toFlatten), [])
       .filter(
@@ -162,7 +191,7 @@ export class ProtocolService {
 
     const subProtocolMap: SubProtocolsMap = activeOnly
       ? this.activeSubProtocols
-      : this.mergeSubProtocolMaps(this.activeSubProtocols, this.passiveSubProtocols)
+      : this.supportedSubProtocols
 
     return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter(
       (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
@@ -197,17 +226,45 @@ export class ProtocolService {
   }
 
   private getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-    return []
+    const ethereumProtocol = new EthereumProtocol()
+
+    return [
+      [new TezosProtocol(), new TezosKtProtocol()],
+      ...ethTokens
+        .filter((token: Token, index: number, array: Token[]) => !activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
+        .map(
+          (token: Token) =>
+            [
+              ethereumProtocol,
+              new GenericERC20(
+                new EthereumERC20ProtocolOptions(
+                  new EthereumProtocolNetwork(),
+                  new EthereumERC20ProtocolConfig(
+                    token.symbol,
+                    token.name,
+                    token.marketSymbol,
+                    token.identifier as SubProtocolSymbols,
+                    token.contractAddress,
+                    token.decimals
+                  )
+                )
+              )
+            ] as [EthereumProtocol, GenericERC20]
+        )
+    ]
   }
 
   private getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
+    const ethereumProtocol = new EthereumProtocol()
+
     return [
-      [new TezosProtocol(), new TezosKtProtocol()],
       [new TezosProtocol(), new TezosBTC()],
-      ...ethTokens.map(
+      ...ethTokens
+      .filter((token: Token, index: number, array: Token[]) => activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
+        .map(
         (token: Token) =>
           [
-            new EthereumProtocol(),
+            ethereumProtocol,
             new GenericERC20(
               new EthereumERC20ProtocolOptions(
                 new EthereumProtocolNetwork(),
@@ -283,9 +340,9 @@ export class ProtocolService {
 
   private removeProtocolDuplicates(): void {
     // if a protocol has been set as passive and active, it's considered active
-    const activeIdentifiers: string[] = this.activeProtocols.map(getProtocolAndNetworkIdentifier)
+    const activeIdentifiers: Set<string> = new Set(this.activeProtocols.map(getProtocolAndNetworkIdentifier))
     this._passiveProtocols = this.passiveProtocols.filter(
-      (protocol: ICoinProtocol) => !activeIdentifiers.includes(getProtocolAndNetworkIdentifier(protocol))
+      (protocol: ICoinProtocol) => !activeIdentifiers.has(getProtocolAndNetworkIdentifier(protocol))
     )
   }
 
