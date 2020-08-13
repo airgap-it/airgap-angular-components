@@ -9,7 +9,7 @@ interface TranslateResource {
   suffix: string
 }
 
-export class AirGapCommonTranslateLoader implements TranslateLoader {
+export class AirGapTranslateLoader implements TranslateLoader {
   private readonly translateResources: TranslateResource[]
 
   constructor(

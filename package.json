@@ -1,5 +1,5 @@
 {
-  "name": "airgap-common-components",
+  "name": "airgap-angular-components",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

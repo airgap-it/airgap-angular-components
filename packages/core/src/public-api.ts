@@ -2,7 +2,7 @@
  * Public API Surface of core
  */
 
-export * from './lib/airgap-common-core.module'
+export * from './lib/airgap-angular-core.module'
 
 export * from './lib/components/components.module'
 export * from './lib/components/currency-symbol/currency-symbol.component'
@@ -12,7 +12,7 @@ export * from './lib/components/network-badge/network-badge.component'
 export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 
-export * from './lib/translation/AirGapCommonTranslateLoader'
+export * from './lib/translation/AirGapTranslateLoader'
 
 export * from './lib/pipes/pipes.module'
 export * from './lib/pipes/amount-converter/amount-converter.pipe'
