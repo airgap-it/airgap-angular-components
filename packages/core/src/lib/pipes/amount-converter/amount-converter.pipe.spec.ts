@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ProtocolService } from '../../services/protocol/protocol.service'
+import { SubProtocolService } from '../../services/protocol/internal/sub-protocol.service'
+import { MainProtocolService } from '../../services/protocol/internal/main-protocol.service'
 import { AmountConverterPipe } from './amount-converter.pipe'
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -11,7 +13,7 @@ describe('AmountConverter Pipe', () => {
   let amountConverterPipe: AmountConverterPipe
 
   beforeAll(async () => {
-    protocolService = new ProtocolService()
+    protocolService = new ProtocolService(new MainProtocolService(), new SubProtocolService())
     protocolService.init()
   })
 
@@ -181,12 +183,12 @@ describe('AmountConverter Pipe', () => {
       expect(
         (() => {
           try {
-            const result = amountConverterPipe.transform(args.value, {
+            const transformed = amountConverterPipe.transform(args.value, {
               protocol: args.protocol,
               maxDigits: 0
             })
 
-            return result
+            return transformed
           } catch (error) {
             return error.toString()
           }

@@ -1,5 +1,7 @@
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ProtocolService } from '../../services/protocol/protocol.service'
+import { MainProtocolService } from '../../services/protocol/internal/main-protocol.service'
+import { SubProtocolService } from '../../services/protocol/internal/sub-protocol.service'
 import { FeeConverterPipe } from './fee-converter.pipe'
 
 describe('FeeConverter Pipe', () => {
@@ -7,7 +9,7 @@ describe('FeeConverter Pipe', () => {
   let protocolService: ProtocolService
 
   beforeAll(() => {
-    protocolService = new ProtocolService()
+    protocolService = new ProtocolService(new MainProtocolService(), new SubProtocolService())
     protocolService.init()
   })
 
@@ -58,6 +60,7 @@ describe('FeeConverter Pipe', () => {
   it('should return an empty string when protocolIdentifier unknown', () => {
     try {
       feeConverterPipe.transform('1', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         protocol: 'unknown-protocol' as any
       })
     } catch (error) {
@@ -70,11 +73,11 @@ describe('FeeConverter Pipe', () => {
       expect(
         (() => {
           try {
-            const result = feeConverterPipe.transform(args.value, {
+            const transformed = feeConverterPipe.transform(args.value, {
               protocol: args.protocol
             })
 
-            return result
+            return transformed
           } catch (error) {
             return error.toString()
           }
