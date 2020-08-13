@@ -7,6 +7,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build core",
+    "build:prod": "ng build --prod core",
     "test": "ng test core",
     "test:ci": "ng test core --code-coverage --watch=false",
     "test:lerna": "ng test core --watch=false",
@@ -36,8 +37,5 @@
     "ngx-moment": "^5.0.0",
     "rxjs": "^6.6.2",
     "zone.js": "^0.10.3"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

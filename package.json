@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "build": "lerna run build --stream",
+    "build:prod": "lerna run build:prod --stream",
     "test": "lerna run test:lerna --stream",
     "test:ci": "lerna run test:ci --stream",
     "lint": "lerna run lint --stream",

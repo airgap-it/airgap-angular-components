@@ -35,7 +35,7 @@ RUN npm install
 RUN export NODE_ENV=production
 
 # build
-RUN npm run build
+RUN npm run build:prod
 
 CMD ["npm", "run", "test"]
 

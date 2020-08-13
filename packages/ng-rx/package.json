@@ -7,6 +7,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build ng-rx",
+    "build:prod": "ng build --prod ng-rx",
     "test": "ng test ng-rx",
     "test:ci": "ng test ng-rx --code-coverage --watch=false",
     "test:lerna": "ng test ng-rx --watch=false",
@@ -25,8 +26,5 @@
     "@angular/platform-browser-dynamic": "^10.0.8",
     "rxjs": "^6.6.2",
     "zone.js": "^0.10.3"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }
