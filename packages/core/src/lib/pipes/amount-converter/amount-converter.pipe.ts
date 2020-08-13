@@ -45,7 +45,7 @@ export class AmountConverterPipe implements PipeTransform {
       throw new Error('Invalid amount')
     }
 
-    if (typeof args.maxDigits !== 'number') {
+    if (args.maxDigits !== undefined && typeof args.maxDigits !== 'number') {
       throw new Error('Invalid maxDigits')
     }
 
