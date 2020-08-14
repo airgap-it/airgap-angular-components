@@ -261,6 +261,39 @@ describe('SubProtocolStoreService', () => {
   })
 
   describe('Utils', () => {
+    const validIdentifiers: string[] = [
+      SubProtocolSymbols.ETH_ERC20,
+      SubProtocolSymbols.XTZ_BTC,
+      SubProtocolSymbols.XTZ_KT,
+      SubProtocolSymbols.XTZ_STKR,
+      SubProtocolSymbols.XTZ_USD,
+      'eth-erc20-$ffc',
+      'eth-erc20-1wo'
+    ]
+
+    const invalidIdentifiers: string[] = [
+      'qwerty',
+      'abcde',
+      'tzBTC',
+      'tzKT',
+      'tzSTKR',
+      'tzUSD',
+      'erc20',
+    ]
+
+    it('should check if the identifier is valid', () => {
+      service.init({
+        activeSubProtocols: [],
+        passiveSubProtocols: []
+      })
+
+      const allValid: boolean = validIdentifiers.reduce((all: boolean, next: string) => all && service.isIdentifierValid(next), true)
+      const allInvalid: boolean = invalidIdentifiers.reduce((all: boolean, next: string) => all && !service.isIdentifierValid(next), true)
+
+      expect(allValid).toBeTrue()
+      expect(allInvalid).toBeTrue()
+    })
+
     it('should find networks for the requested sub protocol by its identifier', () => {
       const tezosProtocol = new TezosProtocol()
       const tezosTestnetProtocol = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))

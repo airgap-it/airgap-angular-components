@@ -784,10 +784,10 @@ describe('ProtocolService', () => {
 
       const allInvalid: boolean = invalidAddresses
         .map((entry) => service.isAddressOfProtocol(entry.protocol, entry.address))
-        .reduce((all, next) => all && next, true)
+        .reduce((all, next) => all && !next, true)
 
       expect(allValid).toBeTrue()
-      expect(allInvalid).toBeFalse()
+      expect(allInvalid).toBeTrue()
     })
   })
 })

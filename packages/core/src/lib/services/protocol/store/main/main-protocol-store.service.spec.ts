@@ -211,6 +211,42 @@ describe('MainProtocolStoreService', () => {
   })
 
   describe('Utils', () => {
+    const validIdentifiers: string[] = [
+      MainProtocolSymbols.AE,
+      MainProtocolSymbols.BTC,
+      MainProtocolSymbols.COSMOS,
+      MainProtocolSymbols.ETH,
+      MainProtocolSymbols.GRS,
+      MainProtocolSymbols.KUSAMA,
+      MainProtocolSymbols.POLKADOT,
+      MainProtocolSymbols.XTZ,
+    ]
+
+    const invalidIdentifiers: string[] = [
+      'qwerty',
+      'abcde',
+      'aeternity',
+      'bitcoin',
+      'ethereum',
+      'tezos',
+      'ksm',
+      'dot',
+      'atom'
+    ]
+
+    it('should check if the identifier is valid', () => {
+      service.init({
+        activeProtocols: [],
+        passiveProtocols: []
+      })
+
+      const allValid: boolean = validIdentifiers.reduce((all: boolean, next: string) => all && service.isIdentifierValid(next), true)
+      const allInvalid: boolean = invalidIdentifiers.reduce((all: boolean, next: string) => all && !service.isIdentifierValid(next), true)
+
+      expect(allValid).toBeTrue()
+      expect(allInvalid).toBeTrue()
+    })
+
     it('should find networks for the requested main protocol by its identifier', () => {
       const tezosProtocol = new TezosProtocol()
       const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
