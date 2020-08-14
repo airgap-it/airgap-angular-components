@@ -50,11 +50,11 @@ export class SubProtocolService extends BaseProtocolService<SubProtocolsMap, Sub
 
   public getSubProtocolByIdentifier(
     identifier: SubProtocolSymbols,
-    network?: ProtocolNetwork,
+    network?: ProtocolNetwork | string,
     activeOnly: boolean = true
   ): ICoinSubProtocol {
     const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(mainIdentifier, network).network
+    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
@@ -70,10 +70,10 @@ export class SubProtocolService extends BaseProtocolService<SubProtocolsMap, Sub
 
   public getSubProtocolsByMainIdentifier(
     mainIdentifier: MainProtocolSymbols,
-    network?: ProtocolNetwork,
+    network?: ProtocolNetwork | string,
     activeOnly: boolean = true
   ): ICoinSubProtocol[] {
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(mainIdentifier, network).network
+    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols

@@ -266,6 +266,23 @@ describe('ProtocolsService', () => {
       expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
     })
 
+    it('should find a sub protocol by sub protocol and network identifiers', () => {
+      service.init({
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [
+            new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
+            new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))
+          ]
+        ]
+      })
+
+      const foundSubProtocol = service.getSubProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet.identifier)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
+    })
+
     it('should not find a sub protocol by a sub identifier if network does not match', () => {
       service.init({
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
@@ -290,6 +307,24 @@ describe('ProtocolsService', () => {
       })
 
       const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
+
+      expect(foundSubProtocols.length).toBe(1)
+      expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocols[0].options.network).toBe(tezosTestnet)
+    })
+
+    it('should find a sub protocol by main protocol and network identifiers', () => {
+      service.init({
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [
+            new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
+            new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))
+          ]
+        ]
+      })
+
+      const foundSubProtocols = service.getSubProtocolsByMainIdentifier(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
 
       expect(foundSubProtocols.length).toBe(1)
       expect(foundSubProtocols[0].identifier).toBe(SubProtocolSymbols.XTZ_BTC)

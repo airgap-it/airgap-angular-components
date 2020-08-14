@@ -9,7 +9,7 @@ import {
   TezosProtocol,
   CosmosProtocol,
   PolkadotProtocol,
-  KusamaProtocol,
+  KusamaProtocol
 } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
@@ -28,12 +28,19 @@ export class MainProtocolService extends BaseProtocolService<ICoinProtocol[], Ma
     super('MainProtocolService')
   }
 
-  public getProtocolByIdentifier(identifier: MainProtocolSymbols, network?: ProtocolNetwork, activeOnly: boolean = true): ICoinProtocol {
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.supportedProtocols)
-      .filter(
-        (protocol: ICoinProtocol) => protocol.identifier.startsWith(identifier) && isNetworkEqual(protocol.options.network, targetNetwork)
-      )
+  public getProtocolByIdentifier(
+    identifier: MainProtocolSymbols,
+    network?: ProtocolNetwork | string,
+    activeOnly: boolean = true
+  ): ICoinProtocol {
+    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(identifier).network
+    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.supportedProtocols).filter(
+      (protocol: ICoinProtocol) =>
+        protocol.identifier.startsWith(identifier) &&
+        (typeof targetNetwork === 'string'
+          ? protocol.options.network.identifier === targetNetwork
+          : isNetworkEqual(protocol.options.network, targetNetwork))
+    )
 
     if (filtered.length === 0) {
       throw new ProtocolNotSupported()

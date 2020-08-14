@@ -195,6 +195,17 @@ describe('MainProtocolsService', () => {
       expect(foundProtocol?.options.network).toBe(tezosTestnet)
     })
 
+    it('should find a main protocol by protocol and network identifiers', () => {
+      service.init({
+        activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))]
+      })
+
+      const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
+
+      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocol?.options.network).toBe(tezosTestnet)
+    })
+
     it('should not find a main protocol by an identifier if network does not match', () => {
       service.init({
         activeProtocols: [new TezosProtocol()]

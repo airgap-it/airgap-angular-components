@@ -461,6 +461,27 @@ describe('ProtocolsService', () => {
       expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
     })
 
+    it('should find a protocol by protocol and network identifier', () => {
+      const tezosTestnetProtocol = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      service.init({
+        activeProtocols: [new TezosProtocol(), tezosTestnetProtocol],
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [tezosTestnetProtocol, new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))]
+        ]
+      })
+
+      const foundProtocol = service.getProtocol(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
+      const foundSubProtocol = service.getProtocol(SubProtocolSymbols.XTZ_BTC, tezosTestnet.identifier)
+
+      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocol?.options.network).toBe(tezosTestnet)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
+    })
+
     it('should not find a protocol by an identifier if network does not match', () => {
       service.init({
         activeProtocols: [new TezosProtocol()],

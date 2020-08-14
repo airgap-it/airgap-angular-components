@@ -104,7 +104,7 @@ export class ProtocolService {
 
   public getProtocol(
     protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
-    network?: ProtocolNetwork,
+    network?: ProtocolNetwork | string,
     activeOnly: boolean = true
   ): ICoinProtocol | undefined {
     try {
