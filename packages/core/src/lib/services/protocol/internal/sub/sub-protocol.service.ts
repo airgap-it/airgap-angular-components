@@ -18,11 +18,11 @@ import {
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig
 } from 'airgap-coin-lib/dist/protocols/ethereum/EthereumProtocolOptions'
-import { getMainIdentifier } from '../../../utils/protocol/protocol-identifier'
-import { getProtocolAndNetworkIdentifier } from '../../../utils/protocol/protocol-network-identifier'
-import { Token } from '../../../types/Token'
-import { ethTokens } from '../tokens'
-import { BaseProtocolService, BaseProtocolServiceConfig } from './base-protocol.service'
+import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
+import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
+import { Token } from '../../../../types/Token'
+import { ethTokens } from '../../tokens'
+import { BaseProtocolService, BaseProtocolServiceConfig } from '../base-protocol.service'
 
 export const activeEthTokens: Set<string> = new Set(['eth-erc20-xchf'])
 

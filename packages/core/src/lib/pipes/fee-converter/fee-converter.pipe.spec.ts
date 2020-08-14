@@ -1,7 +1,7 @@
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ProtocolService } from '../../services/protocol/protocol.service'
-import { MainProtocolService } from '../../services/protocol/internal/main-protocol.service'
-import { SubProtocolService } from '../../services/protocol/internal/sub-protocol.service'
+import { MainProtocolService } from '../../services/protocol/internal/main/main-protocol.service'
+import { SubProtocolService } from '../../services/protocol/internal/sub/sub-protocol.service'
 import { FeeConverterPipe } from './fee-converter.pipe'
 
 describe('FeeConverter Pipe', () => {

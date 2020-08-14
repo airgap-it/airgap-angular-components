@@ -3,8 +3,8 @@ import { ICoinProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { createNotInitialized } from '../../utils/not-initialized'
-import { MainProtocolServiceConfig, MainProtocolService } from './internal/main-protocol.service'
-import { SubProtocolServiceConfig, SubProtocolService, SubProtocolsMap } from './internal/sub-protocol.service'
+import { MainProtocolServiceConfig, MainProtocolService } from './internal/main/main-protocol.service'
+import { SubProtocolServiceConfig, SubProtocolService, SubProtocolsMap } from './internal/sub/sub-protocol.service'
 
 export type ProtocolServiceConfig = MainProtocolServiceConfig & SubProtocolServiceConfig
 
@@ -14,7 +14,6 @@ const notInitialized = createNotInitialized('ProtocolService', 'Call `init` firs
   providedIn: 'root'
 })
 export class ProtocolService {
-
   constructor(public readonly mainProtocolService: MainProtocolService, public readonly subProtocolService: SubProtocolService) {}
 
   public get isInitialized(): boolean {
@@ -94,19 +93,13 @@ export class ProtocolService {
   public isProtocolActive(protocol: ICoinProtocol): boolean
   public isProtocolActive(identifier: ProtocolSymbols, network?: ProtocolNetwork): boolean
   public isProtocolActive(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork): boolean {
-    const identifier: ProtocolSymbols = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
-    const targetNetwork: ProtocolNetwork | undefined = typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network
-
-    return this.getProtocol(identifier, targetNetwork, true) !== undefined
+    return this.isProtocolRegistered(protocolOrIdentifier, network, true)
   }
 
   public isProtocolSupported(protocol: ICoinProtocol): boolean
   public isProtocolSupported(identifier: ProtocolSymbols, network?: ProtocolNetwork): boolean
   public isProtocolSupported(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork): boolean {
-    const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
-    const targetNetwork: ProtocolNetwork | undefined = typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network
-
-    return this.getProtocol(identifier, targetNetwork, false) !== undefined
+    return this.isProtocolRegistered(protocolOrIdentifier, network, false)
   }
 
   public getProtocol(
@@ -131,5 +124,17 @@ export class ProtocolService {
     const protocol: ICoinProtocol | undefined = this.getProtocol(protocolSymbol)
 
     return protocol !== undefined && address.match(protocol.addressValidationPattern) !== null
+  }
+
+  private isProtocolRegistered(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    network?: ProtocolNetwork,
+    checkActiveOnly: boolean = true
+  ): boolean {
+    const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+    const targetNetwork: ProtocolNetwork | undefined =
+      typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network
+
+    return this.getProtocol(identifier, targetNetwork, checkActiveOnly) !== undefined
   }
 }

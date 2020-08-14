@@ -12,7 +12,7 @@ import {
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { getIdentifiers, defaultActiveIdentifiers, defaultPassiveIdentifiers } from '../utils/test'
+import { getIdentifiers, defaultActiveIdentifiers, defaultPassiveIdentifiers } from '../../utils/test'
 import { MainProtocolService, MainProtocolServiceConfig } from './main-protocol.service'
 
 describe('MainProtocolsService', () => {

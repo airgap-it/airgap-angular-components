@@ -18,7 +18,7 @@ import {
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { defaultActiveSubIdentifiers, defaultPassiveSubIdentifiers, getSubIdentifiers } from '../utils/test'
+import { defaultActiveSubIdentifiers, defaultPassiveSubIdentifiers, getSubIdentifiers } from '../../utils/test'
 import { SubProtocolService, SubProtocolServiceConfig } from './sub-protocol.service'
 
 describe('ProtocolsService', () => {

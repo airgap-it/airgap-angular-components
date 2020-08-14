@@ -2,7 +2,7 @@ import { SubProtocolSymbols, ProtocolSymbols, MainProtocolSymbols } from 'airgap
 import { ICoinSubProtocol, ICoinProtocol } from 'airgap-coin-lib'
 import { Token } from '../../../types/Token'
 import { ethTokens } from '../tokens'
-import { activeEthTokens, SubProtocolsMap } from '../internal/sub-protocol.service'
+import { activeEthTokens, SubProtocolsMap } from '../internal/sub/sub-protocol.service'
 
 export const defaultActiveIdentifiers = [
   MainProtocolSymbols.AE,

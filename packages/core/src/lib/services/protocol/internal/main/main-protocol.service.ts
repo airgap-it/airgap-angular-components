@@ -15,8 +15,8 @@ import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
 import { isNetworkEqual } from 'airgap-coin-lib/dist/utils/Network'
-import { getProtocolAndNetworkIdentifier } from '../../../utils/protocol/protocol-network-identifier'
-import { BaseProtocolService, BaseProtocolServiceConfig } from './base-protocol.service'
+import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
+import { BaseProtocolService, BaseProtocolServiceConfig } from '../base-protocol.service'
 
 export type MainProtocolServiceConfig = BaseProtocolServiceConfig<ICoinProtocol[]>
 
