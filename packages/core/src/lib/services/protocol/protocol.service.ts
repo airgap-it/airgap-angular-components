@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core'
 import { ICoinProtocol, ICoinSubProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
 import { createNotInitialized } from '../../utils/not-initialized'
+import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -126,6 +128,22 @@ export class ProtocolService {
     } catch (error) {
       return undefined
     }
+  }
+
+  public getSubProtocols(
+    mainProtocol: ICoinProtocol | MainProtocolSymbols,
+    network?: ProtocolNetwork | string,
+    activeOnly: boolean = true
+  ): ICoinSubProtocol[] {
+    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : mainProtocol.identifier
+    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
+    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+
+    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeSubProtocols : this.supportedSubProtocols
+
+    return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
+      (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
+    ) as ICoinSubProtocol[]
   }
 
   public getNetworksForProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {

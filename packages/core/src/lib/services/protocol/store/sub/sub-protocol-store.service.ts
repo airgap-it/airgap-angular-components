@@ -76,21 +76,6 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
       .filter((network: ProtocolNetwork | undefined) => network !== undefined) as ProtocolNetwork[]
   }
 
-  public getSubProtocolsByMainIdentifier(
-    mainIdentifier: MainProtocolSymbols,
-    network?: ProtocolNetwork | string,
-    activeOnly: boolean = true
-  ): ICoinSubProtocol[] {
-    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
-    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
-
-    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
-
-    return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
-      (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
-    ) as ICoinSubProtocol[]
-  }
-
   protected transformConfig(config: SubProtocolStoreConfig): BaseProtocolStoreConfig<SubProtocolsMap> {
     return {
       passiveProtocols: this.createSubProtocolMap(config.passiveSubProtocols),
