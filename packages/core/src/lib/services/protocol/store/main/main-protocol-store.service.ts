@@ -66,8 +66,9 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     // if a protocol has been set as passive and active, it's considered active
     const presentIdentifiers: Set<string> = new Set()
 
-    this._activeProtocols = this.filterProtocolsIfIdentifierRegistered(this.activeProtocols, presentIdentifiers)
-    this._passiveProtocols = this.filterProtocolsIfIdentifierRegistered(this.passiveProtocols, presentIdentifiers)
+    // keep the last occurance
+    this._activeProtocols = this.filterProtocolsIfIdentifierRegistered(this.activeProtocols.reverse(), presentIdentifiers).reverse()
+    this._passiveProtocols = this.filterProtocolsIfIdentifierRegistered(this.passiveProtocols.reverse(), presentIdentifiers).reverse()
   }
 
   private filterProtocolsIfIdentifierRegistered(protocols: ICoinProtocol[], registry: Set<string>): ICoinProtocol[] {
