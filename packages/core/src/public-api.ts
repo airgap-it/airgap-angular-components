@@ -24,6 +24,7 @@ export * from './lib/services/protocol/protocol.service'
 export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
 
+export * from './lib/utils/array/remove-duplicates'
 export * from './lib/utils/protocol/protocol-identifier'
 export * from './lib/utils/protocol/protocol-network-identifier'
 export * from './lib/utils/not-initialized'

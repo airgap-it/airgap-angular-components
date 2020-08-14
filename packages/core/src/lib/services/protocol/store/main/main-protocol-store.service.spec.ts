@@ -12,17 +12,17 @@ import {
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import { getIdentifiers, defaultActiveIdentifiers, defaultPassiveIdentifiers } from '../../utils/test'
-import { MainProtocolService, MainProtocolServiceConfig } from './main-protocol.service'
+import { getIdentifiers } from '../../utils/test'
+import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
-describe('MainProtocolsService', () => {
-  let service: MainProtocolService
+describe('MainProtocolStoreService', () => {
+  let service: MainProtocolStoreService
 
   let tezosTestnet: TezosProtocolNetwork
 
   beforeEach(() => {
     TestBed.configureTestingModule({})
-    service = TestBed.inject(MainProtocolService)
+    service = TestBed.inject(MainProtocolStoreService)
 
     tezosTestnet = new TezosProtocolNetwork(
       'Testnet',
@@ -40,7 +40,7 @@ describe('MainProtocolsService', () => {
   describe('Init', () => {
     function makeInitializationTest(
       description: string,
-      createConfig: () => MainProtocolServiceConfig,
+      createConfig: () => MainProtocolStoreConfig,
       createExpected: () => {
         activeIdentifiers: MainProtocolSymbols[]
         passiveIdentifiers: MainProtocolSymbols[]
@@ -65,15 +65,6 @@ describe('MainProtocolsService', () => {
         expect(passiveIdentifiers.sort()).toEqual(expected.passiveIdentifiers.sort())
       })
     }
-
-    makeInitializationTest(
-      'should be initialized with default protocols',
-      () => ({}),
-      () => ({
-        activeIdentifiers: defaultActiveIdentifiers,
-        passiveIdentifiers: defaultPassiveIdentifiers,
-      })
-    )
 
     it('should throw an error when not initialized', () => {
       expect(service.isInitialized).toBeFalse()
@@ -113,19 +104,6 @@ describe('MainProtocolsService', () => {
     )
 
     makeInitializationTest(
-      'should be initialized with provided extra protocols',
-      () => ({
-        extraPassiveProtocols: [new AeternityProtocol()],
-        activeProtocols: [new BitcoinProtocol()], // by default every protocol is active, it needs to be overwitten for this test
-        extraActiveProtocols: [new CosmosProtocol()],
-      }),
-      () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
-        passiveIdentifiers: [MainProtocolSymbols.AE],
-      })
-    )
-
-    makeInitializationTest(
       'should remove duplicated protocols',
       () => ({
         passiveProtocols: [new AeternityProtocol(), new BitcoinProtocol()],
@@ -153,7 +131,8 @@ describe('MainProtocolsService', () => {
   describe('Find Protocols', () => {
     it('should find a main protocol by an identifier', () => {
       service.init({
-        activeProtocols: [new AeternityProtocol()]
+        activeProtocols: [new AeternityProtocol()],
+        passiveProtocols: []
       })
 
       const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.AE)
@@ -163,7 +142,8 @@ describe('MainProtocolsService', () => {
 
     it('should not find a main protocol by an identifier if not active', () => {
       service.init({
-        activeProtocols: [new AeternityProtocol()]
+        activeProtocols: [new AeternityProtocol()],
+        passiveProtocols: []
       })
 
       try {
@@ -186,7 +166,8 @@ describe('MainProtocolsService', () => {
 
     it('should find a main protocol by an identifier and network', () => {
       service.init({
-        activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))]
+        activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
+        passiveProtocols: []
       })
 
       const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
@@ -197,7 +178,8 @@ describe('MainProtocolsService', () => {
 
     it('should find a main protocol by protocol and network identifiers', () => {
       service.init({
-        activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))]
+        activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
+        passiveProtocols: []
       })
 
       const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
@@ -208,7 +190,8 @@ describe('MainProtocolsService', () => {
 
     it('should not find a main protocol by an identifier if network does not match', () => {
       service.init({
-        activeProtocols: [new TezosProtocol()]
+        activeProtocols: [new TezosProtocol()],
+        passiveProtocols: []
       })
 
       try {

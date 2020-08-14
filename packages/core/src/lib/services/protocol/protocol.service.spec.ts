@@ -21,20 +21,27 @@ import {
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
-import {
-  defaultActiveIdentifiers,
-  defaultPassiveIdentifiers,
-  defaultActiveSubIdentifiers,
-  defaultPassiveSubIdentifiers,
-  getIdentifiers,
-  getSubIdentifiers
-} from './utils/test'
+import { removeDuplicates } from '../../utils/array/remove-duplicates'
+import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
+import { getDefaultActiveProtocols, getDefaultPassiveProtocols, getDefaultActiveSubProtocols, getDefaultPassiveSubProtocols } from './defaults'
 
-describe('ProtocolsService', () => {
+describe('ProtocolService', () => {
   let service: ProtocolService
 
   let tezosTestnet: TezosProtocolNetwork
+
+  let defaultActiveIdentifiers: MainProtocolSymbols[]
+  let defaultPassiveIdentifiers: MainProtocolSymbols[]
+  let defaultActiveSubIdentifiers: SubProtocolSymbols[]
+  let defaultPassiveSubIdentifiers: SubProtocolSymbols[]
+
+  beforeAll(() => {
+    defaultActiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultActiveProtocols()) as MainProtocolSymbols[])
+    defaultPassiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultPassiveProtocols()) as MainProtocolSymbols[])
+    defaultActiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultActiveSubProtocols()) as SubProtocolSymbols[])
+    defaultPassiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultPassiveSubProtocols()) as SubProtocolSymbols[])
+  })
 
   beforeEach(() => {
     TestBed.configureTestingModule({})

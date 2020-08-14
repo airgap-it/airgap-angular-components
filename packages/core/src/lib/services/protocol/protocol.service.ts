@@ -1,12 +1,24 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol } from 'airgap-coin-lib'
+import { ICoinProtocol, ICoinSubProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { createNotInitialized } from '../../utils/not-initialized'
-import { MainProtocolServiceConfig, MainProtocolService } from './internal/main/main-protocol.service'
-import { SubProtocolServiceConfig, SubProtocolService, SubProtocolsMap } from './internal/sub/sub-protocol.service'
+import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
+import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
+import {
+  getDefaultPassiveProtocols,
+  getDefaultActiveProtocols,
+  getDefaultPassiveSubProtocols,
+  getDefaultActiveSubProtocols
+} from './defaults'
 
-export type ProtocolServiceConfig = MainProtocolServiceConfig & SubProtocolServiceConfig
+export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
+  extraPassiveProtocols?: ICoinProtocol[]
+  extraActiveProtocols?: ICoinProtocol[]
+
+  extraPassiveSubProtocols?: [ICoinProtocol, ICoinSubProtocol][]
+  extraActiveSubProtocols?: [ICoinProtocol, ICoinSubProtocol][]
+}
 
 const notInitialized = createNotInitialized('ProtocolService', 'Call `init` first.')
 
@@ -14,15 +26,15 @@ const notInitialized = createNotInitialized('ProtocolService', 'Call `init` firs
   providedIn: 'root'
 })
 export class ProtocolService {
-  constructor(public readonly mainProtocolService: MainProtocolService, public readonly subProtocolService: SubProtocolService) {}
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
   public get isInitialized(): boolean {
-    return this.mainProtocolService.isInitialized && this.subProtocolService.isInitialized
+    return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
   }
 
   public get supportedProtocols(): ICoinProtocol[] {
     try {
-      return this.mainProtocolService.supportedProtocols
+      return this.mainProtocolStore.supportedProtocols
     } catch {
       return notInitialized()
     }
@@ -30,7 +42,7 @@ export class ProtocolService {
 
   public get passiveProtocols(): ICoinProtocol[] {
     try {
-      return this.mainProtocolService.passiveProtocols
+      return this.mainProtocolStore.passiveProtocols
     } catch {
       return notInitialized()
     }
@@ -38,7 +50,7 @@ export class ProtocolService {
 
   public get activeProtocols(): ICoinProtocol[] {
     try {
-      return this.mainProtocolService.activeProtocols
+      return this.mainProtocolStore.activeProtocols
     } catch {
       return notInitialized()
     }
@@ -46,7 +58,7 @@ export class ProtocolService {
 
   public get supportedSubProtocols(): SubProtocolsMap {
     try {
-      return this.subProtocolService.supportedProtocols
+      return this.subProtocolStore.supportedProtocols
     } catch {
       return notInitialized()
     }
@@ -54,7 +66,7 @@ export class ProtocolService {
 
   public get passiveSubProtocols(): SubProtocolsMap {
     try {
-      return this.subProtocolService.passiveProtocols
+      return this.subProtocolStore.passiveProtocols
     } catch {
       return notInitialized()
     }
@@ -62,7 +74,7 @@ export class ProtocolService {
 
   public get activeSubProtocols(): SubProtocolsMap {
     try {
-      return this.subProtocolService.activeProtocols
+      return this.subProtocolStore.activeProtocols
     } catch {
       return notInitialized()
     }
@@ -76,17 +88,13 @@ export class ProtocolService {
       return
     }
 
-    this.mainProtocolService.init({
-      passiveProtocols: config?.passiveProtocols,
-      activeProtocols: config?.activeProtocols,
-      extraPassiveProtocols: config?.extraPassiveProtocols,
-      extraActiveProtocols: config?.extraActiveProtocols
+    this.mainProtocolStore.init({
+      passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
+      activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
     })
-    this.subProtocolService.init({
-      passiveSubProtocols: config?.passiveSubProtocols,
-      activeSubProtocols: config?.activeSubProtocols,
-      extraPassiveSubProtocols: config?.extraPassiveSubProtocols,
-      extraActiveSubProtocols: config?.extraActiveSubProtocols
+    this.subProtocolStore.init({
+      passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(config?.extraPassiveSubProtocols ?? []),
+      activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
     })
   }
 
@@ -109,9 +117,9 @@ export class ProtocolService {
   ): ICoinProtocol | undefined {
     try {
       if (typeof protocolOrIdentifier == 'string') {
-        return Object.values(MainProtocolSymbols).includes(protocolOrIdentifier as MainProtocolSymbols)
-          ? this.mainProtocolService.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
-          : this.subProtocolService.getSubProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
+        return this.mainProtocolStore.isIdentifierValid(protocolOrIdentifier)
+          ? this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
+          : this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
       } else {
         return protocolOrIdentifier
       }
