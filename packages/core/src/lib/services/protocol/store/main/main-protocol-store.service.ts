@@ -47,6 +47,12 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
   }
 
+  public getNetworksForProtocol(identifier: MainProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {
+    return (activeOnly ? this.activeProtocols : this.supportedProtocols)
+      .filter((protocol: ICoinProtocol) => protocol.identifier === identifier)
+      .map((protocol: ICoinProtocol) => protocol.options.network)
+  }
+
   protected transformConfig(config: MainProtocolStoreConfig): BaseProtocolStoreConfig<ICoinProtocol[]> {
     // do nothing, `config` has already the desired interface
     return config
@@ -58,9 +64,21 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
 
   protected removeProtocolDuplicates(): void {
     // if a protocol has been set as passive and active, it's considered active
-    const activeIdentifiers: Set<string> = new Set(this.activeProtocols.map(getProtocolAndNetworkIdentifier))
-    this._passiveProtocols = this.passiveProtocols.filter(
-      (protocol: ICoinProtocol) => !activeIdentifiers.has(getProtocolAndNetworkIdentifier(protocol))
-    )
+    const presentIdentifiers: Set<string> = new Set()
+
+    this._activeProtocols = this.filterProtocolsIfIdentifierRegistered(this.activeProtocols, presentIdentifiers)
+    this._passiveProtocols = this.filterProtocolsIfIdentifierRegistered(this.passiveProtocols, presentIdentifiers)
+  }
+
+  private filterProtocolsIfIdentifierRegistered(protocols: ICoinProtocol[], registry: Set<string>): ICoinProtocol[] {
+    return protocols.filter((protocol: ICoinProtocol) => {
+      const protocolAndNetworkIdentifier = getProtocolAndNetworkIdentifier(protocol)
+      const alreadyPresent: boolean = registry.has(protocolAndNetworkIdentifier)
+      if (!alreadyPresent) {
+        registry.add(protocolAndNetworkIdentifier)
+      }
+
+      return !alreadyPresent
+    })
   }
 }

@@ -57,15 +57,23 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
-    const subProtocolMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
 
-    const subProtocol = (subProtocolMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+    const subProtocol = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
 
     if (subProtocol === undefined) {
       throw new ProtocolNotSupported()
     }
 
     return subProtocol
+  }
+
+  public getNetworksForProtocol(identifier: SubProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {
+    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+
+    return Object.values(subProtocolsMap)
+      .map((entry) => entry[identifier]?.options.network)
+      .filter((network: ProtocolNetwork | undefined) => network !== undefined) as ProtocolNetwork[]
   }
 
   public getSubProtocolsByMainIdentifier(
@@ -76,9 +84,9 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
-    const subProtocolMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
 
-    return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter(
+    return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
       (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
     ) as ICoinSubProtocol[]
   }

@@ -6,31 +6,35 @@ import {
   TezosProtocol,
   CosmosProtocol,
   TezosProtocolNetwork,
-  TezblockBlockExplorer,
-  TezosProtocolNetworkExtras,
   TezosProtocolOptions,
+  CosmosProtocolNetwork,
+  BitcoinProtocolNetwork,
+  BitcoinProtocolOptions,
+  CosmosProtocolOptions
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+import { NetworkType, ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { getIdentifiers } from '../../utils/test'
 import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
 describe('MainProtocolStoreService', () => {
   let service: MainProtocolStoreService
 
+  let bitcoinTestnet: BitcoinProtocolNetwork
+  let cosmosTestnet: CosmosProtocolNetwork
   let tezosTestnet: TezosProtocolNetwork
+
+  beforeAll(() => {
+    bitcoinTestnet = new BitcoinProtocolNetwork('Testnet', NetworkType.TESTNET)
+
+    cosmosTestnet = new CosmosProtocolNetwork('Testnet', NetworkType.TESTNET)
+
+    tezosTestnet = new TezosProtocolNetwork('Testnet', NetworkType.TESTNET)
+  })
 
   beforeEach(() => {
     TestBed.configureTestingModule({})
     service = TestBed.inject(MainProtocolStoreService)
-
-    tezosTestnet = new TezosProtocolNetwork(
-      'Testnet',
-      NetworkType.TESTNET,
-      undefined,
-      new TezblockBlockExplorer(),
-      new TezosProtocolNetworkExtras()
-    )
   })
 
   it('should be created', () => {
@@ -44,7 +48,7 @@ describe('MainProtocolStoreService', () => {
       createExpected: () => {
         activeIdentifiers: MainProtocolSymbols[]
         passiveIdentifiers: MainProtocolSymbols[]
-      },
+      }
     ): void {
       it(description, () => {
         const config = createConfig()
@@ -95,35 +99,39 @@ describe('MainProtocolStoreService', () => {
       'should be initialized with provided protocols',
       () => ({
         passiveProtocols: [new AeternityProtocol()],
-        activeProtocols: [new BitcoinProtocol()],
+        activeProtocols: [new BitcoinProtocol()]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC],
         passiveIdentifiers: [MainProtocolSymbols.AE],
+        activeIdentifiers: [MainProtocolSymbols.BTC]
       })
     )
 
     makeInitializationTest(
       'should remove duplicated protocols',
       () => ({
-        passiveProtocols: [new AeternityProtocol(), new BitcoinProtocol()],
-        activeProtocols: [new BitcoinProtocol(), new CosmosProtocol()],
+        activeProtocols: [new BitcoinProtocol(), new CosmosProtocol(), new CosmosProtocol()],
+        passiveProtocols: [new AeternityProtocol(), new AeternityProtocol(), new BitcoinProtocol()]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
         passiveIdentifiers: [MainProtocolSymbols.AE],
+        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS]
       })
     )
 
     makeInitializationTest(
       'should not remove as duplicated protocols with the same identifier but different networks',
       () => ({
-        passiveProtocols: [new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
-        activeProtocols: [new TezosProtocol()],
+        passiveProtocols: [
+          new BitcoinProtocol(),
+          new BitcoinProtocol(new BitcoinProtocolOptions(bitcoinTestnet)),
+          new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+        ],
+        activeProtocols: [new CosmosProtocol(), new CosmosProtocol(new CosmosProtocolOptions(cosmosTestnet)), new TezosProtocol()]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.XTZ],
-        passiveIdentifiers: [MainProtocolSymbols.XTZ],
+        passiveIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.BTC, MainProtocolSymbols.XTZ],
+        activeIdentifiers: [MainProtocolSymbols.COSMOS, MainProtocolSymbols.COSMOS, MainProtocolSymbols.XTZ]
       })
     )
   })
@@ -199,6 +207,53 @@ describe('MainProtocolStoreService', () => {
       } catch (error) {
         expect(error.toString()).toBe('Error: serializer(PROTOCOL_NOT_SUPPORTED): ')
       }
+    })
+  })
+
+  describe('Utils', () => {
+    it('should find networks for the requested main protocol by its identifier', () => {
+      const tezosProtocol = new TezosProtocol()
+      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      service.init({
+        activeProtocols: [tezosProtocol, tezosProtocolTestnet],
+        passiveProtocols: []
+      })
+
+      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+      const foundNetworkIdentifiers = foundNetworks.map((network: ProtocolNetwork) => network.identifier)
+
+      expect(foundNetworkIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
+    })
+
+    it('should not find networks for the requested main protocol by its identifier if not active', () => {
+      service.init({
+        activeProtocols: [],
+        passiveProtocols: [new TezosProtocol()]
+      })
+
+      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+
+      expect(foundNetworks.length).toBe(0)
+    })
+
+    it('should find networks for the requested passive main protocol by its identifier if specified', () => {
+      const tezosProtocol = new TezosProtocol()
+      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      service.init({
+        activeProtocols: [tezosProtocol],
+        passiveProtocols: [tezosProtocolTestnet]
+      })
+
+      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ, false)
+      const foundNetworkIdentifiers = foundNetworks.map((network: ProtocolNetwork) => network.identifier)
+
+      expect(foundNetworkIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
     })
   })
 })

@@ -65,6 +65,7 @@ export abstract class BaseProtocolStoreService<
   public abstract isIdentifierValid(identifier: string): boolean
 
   public abstract getProtocolByIdentifier(identifier: SymbolType, network?: ProtocolNetwork | string, activeOnly?: boolean): ICoinType
+  public abstract getNetworksForProtocol(identifier: SymbolType, activeOnly?: boolean): ProtocolNetwork[]
 
   protected abstract transformConfig(config: ConfigType): BaseProtocolStoreConfig<CollectionType>
   protected abstract mergeProtocols(protocols1: CollectionType, protocols2: CollectionType | undefined): CollectionType

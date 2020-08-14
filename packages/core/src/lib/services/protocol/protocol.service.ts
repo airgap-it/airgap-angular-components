@@ -128,6 +128,14 @@ export class ProtocolService {
     }
   }
 
+  public getNetworksForProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {
+    const identifier: ProtocolSymbols = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+
+    return this.mainProtocolStore.isIdentifierValid(identifier)
+      ? this.mainProtocolStore.getNetworksForProtocol(identifier as MainProtocolSymbols, activeOnly)
+      : this.subProtocolStore.getNetworksForProtocol(identifier as SubProtocolSymbols, activeOnly)
+  }
+
   public isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): boolean {
     const protocol: ICoinProtocol | undefined = this.getProtocol(protocolSymbol)
 

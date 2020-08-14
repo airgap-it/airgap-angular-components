@@ -20,11 +20,16 @@ import {
   TezosKtProtocol
 } from 'airgap-coin-lib'
 import { MainProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { NetworkType } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+import { NetworkType, ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { removeDuplicates } from '../../utils/array/remove-duplicates'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
-import { getDefaultActiveProtocols, getDefaultPassiveProtocols, getDefaultActiveSubProtocols, getDefaultPassiveSubProtocols } from './defaults'
+import {
+  getDefaultActiveProtocols,
+  getDefaultPassiveProtocols,
+  getDefaultActiveSubProtocols,
+  getDefaultPassiveSubProtocols
+} from './defaults'
 
 describe('ProtocolService', () => {
   let service: ProtocolService
@@ -65,10 +70,10 @@ describe('ProtocolService', () => {
       description: string,
       createConfig: () => ProtocolServiceConfig,
       createExpected: () => {
-        activeIdentifiers: MainProtocolSymbols[]
         passiveIdentifiers: MainProtocolSymbols[]
-        activeSubIdentifiers: SubProtocolSymbols[]
+        activeIdentifiers: MainProtocolSymbols[]
         passiveSubIdentifiers: SubProtocolSymbols[]
+        activeSubIdentifiers: SubProtocolSymbols[]
       }
     ): void {
       it(description, () => {
@@ -103,10 +108,10 @@ describe('ProtocolService', () => {
       'should be initialized with default protocols',
       () => ({}),
       () => ({
-        activeIdentifiers: defaultActiveIdentifiers,
         passiveIdentifiers: defaultPassiveIdentifiers,
-        activeSubIdentifiers: defaultActiveSubIdentifiers,
-        passiveSubIdentifiers: defaultPassiveSubIdentifiers
+        activeIdentifiers: defaultActiveIdentifiers,
+        passiveSubIdentifiers: defaultPassiveSubIdentifiers,
+        activeSubIdentifiers: defaultActiveSubIdentifiers
       })
     )
 
@@ -165,10 +170,10 @@ describe('ProtocolService', () => {
         passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC],
         passiveIdentifiers: [MainProtocolSymbols.AE],
-        activeSubIdentifiers: [SubProtocolSymbols.XTZ_USD],
-        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_BTC]
+        activeIdentifiers: [MainProtocolSymbols.BTC],
+        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_BTC],
+        activeSubIdentifiers: [SubProtocolSymbols.XTZ_USD]
       })
     )
 
@@ -192,29 +197,34 @@ describe('ProtocolService', () => {
         ]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
         passiveIdentifiers: [MainProtocolSymbols.AE],
-        activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, ...defaultActiveSubIdentifiers],
-        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD, ...defaultPassiveSubIdentifiers]
+        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
+        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD, ...defaultPassiveSubIdentifiers],
+        activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, ...defaultActiveSubIdentifiers]
       })
     )
 
     makeInitializationTest(
       'should remove duplicated protocols',
       () => ({
-        passiveProtocols: [new AeternityProtocol(), new BitcoinProtocol()],
-        activeProtocols: [new BitcoinProtocol(), new CosmosProtocol()],
+        passiveProtocols: [new AeternityProtocol(), new AeternityProtocol(), new BitcoinProtocol()],
+        activeProtocols: [new BitcoinProtocol(), new CosmosProtocol(), new CosmosProtocol()],
         passiveSubProtocols: [
           [new TezosProtocol(), new TezosBTC()],
+          [new TezosProtocol(), new TezosUSD()],
           [new TezosProtocol(), new TezosUSD()]
         ],
-        activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [new TezosProtocol(), new TezosKtProtocol()],
+          [new TezosProtocol(), new TezosKtProtocol()]
+        ]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
         passiveIdentifiers: [MainProtocolSymbols.AE],
-        activeSubIdentifiers: [SubProtocolSymbols.XTZ_BTC],
-        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD]
+        activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
+        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD],
+        activeSubIdentifiers: [SubProtocolSymbols.XTZ_BTC, SubProtocolSymbols.XTZ_KT]
       })
     )
 
@@ -224,18 +234,43 @@ describe('ProtocolService', () => {
         passiveProtocols: [new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
         activeProtocols: [new TezosProtocol()],
         passiveSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [
+            new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
+            new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))
+          ],
           [
             new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
             new TezosUSD(new TezosFAProtocolOptions(tezosTestnet, new TezosUSDProtocolConfig()))
           ]
         ],
-        activeSubProtocols: [[new TezosProtocol(), new TezosUSD()]]
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosUSD()],
+          [
+            new TezosProtocol(),
+            new TezosStaker(
+              new TezosFAProtocolOptions(
+                new TezosProtocolNetwork(),
+                new TezosStakerProtocolConfig(undefined, undefined, undefined, SubProtocolSymbols.XTZ_STKR)
+              )
+            )
+          ],
+          [
+            new TezosProtocol(new TezosProtocolOptions(tezosTestnet)),
+            new TezosStaker(
+              new TezosFAProtocolOptions(
+                tezosTestnet,
+                new TezosStakerProtocolConfig(undefined, undefined, undefined, SubProtocolSymbols.XTZ_STKR)
+              )
+            )
+          ]
+        ]
       }),
       () => ({
-        activeIdentifiers: [MainProtocolSymbols.XTZ],
         passiveIdentifiers: [MainProtocolSymbols.XTZ],
-        activeSubIdentifiers: [SubProtocolSymbols.XTZ_USD],
-        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD]
+        activeIdentifiers: [MainProtocolSymbols.XTZ],
+        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_BTC, SubProtocolSymbols.XTZ_BTC, SubProtocolSymbols.XTZ_USD],
+        activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_USD]
       })
     )
   })
@@ -504,6 +539,72 @@ describe('ProtocolService', () => {
   })
 
   describe('Utils', () => {
+    it('should find networks for the requested protocol by its identifier', () => {
+      const tezosProtocol = new TezosProtocol()
+      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      service.init({
+        activeProtocols: [tezosProtocol, tezosProtocolTestnet],
+        activeSubProtocols: [
+          [tezosProtocol, new TezosBTC()],
+          [tezosProtocolTestnet, new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))]
+        ]
+      })
+
+      const foundNetworksForMain = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+      const foundNetworksForSub = service.getNetworksForProtocol(SubProtocolSymbols.XTZ_BTC)
+
+      const foundForMainIdentifiers = foundNetworksForMain.map((network: ProtocolNetwork) => network.identifier)
+      const foundForSubIdentifiers = foundNetworksForSub.map((network: ProtocolNetwork) => network.identifier)
+
+      expect(foundForMainIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
+      expect(foundForSubIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
+    })
+
+    it('should not find networks for the requested protocol by its identifier if not active', () => {
+      service.init({
+        activeProtocols: [],
+        passiveProtocols: [new TezosProtocol()],
+        activeSubProtocols: [],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
+      })
+
+      const foundNetworksForMain = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+      const foundNetworksForSub = service.getNetworksForProtocol(SubProtocolSymbols.XTZ_BTC)
+
+      expect(foundNetworksForMain.length).toBe(0)
+      expect(foundNetworksForSub.length).toBe(0)
+    })
+
+    it('should find networks for the requested passive protocol by its identifier if specified', () => {
+      const tezosProtocol = new TezosProtocol()
+      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      service.init({
+        activeProtocols: [tezosProtocol],
+        passiveProtocols: [tezosProtocolTestnet],
+        activeSubProtocols: [[tezosProtocol, new TezosBTC()]],
+        passiveSubProtocols: [[tezosProtocolTestnet, new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))]]
+      })
+
+      const foundNetworksForMain = service.getNetworksForProtocol(MainProtocolSymbols.XTZ, false)
+      const foundNetworksForSub = service.getNetworksForProtocol(SubProtocolSymbols.XTZ_BTC, false)
+
+      const foundForMainIdentifiers = foundNetworksForMain.map((network: ProtocolNetwork) => network.identifier)
+      const foundForSubIdentifiers = foundNetworksForSub.map((network: ProtocolNetwork) => network.identifier)
+
+      expect(foundForMainIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
+      expect(foundForSubIdentifiers.sort()).toEqual(
+        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+      )
+    })
+
     const validAddresses: { protocol: MainProtocolSymbols; address: string }[] = [
       { protocol: MainProtocolSymbols.AE, address: 'ak_2eid5UDLCVxNvqL95p9UtHmHQKbiFQahRfoo839DeQuBo8A3Qc' },
       { protocol: MainProtocolSymbols.AE, address: 'ak_gxMtcfvnd7aN9XdpmdNgRRETnLL4TNQ4uJgyLzcbBFa3vx6Da' },
