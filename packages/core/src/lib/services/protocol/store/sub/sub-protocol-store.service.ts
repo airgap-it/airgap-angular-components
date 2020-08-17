@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ProtocolNotSupported, ICoinSubProtocol } from 'airgap-coin-lib'
+import { ICoinProtocol, ICoinSubProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
@@ -52,20 +52,21 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     identifier: SubProtocolSymbols,
     network?: ProtocolNetwork | string,
     activeOnly: boolean = true
-  ): ICoinSubProtocol {
+  ): ICoinSubProtocol | undefined {
+    try {
     const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
     const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
 
-    const subProtocol = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+    return (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[SubProtocolStore:getProtocolByIdentifer]', error)
 
-    if (subProtocol === undefined) {
-      throw new ProtocolNotSupported()
+      return undefined
     }
-
-    return subProtocol
   }
 
   public getNetworksForProtocol(identifier: SubProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {

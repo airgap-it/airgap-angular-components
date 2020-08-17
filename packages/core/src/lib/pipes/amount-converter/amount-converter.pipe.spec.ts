@@ -85,45 +85,45 @@ describe('AmountConverter Pipe', () => {
     })
   })
 
-  it('should display very small ETH number to a non-scientific string representation', () => {
+  it('should display very small ETH number to a non-scientific string representation', async () => {
     expect(
-      amountConverterPipe.transform('1', {
+      await amountConverterPipe.transform('1', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
     ).toEqual('0.000000000000000001 ETH')
   })
 
-  it('should display a normal ETH number to a non-scientific string representation', () => {
+  it('should display a normal ETH number to a non-scientific string representation', async () => {
     expect(
-      amountConverterPipe.transform('1000000000000000000', {
+      await amountConverterPipe.transform('1000000000000000000', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
     ).toEqual('1 ETH')
   })
 
-  it('should display a big ETH number to a non-scientific string representation', () => {
+  it('should display a big ETH number to a non-scientific string representation', async () => {
     expect(
-      amountConverterPipe.transform('10000000000000000000000000000000000', {
+      await amountConverterPipe.transform('10000000000000000000000000000000000', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
     ).toEqual(`10'000'000'000'000'000 ETH`)
   })
 
-  it('should return a valid amount if value is 0', () => {
+  it('should return a valid amount if value is 0', async () => {
     expect(
-      amountConverterPipe.transform('0', {
+      await amountConverterPipe.transform('0', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
     ).toEqual('0 ETH')
   })
 
-  it('should return an empty string when protocol is not set', () => {
+  it('should return an empty string when protocol is not set', async () => {
     try {
-      amountConverterPipe.transform('1', {
+      await amountConverterPipe.transform('1', {
         protocol: undefined,
         maxDigits: 0
       })
@@ -132,9 +132,9 @@ describe('AmountConverter Pipe', () => {
     }
   })
 
-  it('should handle values that are not a number', () => {
+  it('should handle values that are not a number', async () => {
     try {
-      amountConverterPipe.transform('test', {
+      await amountConverterPipe.transform('test', {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
@@ -143,9 +143,9 @@ describe('AmountConverter Pipe', () => {
     }
   })
 
-  it('should handle values that are undefined', () => {
+  it('should handle values that are undefined', async () => {
     try {
-      amountConverterPipe.transform(undefined, {
+      await amountConverterPipe.transform(undefined, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
@@ -154,9 +154,9 @@ describe('AmountConverter Pipe', () => {
     }
   })
 
-  it('should handle values that are null', () => {
+  it('should handle values that are null', async () => {
     try {
-      amountConverterPipe.transform(null, {
+      await amountConverterPipe.transform(null, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
@@ -165,11 +165,11 @@ describe('AmountConverter Pipe', () => {
     }
   })
 
-  it('should handle values that are empty object', () => {
+  it('should handle values that are empty object', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const value: any = {}
     try {
-      amountConverterPipe.transform(value, {
+      await amountConverterPipe.transform(value, {
         protocol: MainProtocolSymbols.ETH,
         maxDigits: 0
       })
@@ -179,11 +179,11 @@ describe('AmountConverter Pipe', () => {
   })
 
   function getTest(args) {
-    it(`Test with: ${JSON.stringify(args)}`, () => {
+    it(`Test with: ${JSON.stringify(args)}`, async () => {
       expect(
-        (() => {
+        await (async () => {
           try {
-            const transformed = amountConverterPipe.transform(args.value, {
+            const transformed = await amountConverterPipe.transform(args.value, {
               protocol: args.protocol,
               maxDigits: 0
             })
@@ -231,8 +231,8 @@ describe('AmountConverter Pipe', () => {
     { value: '1', protocol: null, expected: 'Error: Invalid protocol' },
     { value: '1', protocol: undefined, expected: 'Error: Invalid protocol' },
     { value: '1', protocol: NaN, expected: 'Error: Invalid protocol' },
-    { value: '1', protocol: 'test', expected: 'Error: Protocol not supported' },
-    { value: '1', protocol: 'asdf', expected: 'Error: Protocol not supported' }
+    { value: '1', protocol: 'test', expected: 'Error: Protocol test not supported' },
+    { value: '1', protocol: 'asdf', expected: 'Error: Protocol asdf not supported' }
   ]
   makeTests(falsyprotocols)
 })

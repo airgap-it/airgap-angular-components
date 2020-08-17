@@ -18,13 +18,13 @@
       <airgap-titled-text 
         class="ion-padding-bottom"
         [title]="'from-to.amount_label' | translate" 
-        [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier }"
+        [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text 
         *ngIf="transaction.fee"
         [title]="'from-to.fee_label' | translate"
-        [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier }"
+        [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text 

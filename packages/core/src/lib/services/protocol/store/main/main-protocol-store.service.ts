@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ProtocolNotSupported } from 'airgap-coin-lib'
+import { ICoinProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
@@ -30,21 +30,24 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     identifier: MainProtocolSymbols,
     network?: ProtocolNetwork | string,
     activeOnly: boolean = true
-  ): ICoinProtocol {
-    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(identifier).network
-    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.supportedProtocols).filter(
-      (protocol: ICoinProtocol) =>
-        protocol.identifier.startsWith(identifier) &&
-        (typeof targetNetwork === 'string'
-          ? protocol.options.network.identifier === targetNetwork
-          : isNetworkEqual(protocol.options.network, targetNetwork))
-    )
+  ): ICoinProtocol | undefined {
+    try {
+      const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(identifier).network
+      const found: ICoinProtocol | undefined = (activeOnly ? this.activeProtocols : this.supportedProtocols).find(
+        (protocol: ICoinProtocol) =>
+          protocol.identifier === identifier &&
+          (typeof targetNetwork === 'string'
+            ? protocol.options.network.identifier === targetNetwork
+            : isNetworkEqual(protocol.options.network, targetNetwork))
+      )
 
-    if (filtered.length === 0) {
-      throw new ProtocolNotSupported()
+      return found
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('[MainProtocolStore:getProtocolByIdentifer]', error)
+
+      return undefined
     }
-
-    return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
   }
 
   public getNetworksForProtocol(identifier: MainProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {

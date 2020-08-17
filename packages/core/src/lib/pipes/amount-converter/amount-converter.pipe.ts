@@ -36,7 +36,7 @@ export class AmountConverterPipe implements PipeTransform {
 
   constructor(private readonly protocolsService: ProtocolService) {}
 
-  public transform(value: AmountConverterValue, args: AmountConverterArgs): string {
+  public async transform(value: AmountConverterValue, args: AmountConverterArgs): Promise<string> {
     if (!args.protocol) {
       throw new Error('Invalid protocol')
     }
@@ -49,11 +49,7 @@ export class AmountConverterPipe implements PipeTransform {
       throw new Error('Invalid maxDigits')
     }
 
-    const protocol: ICoinProtocol | undefined = this.protocolsService.getProtocol(args.protocol)
-    if (protocol === undefined) {
-      throw new Error('Protocol not supported')
-    }
-
+    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol)
     const amount = this.transformValueOnly(value, protocol, args.maxDigits)
 
     return `${amount} ${protocol.symbol}`
