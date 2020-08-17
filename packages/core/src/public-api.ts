@@ -20,6 +20,7 @@ export * from './lib/pipes/fee-converter/fee-converter.pipe'
 
 export * from './lib/services/language/language.service'
 export * from './lib/services/protocol/protocol.service'
+export * from './lib/services/protocol/tokens'
 
 export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
