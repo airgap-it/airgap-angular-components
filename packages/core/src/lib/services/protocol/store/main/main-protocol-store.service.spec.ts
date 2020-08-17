@@ -134,6 +134,33 @@ describe('MainProtocolStoreService', () => {
         activeIdentifiers: [MainProtocolSymbols.COSMOS, MainProtocolSymbols.COSMOS, MainProtocolSymbols.XTZ]
       })
     )
+
+    it('should be initialized once', async () => {
+      service.init({
+        passiveProtocols: [new AeternityProtocol()],
+        activeProtocols: [new BitcoinProtocol()]
+      })
+
+      service.init({
+        passiveProtocols: [new CosmosProtocol()],
+        activeProtocols: [new TezosProtocol()]
+      })
+
+      const supportedIdentifiers = getIdentifiers(service.supportedProtocols)
+
+      const activeIdentifiers = getIdentifiers(service.activeProtocols)
+      const passiveIdentifiers = getIdentifiers(service.passiveProtocols)
+
+      const expectedPassiveIdentifiers = [MainProtocolSymbols.AE]
+      const expectedActiveIdentifiers = [MainProtocolSymbols.BTC]
+
+      expect(service.isInitialized).toBeTrue()      
+
+      expect(supportedIdentifiers.sort()).toEqual(expectedActiveIdentifiers.concat(expectedPassiveIdentifiers).sort())
+
+      expect(activeIdentifiers.sort()).toEqual(expectedActiveIdentifiers.sort())
+      expect(passiveIdentifiers.sort()).toEqual(expectedPassiveIdentifiers.sort())
+    })
   })
 
   describe('Find Protocols', () => {

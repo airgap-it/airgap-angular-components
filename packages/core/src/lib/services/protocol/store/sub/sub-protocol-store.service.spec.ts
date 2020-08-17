@@ -172,6 +172,33 @@ describe('SubProtocolStoreService', () => {
         activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_USD]
       })
     )
+
+    it('should be initialized once', async () => {
+      service.init({
+        passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]],
+        activeSubProtocols: [[new TezosProtocol(), new TezosUSD()]]
+      })
+
+      service.init({
+        passiveSubProtocols: [[new TezosProtocol(), new TezosKtProtocol()]],
+        activeSubProtocols: [[new TezosProtocol(), new TezosStaker()]]
+      })
+
+      const supportedSubIdentifiers = getSubIdentifiers(service.supportedProtocols)
+
+      const activeSubIdentifiers = getSubIdentifiers(service.activeProtocols)
+      const passiveSubIdentifiers = getSubIdentifiers(service.passiveProtocols)
+
+      const expectedPassiveSubIdentifiers = [SubProtocolSymbols.XTZ_BTC]
+      const expectedActiveSubIdentifiers = [SubProtocolSymbols.XTZ_USD]
+
+      expect(service.isInitialized).toBeTrue()
+
+      expect(supportedSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.concat(expectedPassiveSubIdentifiers).sort())
+
+      expect(activeSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.sort())
+      expect(passiveSubIdentifiers.sort()).toEqual(expectedPassiveSubIdentifiers.sort())
+    })
   })
 
   describe('Find Protocols', () => {

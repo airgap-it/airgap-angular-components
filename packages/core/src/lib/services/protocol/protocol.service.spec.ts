@@ -81,7 +81,7 @@ describe('ProtocolService', () => {
         activeSubIdentifiers: SubProtocolSymbols[]
       }
     ): void {
-      it(description, () => {
+      it(description, async () => {
         const config = createConfig()
         const expected = createExpected()
 
@@ -96,7 +96,7 @@ describe('ProtocolService', () => {
         const activeSubIdentifiers = getSubIdentifiers(service.activeSubProtocols)
         const passiveSubIdentifiers = getSubIdentifiers(service.passiveSubProtocols)
 
-        expect(service.isInitialized).toBeTrue()
+        await expectAsync(service.waitReady()).toBeResolved()
 
         expect(supportedIdentifiers.sort()).toEqual(expected.activeIdentifiers.concat(expected.passiveIdentifiers).sort())
         expect(supportedSubIdentifiers.sort()).toEqual(expected.activeSubIdentifiers.concat(expected.passiveSubIdentifiers).sort())
@@ -121,8 +121,6 @@ describe('ProtocolService', () => {
     )
 
     it('should throw an error when not initialized', () => {
-      expect(service.isInitialized).toBeFalse()
-
       try {
         // eslint-disable-next-line no-unused-expressions
         service.supportedProtocols
@@ -278,6 +276,47 @@ describe('ProtocolService', () => {
         activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_USD]
       })
     )
+    it('should be initialized once', async () => {
+      service.init({
+        passiveProtocols: [new AeternityProtocol()],
+        activeProtocols: [new BitcoinProtocol()],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosBTC()]],
+        activeSubProtocols: [[new TezosProtocol(), new TezosUSD()]]
+      })
+
+      service.init({
+        passiveProtocols: [new CosmosProtocol()],
+        activeProtocols: [new TezosProtocol()],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosKtProtocol()]],
+        activeSubProtocols: [[new TezosProtocol(), new TezosStaker()]]
+      })
+
+      const supportedIdentifiers = getIdentifiers(service.supportedProtocols)
+      const supportedSubIdentifiers = getSubIdentifiers(service.supportedSubProtocols)
+
+      const activeIdentifiers = getIdentifiers(service.activeProtocols)
+      const passiveIdentifiers = getIdentifiers(service.passiveProtocols)
+
+      const activeSubIdentifiers = getSubIdentifiers(service.activeSubProtocols)
+      const passiveSubIdentifiers = getSubIdentifiers(service.passiveSubProtocols)
+
+      const expectedPassiveIdentifiers = [MainProtocolSymbols.AE]
+      const expectedActiveIdentifiers = [MainProtocolSymbols.BTC]
+
+      const expectedPassiveSubIdentifiers = [SubProtocolSymbols.XTZ_BTC]
+      const expectedActiveSubIdentifiers = [SubProtocolSymbols.XTZ_USD]
+
+      await expectAsync(service.waitReady()).toBeResolved()
+
+      expect(supportedIdentifiers.sort()).toEqual(expectedActiveIdentifiers.concat(expectedPassiveIdentifiers).sort())
+      expect(supportedSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.concat(expectedPassiveSubIdentifiers).sort())
+
+      expect(activeIdentifiers.sort()).toEqual(expectedActiveIdentifiers.sort())
+      expect(passiveIdentifiers.sort()).toEqual(expectedPassiveIdentifiers.sort())
+
+      expect(activeSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.sort())
+      expect(passiveSubIdentifiers.sort()).toEqual(expectedPassiveSubIdentifiers.sort())
+    })
   })
 
   /**

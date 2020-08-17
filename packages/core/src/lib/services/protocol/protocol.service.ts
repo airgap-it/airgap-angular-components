@@ -5,6 +5,7 @@ import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
 import { createNotInitialized } from '../../utils/not-initialized'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
+import { ExposedPromise } from '../../utils/ExposedPromise'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -28,9 +29,11 @@ const notInitialized = createNotInitialized('ProtocolService', 'Call `init` firs
   providedIn: 'root'
 })
 export class ProtocolService {
+  private readonly isReady: ExposedPromise<void> = new ExposedPromise()
+
   constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
-  public get isInitialized(): boolean {
+  private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
   }
 
@@ -94,10 +97,17 @@ export class ProtocolService {
       passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
       activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
     })
+
     this.subProtocolStore.init({
       passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(config?.extraPassiveSubProtocols ?? []),
       activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
     })
+
+    this.isReady.resolve()
+  }
+
+  public async waitReady(): Promise<void> {
+    return this.isReady.promise
   }
 
   public isProtocolActive(protocol: ICoinProtocol): boolean
