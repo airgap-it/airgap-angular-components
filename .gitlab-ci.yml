@@ -31,6 +31,7 @@ unit:
     - docker run --name unit-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT /bin/bash -c "npm run test:ci"
     - docker run --name lint-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT /bin/bash -c "npm run lint:ci"
   after_script:
+    - docker rm -f unit-$CI_COMMIT_SHA || true
     - docker rm -f lint-$CI_COMMIT_SHA || true
   tags:
     - docker
@@ -43,7 +44,9 @@ publish:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker run --env NPM_AUTH_TOKEN --name unit-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT ./npm-ci-publish.sh
+    - docker run --env NPM_AUTH_TOKEN --name publish-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT ./npm-ci-publish.sh
+  after_script:
+    - docker rm -f publish-$CI_COMMIT_SHA || true
   tags:
     - docker
 
@@ -53,6 +56,8 @@ publish_beta:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   script:
-    - docker run --env NPM_AUTH_TOKEN --name unit-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT ./npm-ci-publish-beta-only.sh
+    - docker run --env NPM_AUTH_TOKEN --name publish-$CI_COMMIT_SHA $IMAGE_TAG_CURRENT ./npm-ci-publish-beta-only.sh
+  after_script:
+    - docker rm -f publish-$CI_COMMIT_SHA || true
   tags:
     - docker

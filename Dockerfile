@@ -24,6 +24,10 @@ WORKDIR /libs
 # copy sources
 COPY . /libs
 
+# set permissions
+RUN chmod +x ./npm-ci-publish-beta-only.sh
+RUN chmod +x ./npm-ci-publish.sh
+
 # install dependencies
 RUN npm install 
 
@@ -31,7 +35,7 @@ RUN npm install
 RUN export NODE_ENV=production
 
 # build
-RUN npm run build
+RUN npm run build:prod
 
 CMD ["npm", "run", "test"]
 

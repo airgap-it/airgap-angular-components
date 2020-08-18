@@ -33,18 +33,13 @@ www/
 $RECYCLE.BIN/
 e2e-reports/*
 
-airgap_cordova_secure_storage_deploy
-airgap_cordova_secure_storage_deploy.pub
-
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
-
-src/assets/libs/airgap-coin-lib.browserify.js
 
 .env
 
 screenshots/
 reports/
 
-electron/build/
+.npmrc

@@ -34,12 +34,12 @@
   },
   "paths": {
     "core": [
-      "dist/core/core",
-      "dist/core"
+      "packages/core/dist/core",
+      "packages/core/dist"
     ],
     "ng-rx": [
-      "dist/ng-rx/ng-rx",
-      "dist/ng-rx"
+      "packages/ng-rx/dist/ng-rx",
+      "packages/ng-rx/dist"
     ]
   }
 }

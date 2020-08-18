@@ -3,7 +3,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "outDir": "../../out-tsc/core",
+    "outDir": "./out-tsc/core",
     "typeRoots": [
       "../../node_modules/@types",
       "node_modules/@types",

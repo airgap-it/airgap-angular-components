@@ -17,4 +17,4 @@ import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.p
   exports: [ComponentsModule, PipesModule],
   providers: [AmountConverterPipe]
 })
-export class AirGapCommonCoreModule {}
+export class AirGapAngularCoreModule {}

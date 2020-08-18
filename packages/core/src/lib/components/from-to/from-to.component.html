@@ -4,7 +4,7 @@
   <ion-row class="ion-align-items-center ion-padding-top ion-padding-bottom">
     <ion-col size="3" class="ion-no-padding">
       <ion-row class="ion-justify-content-center">
-        <div class="line"></div>
+        <div class="from-to-line"></div>
       </ion-row>
     </ion-col>
     <ion-col size="9">
@@ -18,13 +18,13 @@
       <airgap-titled-text 
         class="ion-padding-bottom"
         [title]="'from-to.amount_label' | translate" 
-        [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier }"
+        [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text 
         *ngIf="transaction.fee"
         [title]="'from-to.fee_label' | translate"
-        [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier }"
+        [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text 

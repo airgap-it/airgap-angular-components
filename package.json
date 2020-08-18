@@ -1,15 +1,20 @@
 {
-  "name": "airgap-common-components",
+  "name": "airgap-angular-components",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "build": "lerna run build --stream",
+    "build:prod": "lerna run build:prod --stream",
     "test": "lerna run test:lerna --stream",
     "test:ci": "lerna run test:ci --stream",
     "lint": "lerna run lint --stream",
     "lint:ci": "lerna run lint:ci --stream",
     "lint:fix": "lerna run lint:fix --stream",
-    "e2e": "lerna run e2e --stream"
+    "e2e": "lerna run e2e --stream",
+    "version:major": "lerna version --no-git-tag-version major",
+    "version:minor": "lerna version --no-git-tag-version minor",
+    "version:patch": "lerna version --no-git-tag-version patch",
+    "version:beta": "lerna version --no-git-tag-version prerelease --preid beta"
   },
   "private": true,
   "dependencies": {
@@ -33,6 +38,7 @@
     "@angular/router": "^10.0.8",
     "@download/blockies": "^1.0.3",
     "@ionic/angular": "^5.3.1",
+    "@ionic/core": "^5.3.1",
     "@ngx-translate/core": "^13.0.0",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
