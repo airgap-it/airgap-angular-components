@@ -29,6 +29,7 @@
     "@angular/router": "^10.0.8",
     "@download/blockies": "^1.0.3",
     "@ionic/angular": "^5.3.1",
+    "@ionic/core": "^5.3.1",
     "@ngx-translate/core": "^13.0.0",
     "airgap-coin-lib": "^0.9.2",
     "bignumber.js": "^9.0.0",
