@@ -1,48 +1,20 @@
 import { Injectable } from '@angular/core'
-import {
-  ICoinProtocol,
-  ProtocolNotSupported,
-  AeternityProtocol,
-  BitcoinProtocol,
-  EthereumProtocol,
-  GroestlcoinProtocol,
-  TezosProtocol,
-  CosmosProtocol,
-  PolkadotProtocol,
-  KusamaProtocol,
-  ICoinSubProtocol,
-  TezosKtProtocol,
-  TezosBTC,
-  GenericERC20
-} from 'airgap-coin-lib'
+import { ICoinProtocol, ICoinSubProtocol } from 'airgap-coin-lib'
 import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
 import { ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { getProtocolOptionsByIdentifier } from 'airgap-coin-lib/dist/utils/protocolOptionsByIdentifier'
-import { isNetworkEqual } from 'airgap-coin-lib/dist/utils/Network'
-import {
-  EthereumERC20ProtocolOptions,
-  EthereumProtocolNetwork,
-  EthereumERC20ProtocolConfig
-} from 'airgap-coin-lib/dist/protocols/ethereum/EthereumProtocolOptions'
-import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
-import { createNotInitialized } from '../../utils/not-initialized'
-import { Token } from '../../types/Token'
-import { ethTokens } from './tokens'
+import { ExposedPromise } from '../../utils/ExposedPromise'
+import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
+import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
+import {
+  getDefaultPassiveProtocols,
+  getDefaultActiveProtocols,
+  getDefaultPassiveSubProtocols,
+  getDefaultActiveSubProtocols
+} from './defaults'
 
-export interface SubProtocolsMap {
-  [key: string]: {
-    [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol
-  }
-}
-
-export interface ProtocolServiceConfig {
-  passiveProtocols?: ICoinProtocol[]
-  activeProtocols?: ICoinProtocol[]
-
-  passiveSubProtocols?: [ICoinProtocol, ICoinSubProtocol][]
-  activeSubProtocols?: [ICoinProtocol, ICoinSubProtocol][]
-
+export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
   extraActiveProtocols?: ICoinProtocol[]
 
@@ -50,41 +22,52 @@ export interface ProtocolServiceConfig {
   extraActiveSubProtocols?: [ICoinProtocol, ICoinSubProtocol][]
 }
 
-const notInitialized = createNotInitialized('ProtocolService', 'Call `init` first.')
-
 @Injectable({
   providedIn: 'root'
 })
 export class ProtocolService {
-  private _passiveProtocols: ICoinProtocol[] | undefined
-  private _activeProtocols: ICoinProtocol[] | undefined
+  private readonly isReady: ExposedPromise<void> = new ExposedPromise()
 
-  private _passiveSubProtocols: SubProtocolsMap | undefined
-  private _activeSubProtocols: SubProtocolsMap | undefined
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
-  public get isInitialized(): boolean {
-    return (
-      this._passiveProtocols !== undefined &&
-      this._activeProtocols !== undefined &&
-      this._passiveSubProtocols !== undefined &&
-      this._activeSubProtocols !== undefined
-    )
+  private get isInitialized(): boolean {
+    return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
   }
 
-  public get passiveProtocols(): ICoinProtocol[] {
-    return this._passiveProtocols ?? notInitialized()
+  public async getSupportedProtocols(): Promise<ICoinProtocol[]> {
+    await this.waitReady()
+
+    return this.mainProtocolStore.supportedProtocols
   }
 
-  public get activeProtocols(): ICoinProtocol[] {
-    return this._activeProtocols ?? notInitialized()
+  public async getPassiveProtocols(): Promise<ICoinProtocol[]> {
+    await this.waitReady()
+
+    return this.mainProtocolStore.passiveProtocols
   }
 
-  public get passiveSubProtocols(): SubProtocolsMap {
-    return this._passiveSubProtocols ?? notInitialized()
+  public async getActiveProtocols(): Promise<ICoinProtocol[]> {
+    await this.waitReady()
+
+    return this.mainProtocolStore.activeProtocols
   }
 
-  public get activeSubProtocols(): SubProtocolsMap {
-    return this._activeSubProtocols ?? notInitialized()
+  public async getSupportedSubProtocols(): Promise<SubProtocolsMap> {
+    await this.waitReady()
+
+    return this.subProtocolStore.supportedProtocols
+  }
+
+  public async getPassiveSubProtocols(): Promise<SubProtocolsMap> {
+    await this.waitReady()
+
+    return this.subProtocolStore.passiveProtocols
+  }
+
+  public async getActiveSubProtocols(): Promise<SubProtocolsMap> {
+    await this.waitReady()
+
+    return this.subProtocolStore.activeProtocols
   }
 
   public init(config?: ProtocolServiceConfig): void {
@@ -95,225 +78,111 @@ export class ProtocolService {
       return
     }
 
-    this._passiveProtocols = config?.passiveProtocols ?? this.getDefaultPassiveProtocols()
-    this._activeProtocols = config?.activeProtocols ?? this.getDefaultActiveProtocols()
+    this.mainProtocolStore.init({
+      passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
+      activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
+    })
 
-    this._passiveSubProtocols = this.createSubProtocolMap(config?.passiveSubProtocols ?? this.getDefaultPassiveSubProtocols())
-    this._activeSubProtocols = this.createSubProtocolMap(config?.activeSubProtocols ?? this.getDefaultActiveSubProtocols())
+    this.subProtocolStore.init({
+      passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(config?.extraPassiveSubProtocols ?? []),
+      activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
+    })
 
-    if (config?.extraPassiveProtocols !== undefined) {
-      this._passiveProtocols.push(...config.extraPassiveProtocols)
-    }
-
-    if (config?.extraActiveProtocols !== undefined) {
-      this._activeProtocols.push(...config.extraActiveProtocols)
-    }
-
-    if (config?.extraPassiveSubProtocols !== undefined) {
-      this._passiveSubProtocols = this.mergeSubProtocolMaps(this.passiveSubProtocols, config.extraPassiveSubProtocols)
-    }
-
-    if (config?.extraActiveSubProtocols !== undefined) {
-      this._activeSubProtocols = this.mergeSubProtocolMaps(this.activeSubProtocols, config.extraActiveSubProtocols)
-    }
-
-    this.removeProtocolDuplicates()
-    this.removeSubProtocolDuplicates()
+    this.isReady.resolve()
   }
 
-  public getProtocol(
+  public async waitReady(): Promise<void> {
+    return this.isReady.promise
+  }
+
+  public async isProtocolActive(protocol: ICoinProtocol): Promise<boolean>
+  public async isProtocolActive(identifier: ProtocolSymbols, network?: ProtocolNetwork): Promise<boolean>
+  public async isProtocolActive(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork): Promise<boolean> {
+    await this.waitReady()
+
+    return this.isProtocolRegistered(protocolOrIdentifier, network, true)
+  }
+
+  public async isProtocolSupported(protocol: ICoinProtocol): Promise<boolean>
+  public async isProtocolSupported(identifier: ProtocolSymbols, network?: ProtocolNetwork): Promise<boolean>
+  public async isProtocolSupported(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, network?: ProtocolNetwork): Promise<boolean> {
+    await this.waitReady()
+
+    return this.isProtocolRegistered(protocolOrIdentifier, network, false)
+  }
+
+  public async getProtocol(
     protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
-    network?: ProtocolNetwork,
+    network?: ProtocolNetwork | string,
     activeOnly: boolean = true
-  ): ICoinProtocol | undefined {
-    try {
-      return typeof protocolOrIdentifier === 'string'
-        ? this.getProtocolByIdentifier(protocolOrIdentifier, network, activeOnly)
-        : protocolOrIdentifier
-    } catch (error) {
-      return undefined
+  ): Promise<ICoinProtocol> {
+    await this.waitReady()
+
+    if (typeof protocolOrIdentifier == 'string') {
+      const protocol: ICoinProtocol | undefined = this.mainProtocolStore.isIdentifierValid(protocolOrIdentifier)
+        ? this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
+        : this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
+
+      if (protocol === undefined) {
+        throw new Error(`Protocol ${protocolOrIdentifier} not supported`)
+      }
+
+      return protocol
+    } else {
+      return protocolOrIdentifier
     }
   }
 
-  public getProtocolByIdentifier(identifier: ProtocolSymbols, network?: ProtocolNetwork, activeOnly: boolean = true): ICoinProtocol {
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const filtered: ICoinProtocol[] = (activeOnly ? this.activeProtocols : this.activeProtocols.concat(this.passiveProtocols))
-      .map((protocol: ICoinProtocol) => [protocol, ...(protocol.subProtocols ?? [])])
-      .reduce((flatten: ICoinProtocol[], toFlatten: ICoinProtocol[]) => flatten.concat(toFlatten), [])
-      .filter(
-        (protocol: ICoinProtocol) => protocol.identifier.startsWith(identifier) && isNetworkEqual(protocol.options.network, targetNetwork)
-      )
-
-    if (filtered.length === 0) {
-      throw new ProtocolNotSupported()
-    }
-
-    return filtered.sort((a: ICoinProtocol, b: ICoinProtocol) => a.identifier.length - b.identifier.length)[0]
-  }
-
-  public getSubProtocolsByIdentifier(
-    identifier: ProtocolSymbols,
-    network?: ProtocolNetwork,
+  public async getSubProtocols(
+    mainProtocol: ICoinProtocol | MainProtocolSymbols,
+    network?: ProtocolNetwork | string,
     activeOnly: boolean = true
-  ): ICoinSubProtocol[] {
-    const targetNetwork: ProtocolNetwork = network ?? getProtocolOptionsByIdentifier(identifier, network).network
-    const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
+  ): Promise<ICoinSubProtocol[]> {
+    await this.waitReady()
+
+    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : mainProtocol.identifier
+    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
     const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
-    const subProtocolMap: SubProtocolsMap = activeOnly
-      ? this.activeSubProtocols
-      : this.mergeSubProtocolMaps(this.activeSubProtocols, this.passiveSubProtocols)
+    const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
 
-    return Object.values(subProtocolMap[protocolAndNetworkIdentifier] ?? {}).filter(
+    return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
       (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
     ) as ICoinSubProtocol[]
   }
 
-  public isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): boolean {
-    try {
-      const protocol: ICoinProtocol = this.getProtocolByIdentifier(protocolSymbol)
+  public async getNetworksForProtocol(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    activeOnly: boolean = true
+  ): Promise<ProtocolNetwork[]> {
+    await this.waitReady()
 
-      return address.match(protocol.addressValidationPattern) !== null
-    } catch {
-      return false
-    }
+    const identifier: ProtocolSymbols = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+
+    return this.mainProtocolStore.isIdentifierValid(identifier)
+      ? this.mainProtocolStore.getNetworksForProtocol(identifier as MainProtocolSymbols, activeOnly)
+      : this.subProtocolStore.getNetworksForProtocol(identifier as SubProtocolSymbols, activeOnly)
   }
 
-  private getDefaultPassiveProtocols(): ICoinProtocol[] {
-    return []
+  public async isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): Promise<boolean> {
+    await this.waitReady()
+
+    const protocol: ICoinProtocol = await this.getProtocol(protocolSymbol)
+
+    return address.match(protocol.addressValidationPattern) !== null
   }
 
-  private getDefaultActiveProtocols(): ICoinProtocol[] {
-    return [
-      new AeternityProtocol(),
-      new BitcoinProtocol(),
-      new EthereumProtocol(),
-      new GroestlcoinProtocol(),
-      new TezosProtocol(),
-      new CosmosProtocol(),
-      new PolkadotProtocol(),
-      new KusamaProtocol()
-    ]
-  }
+  private async isProtocolRegistered(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    network?: ProtocolNetwork,
+    checkActiveOnly: boolean = true
+  ): Promise<boolean> {
+    const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+    const targetNetwork: ProtocolNetwork | undefined =
+      typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network
 
-  private getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-    return []
-  }
-
-  private getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-    return [
-      [new TezosProtocol(), new TezosKtProtocol()],
-      [new TezosProtocol(), new TezosBTC()],
-      ...ethTokens.map(
-        (token: Token) =>
-          [
-            new EthereumProtocol(),
-            new GenericERC20(
-              new EthereumERC20ProtocolOptions(
-                new EthereumProtocolNetwork(),
-                new EthereumERC20ProtocolConfig(
-                  token.symbol,
-                  token.name,
-                  token.marketSymbol,
-                  token.identifier as SubProtocolSymbols,
-                  token.contractAddress,
-                  token.decimals
-                )
-              )
-            )
-          ] as [EthereumProtocol, GenericERC20]
-      )
-    ]
-  }
-
-  private createSubProtocolMap(protocols: [ICoinProtocol, ICoinSubProtocol][]): SubProtocolsMap {
-    const subProtocolMap: SubProtocolsMap = {}
-
-    protocols.forEach(([protocol, subProtocol]: [ICoinProtocol, ICoinSubProtocol]) => {
-      if (!subProtocol.identifier.startsWith(protocol.identifier)) {
-        throw new Error(`Sub protocol ${subProtocol.name} is not supported for protocol ${protocol.identifier}.`)
-      }
-
-      if (!isNetworkEqual(protocol.options.network, subProtocol.options.network)) {
-        throw new Error(`Sub protocol ${subProtocol.name} must have the same network as the main protocol.`)
-      }
-
-      const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(protocol)
-
-      if (subProtocolMap[protocolAndNetworkIdentifier] === undefined) {
-        subProtocolMap[protocolAndNetworkIdentifier] = {}
-      }
-
-      subProtocolMap[protocolAndNetworkIdentifier][subProtocol.identifier as SubProtocolSymbols] = subProtocol
-    })
-
-    return subProtocolMap
-  }
-
-  private mergeSubProtocolMaps(
-    first: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap,
-    second: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap
-  ): SubProtocolsMap {
-    if (Array.isArray(first) && Array.isArray(second)) {
-      return this.createSubProtocolMap(first.concat(second))
-    }
-
-    const firstMap: SubProtocolsMap = Array.isArray(first) ? this.createSubProtocolMap(first) : first
-    const secondMap: SubProtocolsMap = Array.isArray(second) ? this.createSubProtocolMap(second) : second
-
-    const mergedMap: SubProtocolsMap = {}
-
-    Object.entries(firstMap)
-      .concat(Object.entries(secondMap))
-      .forEach(
-        ([protocolAndNetworkIdentifier, subProtocols]: [string, { [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol }]) => {
-          if (mergedMap[protocolAndNetworkIdentifier] === undefined) {
-            mergedMap[protocolAndNetworkIdentifier] = subProtocols
-          } else {
-            mergedMap[protocolAndNetworkIdentifier] = {
-              ...mergedMap[protocolAndNetworkIdentifier],
-              ...subProtocols
-            }
-          }
-        }
-      )
-
-    return mergedMap
-  }
-
-  private removeProtocolDuplicates(): void {
-    // if a protocol has been set as passive and active, it's considered active
-    const activeIdentifiers: string[] = this.activeProtocols.map(getProtocolAndNetworkIdentifier)
-    this._passiveProtocols = this.passiveProtocols.filter(
-      (protocol: ICoinProtocol) => !activeIdentifiers.includes(getProtocolAndNetworkIdentifier(protocol))
-    )
-  }
-
-  private removeSubProtocolDuplicates(): void {
-    // if a sub protocol has been set as passive and active, it's considered active
-    const passiveEntries: [string, SubProtocolSymbols][] = Object.entries(this.passiveSubProtocols)
-      .map(([protocolAndNetworkIdentifier, subProtocols]: [string, { [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol }]) =>
-        Object.keys(subProtocols).map((subProtocol: string) => [protocolAndNetworkIdentifier, subProtocol] as [string, SubProtocolSymbols])
-      )
-      .reduce((flatten: [string, SubProtocolSymbols][], toFlatten: [string, SubProtocolSymbols][]) => flatten.concat(toFlatten), [])
-
-    const filtered: SubProtocolsMap = {}
-
-    passiveEntries.forEach(([protocolAndNetworkIdentifier, subProtocolIdentifier]: [string, SubProtocolSymbols]) => {
-      if (
-        this.activeSubProtocols[protocolAndNetworkIdentifier] === undefined ||
-        this.activeSubProtocols[protocolAndNetworkIdentifier][subProtocolIdentifier] === undefined
-      ) {
-        if (filtered[protocolAndNetworkIdentifier] === undefined) {
-          filtered[protocolAndNetworkIdentifier] = {}
-        }
-
-        filtered[protocolAndNetworkIdentifier][subProtocolIdentifier] = this.passiveSubProtocols[protocolAndNetworkIdentifier][
-          subProtocolIdentifier
-        ]
-      }
-    })
-
-    this._passiveSubProtocols = filtered
+    return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
+      .then(() => true)
+      .catch(() => false)
   }
 }

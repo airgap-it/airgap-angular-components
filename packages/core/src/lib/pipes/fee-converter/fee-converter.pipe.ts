@@ -16,7 +16,7 @@ interface FeeConverterArgs {
 export class FeeConverterPipe implements PipeTransform {
   constructor(private readonly protocolsService: ProtocolService) {}
 
-  public transform(value: FeeConverterValue, args: FeeConverterArgs): string {
+  public async transform(value: FeeConverterValue, args: FeeConverterArgs): Promise<string> {
     if (args.protocol === undefined || !args.protocol) {
       throw new Error('Invalid protocol')
     }
@@ -25,11 +25,7 @@ export class FeeConverterPipe implements PipeTransform {
       throw new Error('Invalid fee amount')
     }
 
-    const protocol: ICoinProtocol | undefined = this.protocolsService.getProtocol(args.protocol)
-    if (protocol === undefined) {
-      throw new Error('Protocol not supported')
-    }
-
+    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol)
     const fee: BigNumber = new BigNumber(value).shiftedBy(-protocol.feeDecimals)
 
     if (fee.isNaN()) {

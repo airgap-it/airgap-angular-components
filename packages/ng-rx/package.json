@@ -1,9 +1,13 @@
 {
   "name": "@airgap/angular-ngrx",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "ng": "ng",
     "build": "ng build ng-rx",
+    "build:prod": "ng build --prod ng-rx",
     "test": "ng test ng-rx",
     "test:ci": "ng test ng-rx --code-coverage --watch=false",
     "test:lerna": "ng test ng-rx --watch=false",

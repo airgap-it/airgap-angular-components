@@ -19,9 +19,18 @@ export class IdenticonComponent {
       return
     }
 
-    if (this.protocolService.isAddressOfProtocol(MainProtocolSymbols.AE, value)) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    this.setAddress(value)
+  }
+
+  public identicon: string | undefined
+
+  constructor(private readonly protocolService: ProtocolService) {}
+
+  private async setAddress(value: string): Promise<void> {
+    if (await this.protocolService.isAddressOfProtocol(MainProtocolSymbols.AE, value)) {
       this.identicon = createIcon({ seed: value }).toDataURL()
-    } else if (this.protocolService.isAddressOfProtocol(MainProtocolSymbols.XTZ, value)) {
+    } else if (await this.protocolService.isAddressOfProtocol(MainProtocolSymbols.XTZ, value)) {
       this.identicon = createIcon({
         seed: `0${this.b582int(value)}`,
         spotcolor: '#000'
@@ -30,10 +39,6 @@ export class IdenticonComponent {
       this.identicon = toDataUrl(value.toLowerCase())
     }
   }
-
-  public identicon: string | undefined
-
-  constructor(private readonly protocolService: ProtocolService) {}
 
   private b582int(v: string): string {
     let rv = new BigNumber(0)

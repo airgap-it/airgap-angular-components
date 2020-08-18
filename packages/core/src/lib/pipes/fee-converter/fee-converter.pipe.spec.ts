@@ -1,5 +1,7 @@
 import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { ProtocolService } from '../../services/protocol/protocol.service'
+import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'
+import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
 import { FeeConverterPipe } from './fee-converter.pipe'
 
 describe('FeeConverter Pipe', () => {
@@ -7,7 +9,7 @@ describe('FeeConverter Pipe', () => {
   let protocolService: ProtocolService
 
   beforeAll(() => {
-    protocolService = new ProtocolService()
+    protocolService = new ProtocolService(new MainProtocolStoreService(), new SubProtocolStoreService())
     protocolService.init()
   })
 
@@ -15,66 +17,67 @@ describe('FeeConverter Pipe', () => {
     feeConverterPipe = new FeeConverterPipe(protocolService)
   })
 
-  it('should display very small ETH number to a non-scientific string representation', () => {
-    expect(feeConverterPipe.transform('1', { protocol: MainProtocolSymbols.ETH })).toEqual('0.000000000000000001 ETH')
+  it('should display very small ETH number to a non-scientific string representation', async () => {
+    expect(await feeConverterPipe.transform('1', { protocol: MainProtocolSymbols.ETH })).toEqual('0.000000000000000001 ETH')
   })
 
-  it('should display a normal ETH number to a non-scientific string representation', () => {
+  it('should display a normal ETH number to a non-scientific string representation', async () => {
     expect(
-      feeConverterPipe.transform('1000000000000000000', {
+      await feeConverterPipe.transform('1000000000000000000', {
         protocol: MainProtocolSymbols.ETH
       })
     ).toEqual('1 ETH')
   })
 
-  it('should display a big ETH number to a non-scientific string representation', () => {
+  it('should display a big ETH number to a non-scientific string representation', async () => {
     expect(
-      feeConverterPipe.transform('10000000000000000000000000000000000', {
+      await feeConverterPipe.transform('10000000000000000000000000000000000', {
         protocol: MainProtocolSymbols.ETH
       })
     ).toEqual('10000000000000000 ETH')
   })
 
-  it('should return a valid amount if value is 0', () => {
-    expect(feeConverterPipe.transform('0', { protocol: MainProtocolSymbols.ETH })).toEqual('0 ETH')
+  it('should return a valid amount if value is 0', async () => {
+    expect(await feeConverterPipe.transform('0', { protocol: MainProtocolSymbols.ETH })).toEqual('0 ETH')
   })
 
-  it('should return an empty string for non-numeric value', () => {
+  it('should return an empty string for non-numeric value', async () => {
     try {
-      feeConverterPipe.transform('test', { protocol: MainProtocolSymbols.ETH })
+      await feeConverterPipe.transform('test', { protocol: MainProtocolSymbols.ETH })
     } catch (error) {
       expect(error.toString()).toEqual('Error: Invalid fee amount')
     }
   })
 
-  it('should return an error when protocolIdentifier is not set', () => {
+  it('should return an error when protocolIdentifier is not set', async () => {
     try {
-      feeConverterPipe.transform('1', { protocol: undefined })
+      await feeConverterPipe.transform('1', { protocol: undefined })
     } catch (error) {
       expect(error.toString()).toEqual('Error: Invalid protocol')
     }
   })
 
-  it('should return an empty string when protocolIdentifier unknown', () => {
+  it('should return an empty string when protocolIdentifier unknown', async () => {
     try {
-      feeConverterPipe.transform('1', {
+      await feeConverterPipe.transform('1', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         protocol: 'unknown-protocol' as any
       })
     } catch (error) {
-      expect(error.toString()).toEqual('Error: Protocol not supported')
+      expect(error.toString()).toEqual('Error: Protocol unknown-protocol not supported')
     }
   })
 
   function getTest(args) {
-    it(`Test with: ${JSON.stringify(args)}`, () => {
+    it(`Test with: ${JSON.stringify(args)}`, async () => {
       expect(
-        (() => {
+        await (async () => {
           try {
-            const result = feeConverterPipe.transform(args.value, {
+            const transformed = await feeConverterPipe.transform(args.value, {
               protocol: args.protocol
             })
 
-            return result
+            return transformed
           } catch (error) {
             return error.toString()
           }
@@ -116,8 +119,8 @@ describe('FeeConverter Pipe', () => {
     { value: '1', protocol: null, expected: 'Error: Invalid protocol' },
     { value: '1', protocol: undefined, expected: 'Error: Invalid protocol' },
     { value: '1', protocol: NaN, expected: 'Error: Invalid protocol' },
-    { value: '1', protocol: 'test', expected: 'Error: Protocol not supported' },
-    { value: '1', protocol: 'asdf', expected: 'Error: Protocol not supported' }
+    { value: '1', protocol: 'test', expected: 'Error: Protocol test not supported' },
+    { value: '1', protocol: 'asdf', expected: 'Error: Protocol asdf not supported' }
   ]
   makeTests(falsyProtocolIdentifiers)
 })

@@ -1,6 +1,14 @@
 {
+  "version": "0.0.1",
   "packages": [
     "packages/*"
   ],
-  "version": "independent"
+  "command": {
+    "publish": {
+      "ignoreChanges": [
+        "*.sh",
+        "*.md"
+      ]
+    }
+  }
 }
