@@ -36,6 +36,7 @@ describe('ClipboardService', () => {
     const myText = 'text123'
     await service.copy(myText)
     expect(clipboardPluginMock.write).toHaveBeenCalledTimes(1)
-    expect(clipboardPluginMock.write).toHaveBeenCalledWith(myText)
+    // eslint-disable-next-line id-blacklist
+    expect(clipboardPluginMock.write).toHaveBeenCalledWith({ string: myText })
   })
 })
