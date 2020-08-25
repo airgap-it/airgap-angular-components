@@ -67,4 +67,4 @@ $ npm run bump:beta
 
 ### Other
 
-The project uses [lerna](https://lerna.js.org/) for packages management. Check out [the list of available commands](https://lerna.js.org/#commands) to perform more advanced actions.
+The project uses [lerna](https://lerna.js.org/) for package management. Check out [the list of available commands](https://lerna.js.org/#commands) to perform more advanced actions.
