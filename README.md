@@ -1,27 +1,70 @@
-# AirgapCommonComponents
+# AirGap Angular Components
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.1.
+A set of Angular libraries providing utilities, UI components and services used across various [AirGap](https://airgap.it/) projects.
 
-## Development server
+## Overview
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+The project is split into the following packages:
+- `core`
+- `ng-rx`
 
-## Code scaffolding
+The `core` package consists of numerous utility functions and types as well as Angular components and services that can be used standalone or as a base for more specific implementations.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+The `ng-rx` package extends `core` providing [NgRx](https://ngrx.io/) support for its components.
 
-## Build
+For more information about a specific package, go to its respective folder in the `packages` directory. 
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Development
 
-## Running unit tests
+### Requirements
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Make sure you have statisfied the following requirements before building or testing the project:
+```
+npm >= 6
+```
 
-## Running end-to-end tests
+### Build
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+To build all the packages run:
 
-## Further help
+```
+$ npm install
+$ npm run build
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### Run Tests
+
+To run tests for all the packages run:
+
+```
+$ npm install
+$ npm run test
+```
+
+### Update Version
+
+To bump the version of all the packages run:
+```
+$ npm run bump:version
+```
+You will be prompted to select the desired version.
+
+You can also run one of the commands listed below to skip the prompt and bump the version directly:
+
+```
+$ npm run bump:major
+> v1.0.0 -> v2.0.0
+
+$ npm run bump:minor
+> v1.0.0 -> v1.1.0
+
+$ npm run bump:patch
+> v1.0.0 -> v1.0.1
+
+$ npm run bump:beta
+> v1.0.0 -> v1.0.1-beta.0
+```
+
+### Other
+
+The project uses [lerna](https://lerna.js.org/) for packages management. Check out [the list of available commands](https://lerna.js.org/#commands) to perform more advanced actions.

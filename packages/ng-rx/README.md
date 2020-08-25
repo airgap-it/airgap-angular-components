@@ -1,24 +1,55 @@
-# NgRx
+# @airgap/angular-ngrx
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.2.
+[![npm](https://img.shields.io/npm/v/@airgap/angular-ngrx.svg?colorB=brightgreen)](https://www.npmjs.com/package/@airgap/ngrx)
+[![build](https://img.shields.io/travis/airgap-it/angular-ngrx.svg)](https://travis-ci.org/airgap-it/angular-ngrx/)
+[![codecov](https://img.shields.io/codecov/c/gh/airgap-it/angular-ngrx.svg)](https://codecov.io/gh/airgap-it/angular-ngrx/)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-## Code scaffolding
+`@airgap/angular-ngrx` extends `@airgap/angular-core` providing [NgRx](https://ngrx.io/) support for its components.
 
-Run `ng generate component component-name --project ngRx` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project ngRx`.
-> Note: Don't forget to add `--project ngRx` or else it will be added to the default project in your `angular.json` file. 
+## Requirements
 
-## Build
+Please check `peerDependencies` in `package.json` to see what dependencies are required for this library.
 
-Run `ng build ngRx` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Install
 
-## Publishing
+```
+$ npm install --save @airgap/angular-ngrx
+```
 
-After building your library with `ng build ngRx`, go to the dist folder `cd dist/ng-rx` and run `npm publish`.
+## Development
 
-## Running unit tests
+### Requirements
 
-Run `ng test ngRx` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Make sure you have statisfied the following requirements before building or testing the project:
+```
+npm >= 6
+```
 
-## Further help
+### Build
+Before building the library make sure you have installed the root project dependencies. If not, run:
+```
+$ cd ../..
+$ npm install
+$ cd packages/ng-rx
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+To build the `ng-rx` library run:
+
+```
+$ npm run build
+```
+
+### Run Tests
+Before running the tests make sure you have installed the root project dependencies. If not, run:
+```
+$ cd ../..
+$ npm install
+$ cd packages/ng-rx
+```
+
+To run tests for the `ng-rx` library run:
+
+```
+$ npm run test
+```
