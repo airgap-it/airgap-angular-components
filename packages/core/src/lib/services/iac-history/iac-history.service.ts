@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { IACMessageTransport, IACHanderStatus } from '../iac/iac.service'
+import { IACMessageTransport, IACHanderStatus } from '../iac/base.iac.service'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 
 export interface IACHistoryEntry {

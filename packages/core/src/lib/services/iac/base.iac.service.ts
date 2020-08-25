@@ -1,6 +1,6 @@
 import { IACMessageDefinitionObject, IACMessageType } from 'airgap-coin-lib'
 
-import { SerializerService } from '../../services/serializer/serializer.service'
+import { SerializerService } from '../serializer/serializer.service'
 import { to } from '../../utils/utils'
 import { IACHistoryService } from '../iac-history/iac-history.service'
 // import { ErrorCategory, handleErrorLocal } from '../error-handler/error-handler.service'
@@ -25,7 +25,7 @@ export interface IACMessageHandler {
 
 type ScanAgainCallback = (scanResult?: Error | { currentPage: number; totalPageNumber: number }) => void
 
-export abstract class IACService {
+export abstract class BaseIACService {
   private readonly serializerMessageHandlers: {
     [key in IACMessageType]: (
       data: string | string[],
