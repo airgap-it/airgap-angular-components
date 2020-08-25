@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
+import { ClipboardMock } from '../../../../test/utils/plugins-mock'
+import { CLIPBOARD_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { QrComponent } from './qr.component'
 
 describe('QrComponent', () => {
@@ -9,9 +11,17 @@ describe('QrComponent', () => {
 
   let testBedUtils: TestBedUtils
 
+  let clipboardPluginMock: ClipboardMock
+
   beforeEach(async(() => {
     testBedUtils = new TestBedUtils()
-    TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+    clipboardPluginMock = new ClipboardMock()
+
+    TestBed.configureTestingModule(
+      testBedUtils.moduleDef({
+        providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
+      })
+    ).compileComponents()
   }))
 
   beforeEach(() => {
