@@ -19,6 +19,6 @@ export class AppInfoMock {
 }
 
 export class ClipboardMock {
-  public read: jasmine.Spy = newSpy('read', Promise.resolve())
+  public read: jasmine.Spy = newSpy('read', Promise.resolve('text-from-clipboard'))
   public write: jasmine.Spy = newSpy('write', Promise.resolve())
 }

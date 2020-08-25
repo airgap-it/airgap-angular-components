@@ -9,10 +9,11 @@ describe('ClipboardService', () => {
   let service: ClipboardService
   let testBedUtils: TestBedUtils
 
-  const clipboardPluginMock = new ClipboardMock()
+  let clipboardPluginMock: ClipboardMock
 
   beforeEach(async(() => {
     testBedUtils = new TestBedUtils()
+    clipboardPluginMock = new ClipboardMock()
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
         providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
@@ -23,5 +24,18 @@ describe('ClipboardService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy()
+  })
+
+  it('paste from clipboard', async () => {
+    const text: string = await service.paste()
+    expect(text).toEqual('text-from-clipboard')
+    expect(clipboardPluginMock.read).toHaveBeenCalledTimes(1)
+  })
+
+  it('copy to clipboard', async () => {
+    const myText = 'text123'
+    await service.copy(myText)
+    expect(clipboardPluginMock.write).toHaveBeenCalledTimes(1)
+    expect(clipboardPluginMock.write).toHaveBeenCalledWith(myText)
   })
 })
