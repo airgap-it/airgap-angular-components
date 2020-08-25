@@ -11,10 +11,27 @@ import { IdenticonComponent } from './identicon/identicon.component'
 import { NetworkBadgeComponent } from './network-badge/network-badge.component'
 import { TitledAddressComponent } from './titled-address/titled-address.component'
 import { TitledTextComponent } from './titled-text/titled-text.component'
+import { QrComponent } from './qr/qr.component'
 
 @NgModule({
-  declarations: [FromToComponent, IdenticonComponent, TitledTextComponent, TitledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent],
+  declarations: [
+    FromToComponent,
+    IdenticonComponent,
+    TitledTextComponent,
+    TitledAddressComponent,
+    CurrencySymbolComponent,
+    NetworkBadgeComponent,
+    QrComponent
+  ],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule],
-  exports: [FromToComponent, IdenticonComponent, TitledTextComponent, TitledAddressComponent, CurrencySymbolComponent, NetworkBadgeComponent]
+  exports: [
+    FromToComponent,
+    IdenticonComponent,
+    TitledTextComponent,
+    TitledAddressComponent,
+    CurrencySymbolComponent,
+    NetworkBadgeComponent,
+    QrComponent
+  ]
 })
 export class ComponentsModule {}

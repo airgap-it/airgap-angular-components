@@ -2,16 +2,19 @@
 import { TestModuleMetadata } from '@angular/core/testing'
 import { CommonModule } from '@angular/common'
 import { IonicModule } from '@ionic/angular'
-import { TranslateModule } from '@ngx-translate/core'
+import { TranslateModule, TranslateService } from '@ngx-translate/core'
 
 import { ComponentsModule } from '../../src/lib/components/components.module'
 import { PipesModule } from '../../src/lib/pipes/pipes.module'
+import { QRCodeModule } from 'angularx-qrcode'
+import { Storage } from '@ionic/storage'
+import { StorageMock } from './storage-mock'
 
 export class TestBedUtils {
   public moduleDef(moduleMedatada: TestModuleMetadata, useIonicOnlyTestBed: boolean = false): TestModuleMetadata {
     const mandatoryDeclarations: any[] = []
-    const mandatoryImports: any[] = [CommonModule, IonicModule, ComponentsModule, TranslateModule.forRoot()]
-    const mandatoryProviders: any[] = []
+    const mandatoryImports: any[] = [CommonModule, IonicModule, ComponentsModule, TranslateModule.forRoot(), QRCodeModule]
+    const mandatoryProviders: any[] = [TranslateService, { provide: Storage, useClass: StorageMock }]
 
     if (!useIonicOnlyTestBed) {
       mandatoryImports.push(PipesModule)
