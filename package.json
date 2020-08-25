@@ -11,10 +11,11 @@
     "lint:ci": "lerna run lint:ci --stream",
     "lint:fix": "lerna run lint:fix --stream",
     "e2e": "lerna run e2e --stream",
-    "version:major": "lerna version --no-git-tag-version major",
-    "version:minor": "lerna version --no-git-tag-version minor",
-    "version:patch": "lerna version --no-git-tag-version patch",
-    "version:beta": "lerna version --no-git-tag-version prerelease --preid beta"
+    "bump:version": "lerna version --no-git-tag-version",
+    "bump:major": "lerna version --no-git-tag-version major --yes",
+    "bump:minor": "lerna version --no-git-tag-version minor --yes",
+    "bump:patch": "lerna version --no-git-tag-version patch --yes",
+    "bump:beta": "lerna version --no-git-tag-version prerelease --preid beta --yes"
   },
   "private": true,
   "dependencies": {
