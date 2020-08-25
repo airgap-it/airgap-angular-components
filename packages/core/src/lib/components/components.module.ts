@@ -12,6 +12,7 @@ import { NetworkBadgeComponent } from './network-badge/network-badge.component'
 import { TitledAddressComponent } from './titled-address/titled-address.component'
 import { TitledTextComponent } from './titled-text/titled-text.component'
 import { QrComponent } from './qr/qr.component'
+import { QRCodeModule } from 'angularx-qrcode'
 
 @NgModule({
   declarations: [
@@ -23,7 +24,7 @@ import { QrComponent } from './qr/qr.component'
     NetworkBadgeComponent,
     QrComponent
   ],
-  imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule],
+  imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule],
   exports: [
     FromToComponent,
     IdenticonComponent,
