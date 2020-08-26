@@ -26,7 +26,7 @@ export interface IACMessageHandler {
 type ScanAgainCallback = (scanResult?: Error | { currentPage: number; totalPageNumber: number }) => void
 
 export abstract class BaseIACService {
-  private readonly serializerMessageHandlers: {
+  protected readonly serializerMessageHandlers: {
     [key in IACMessageType]: (
       data: string | string[],
       deserializedSync: IACMessageDefinitionObject[],
@@ -35,11 +35,11 @@ export abstract class BaseIACService {
   }
 
   constructor(
-    private readonly uiEventService: UiEventService,
-    private readonly serializerService: SerializerService,
-    private readonly iacHistoryService: IACHistoryService,
-    private readonly isReady: Promise<void>,
-    private readonly customHandlers: IACMessageHandler[]
+    protected readonly uiEventService: UiEventService,
+    protected readonly serializerService: SerializerService,
+    protected readonly iacHistoryService: IACHistoryService,
+    protected readonly isReady: Promise<void>,
+    protected readonly customHandlers: IACMessageHandler[]
   ) {
     this.serializerMessageHandlers = {
       [IACMessageType.MetadataRequest]: this.syncTypeNotSupportedAlert.bind(this),
@@ -177,5 +177,5 @@ export abstract class BaseIACService {
     return false
   }
 
-  protected abstract relay(data: string | string[]): string
+  protected abstract relay(data: string | string[]): void
 }

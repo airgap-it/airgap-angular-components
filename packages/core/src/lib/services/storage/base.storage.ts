@@ -1,7 +1,10 @@
 import { Storage } from '@ionic/storage'
 
 export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType extends Record<SettingsKey, unknown>> {
-  constructor(protected readonly storage: Storage, private readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] }) {}
+  constructor(
+    protected readonly storage: Storage,
+    protected readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] }
+  ) {}
 
   public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
     const value: SettingsKeyReturnType[K] = (await this.storage.get(key)) || this.defaultValues[key]
