@@ -2,8 +2,10 @@
  * Public API Surface of core
  */
 
+// Core module
 export * from './lib/airgap-angular-core.module'
 
+// Components
 export * from './lib/components/components.module'
 export * from './lib/components/currency-symbol/currency-symbol.component'
 export * from './lib/components/from-to/from-to.component'
@@ -13,12 +15,15 @@ export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 export * from './lib/components/qr/qr.component'
 
+// Translation
 export * from './lib/translation/AirGapTranslateLoader'
 
+// Pipes
 export * from './lib/pipes/pipes.module'
 export * from './lib/pipes/amount-converter/amount-converter.pipe'
 export * from './lib/pipes/fee-converter/fee-converter.pipe'
 
+// Services
 export * from './lib/services/clipboard/clipboard.service'
 export * from './lib/services/iac/base.iac.service'
 export * from './lib/services/iac-history/iac-history.service'
@@ -33,11 +38,16 @@ export * from './lib/services/storage/base.storage'
 export * from './lib/services/storage/storage.service'
 export * from './lib/services/ui-event/ui-event.service'
 
+// Types
 export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
 
+// Utils
 export * from './lib/utils/array/remove-duplicates'
 export * from './lib/utils/protocol/protocol-identifier'
 export * from './lib/utils/protocol/protocol-network-identifier'
 export * from './lib/utils/not-initialized'
 export * from './lib/utils/utils'
+
+// Capacitor
+export * from './lib/capacitor-plugins/injection-tokens'
