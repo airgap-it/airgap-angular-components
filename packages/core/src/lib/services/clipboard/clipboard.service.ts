@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@angular/core'
 import { ClipboardPlugin } from '@capacitor/core'
-import { ToastController } from '@ionic/angular'
 
 // TODO: import { ErrorCategory, handleErrorLocal } from './../error-handler/error-handler.service'
 import { CLIPBOARD_PLUGIN } from '../../capacitor-plugins/injection-tokens'
+import { UiEventService } from '../ui-event/ui-event.service'
 
 @Injectable({ providedIn: 'root' })
 export class ClipboardService {
-  constructor(private readonly toastController: ToastController, @Inject(CLIPBOARD_PLUGIN) private readonly clipboard: ClipboardPlugin) {}
+  constructor(private readonly uiEventService: UiEventService, @Inject(CLIPBOARD_PLUGIN) private readonly clipboard: ClipboardPlugin) {}
 
   public async copy(text: string): Promise<void> {
     return this.clipboard.write({
@@ -16,7 +16,7 @@ export class ClipboardService {
     })
   }
 
-  public async copyAndShowToast(text: string, toastMessage: string = 'Successfully copied to your clipboard!'): Promise<void> {
+  public async copyAndShowToast(text: string, toastMessage: string = 'clipboard.toast.success_text'): Promise<void> {
     try {
       await this.copy(text)
       await this.showToast(toastMessage)
@@ -39,17 +39,16 @@ export class ClipboardService {
   }
 
   private async showToast(message: string) {
-    const toast: HTMLIonToastElement = await this.toastController.create({
+    await this.uiEventService.showTranslatedToast({
       message,
       duration: 1000,
       position: 'top',
       buttons: [
         {
-          text: 'Ok',
+          text: 'clipboard.toast.ok_label',
           role: 'cancel'
         }
       ]
     })
-    await toast.present() // TODO: .catch(handleErrorLocal(ErrorCategory.IONIC_ALERT))
   }
 }

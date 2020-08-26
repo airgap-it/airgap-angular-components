@@ -1,13 +1,60 @@
 import { Injectable } from '@angular/core'
-import { AlertController } from '@ionic/angular'
-import { AlertInput, AlertButton, AlertOptions } from '@ionic/core'
+import { AlertController, ToastController } from '@ionic/angular'
+import { AlertInput, AlertButton, AlertOptions, ToastOptions, ToastButton } from '@ionic/core'
 import { TranslateService } from '@ngx-translate/core'
 
 @Injectable({
   providedIn: 'root'
 })
 export class UiEventService {
-  constructor(private readonly translateService: TranslateService, private readonly alertController: AlertController) {}
+  constructor(
+    private readonly translateService: TranslateService,
+    private readonly alertController: AlertController,
+    private readonly toastController: ToastController
+  ) {}
+
+  public async showTranslatedToast(optionsInput: ToastOptions): Promise<void> {
+    const header = optionsInput.header
+    const message = optionsInput.message?.toString()
+    const buttons = optionsInput.buttons ?? []
+
+    const translationKeys: string[] = [
+      header,
+      message,
+      ...buttons.map((button: string | ToastButton) => (typeof button === 'string' ? button : button.text))
+    ].filter((key: string | undefined): key is string => key !== undefined)
+
+    const values = await this.translateService.get(translationKeys).toPromise()
+
+    buttons.forEach((button: string | ToastButton) => {
+      if (typeof button === 'string') {
+        // eslint-disable-next-line no-param-reassign
+        button = values[button]
+      } else {
+        if (button.text) {
+          button.text = values[button.text]
+        }
+      }
+    })
+
+    const options: ToastOptions = {}
+    if (header) {
+      options.header = values[header]
+    }
+    if (message) {
+      options.message = values[message]
+    }
+
+    options.buttons = buttons
+
+    const toast = await this.toastController.create({
+      duration: 2000, // Apply defaults
+      ...optionsInput, // Overwrite with configuration
+      ...options // Overwrite translations
+    })
+
+    return toast.present()
+  }
 
   public async showTranslatedAlert(optionsInput: AlertOptions): Promise<void> {
     const header = optionsInput.header
@@ -56,8 +103,9 @@ export class UiEventService {
     options.buttons = buttons
 
     const alert = await this.alertController.create({
-      ...options,
-      backdropDismiss: true
+      backdropDismiss: true, // Apply defaults
+      ...optionsInput, // Overwrite with configuration
+      ...options // Overwrite translations
     })
 
     return alert.present()

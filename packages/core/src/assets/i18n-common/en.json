@@ -9,5 +9,11 @@
     "from_label": "From",
     "to_label": "To",
     "transaction-details_label": "Display extra transaction details"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Successfully copied to your clipboard!",
+      "ok_label": "Ok"
+    }
   }
 }
