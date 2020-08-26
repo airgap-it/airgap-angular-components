@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { generateGUID } from 'src/lib/utils/utils'
+import { generateGUID } from '../../utils/utils'
 import { IACMessageTransport, IACHanderStatus } from '../iac/base.iac.service'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 
