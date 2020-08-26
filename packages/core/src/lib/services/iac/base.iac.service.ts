@@ -54,7 +54,7 @@ export abstract class BaseIACService {
   }
 
   public async storeResult(message: string | string[], status: IACHanderStatus, transport: IACMessageTransport): Promise<IACHanderStatus> {
-    this.iacHistoryService.add(message, status, transport, false).catch(console.error)
+    this.iacHistoryService.add(message, transport, false).catch(console.error)
 
     return status
   }

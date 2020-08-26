@@ -1,12 +1,30 @@
 import { Injectable } from '@angular/core'
+import {
+  IACMessageDefinitionObject,
+  IACMessageType,
+  IAirGapTransaction,
+  ICoinProtocol,
+  SignedTransaction,
+  UnsignedTransaction
+} from 'airgap-coin-lib'
+import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import BigNumber from 'bignumber.js'
 import { generateGUID } from '../../utils/utils'
-import { IACMessageTransport, IACHanderStatus } from '../iac/base.iac.service'
+import { IACMessageTransport } from '../iac/base.iac.service'
+import { ProtocolService } from '../protocol/protocol.service'
+import { SerializerService } from '../serializer/serializer.service'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
+
+export interface IACHistoryEntryDetails {
+  type: IACMessageType | undefined
+  protocol: ProtocolSymbols | undefined
+  amount?: string | undefined
+}
 
 export interface IACHistoryEntry {
   id: string
   message: string | string[]
-  status: IACHanderStatus
+  details: IACHistoryEntryDetails[]
   transport: IACMessageTransport
   outgoing: boolean
   hidden: boolean
@@ -22,7 +40,11 @@ export interface IACHistoryEntry {
   providedIn: 'root'
 })
 export class IACHistoryService {
-  constructor(private readonly internalStorageService: InternalStorageService) {}
+  constructor(
+    private readonly internalStorageService: InternalStorageService,
+    private readonly protocolService: ProtocolService,
+    private readonly serializerService: SerializerService
+  ) {}
 
   /**
    * Add a new entry to the history
@@ -32,11 +54,13 @@ export class IACHistoryService {
    * @param transport The transport how the message was received or how it will be sent
    * @param outgoing A flag indicating whether the request is incoming or outgoing
    */
-  public async add(message: string | string[], status: IACHanderStatus, transport: IACMessageTransport, outgoing: boolean): Promise<void> {
+  public async add(message: string | string[], transport: IACMessageTransport, outgoing: boolean): Promise<void> {
+    const details = await this.extractDetails(message)
+
     const entry: IACHistoryEntry = {
       id: generateGUID(),
       message,
-      status,
+      details,
       transport,
       outgoing,
       hidden: false,
@@ -99,5 +123,43 @@ export class IACHistoryService {
    */
   private async store(history: IACHistoryEntry[]): Promise<void> {
     await this.internalStorageService.set(InternalStorageKey.IAC_HISTORY, history)
+  }
+
+  /**
+   * Extract details from a message
+   *
+   * @param message The message to extract details
+   */
+  private async extractDetails(message: string | string[]): Promise<IACHistoryEntryDetails[]> {
+    const objects: IACMessageDefinitionObject[] = await (async () => {
+      try {
+        return await this.serializerService.deserialize(message)
+      } catch (e) {
+        return []
+      }
+    })()
+
+    return await Promise.all(
+      objects.map(async (obj) => {
+        const res: IACHistoryEntryDetails = {
+          type: obj.type,
+          protocol: obj.protocol
+        }
+        const protocol: ICoinProtocol = await this.protocolService.getProtocol(obj.protocol, undefined, false)
+        let txDetails: IAirGapTransaction[] | undefined
+        if (obj.type === IACMessageType.TransactionSignRequest) {
+          txDetails = await protocol.getTransactionDetails(obj.payload as UnsignedTransaction)
+        }
+        if (obj.type === IACMessageType.TransactionSignResponse) {
+          txDetails = await protocol.getTransactionDetailsFromSigned(obj.payload as SignedTransaction)
+        }
+
+        if (txDetails) {
+          res.amount = txDetails.reduce((pv, cv) => pv.plus(cv.amount), new BigNumber(0)).toFixed()
+        }
+
+        return res
+      })
+    )
   }
 }
