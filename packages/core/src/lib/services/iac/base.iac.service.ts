@@ -115,8 +115,7 @@ export abstract class BaseIACService {
 
       return this.storeResult(data, IACHanderStatus.SUCCESS, transport)
     } else {
-      console.warn('No message found')
-      scanAgainCallback()
+      await this.messageNotSupportedAlert(data, scanAgainCallback)
 
       return this.storeResult(data, IACHanderStatus.ERROR, transport)
     }
@@ -126,7 +125,7 @@ export abstract class BaseIACService {
     const relayButton = {
       text: 'Relay',
       handler: () => {
-        this.relay(data) // TODO: Fix
+        this.relay(data)
       }
     }
 
@@ -154,7 +153,7 @@ export abstract class BaseIACService {
     const relayButton = {
       text: 'Relay',
       handler: () => {
-        this.relay(data) // TODO: Fix
+        this.relay(data)
       }
     }
 
@@ -177,5 +176,11 @@ export abstract class BaseIACService {
     return false
   }
 
-  protected abstract relay(data: string | string[]): void
+  /**
+   * This method should relay the message to the other app. The app is responsibe
+   * for navigating away from the scanner because scanning will not be resumed.
+   *
+   * @param data The data that will be relayed
+   */
+  protected abstract relay(data: string | string[]): Promise<void>
 }
