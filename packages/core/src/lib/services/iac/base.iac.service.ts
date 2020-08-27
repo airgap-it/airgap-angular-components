@@ -182,5 +182,5 @@ export abstract class BaseIACService {
    *
    * @param data The data that will be relayed
    */
-  protected abstract relay(data: string | string[]): Promise<void>
+  public abstract relay(data: string | string[]): Promise<void>
 }
