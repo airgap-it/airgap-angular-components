@@ -14,7 +14,8 @@ import {
   EthereumERC20ProtocolOptions,
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig,
-  TezosBTC
+  TezosBTC,
+  TezosUSD
 } from 'airgap-coin-lib'
 import { SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { Token } from '../../types/Token'
@@ -69,10 +70,12 @@ export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtoco
 }
 
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
+  const tezosProtocol = new TezosProtocol()
   const ethereumProtocol = new EthereumProtocol()
 
   return [
-    [new TezosProtocol(), new TezosBTC()],
+    [tezosProtocol, new TezosBTC()],
+    [tezosProtocol, new TezosUSD()],
     ...ethTokens
       .filter((token: Token, index: number, array: Token[]) => activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
       .map(
