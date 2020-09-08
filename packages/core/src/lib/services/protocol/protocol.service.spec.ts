@@ -140,9 +140,11 @@ describe('ProtocolService', () => {
       'should be initialized with provided extra protocols',
       () => ({
         extraPassiveProtocols: [new AeternityProtocol()],
-        activeProtocols: [new BitcoinProtocol()], // by default every protocol is active, it needs to be overwitten for this test
+        activeProtocols: [new BitcoinProtocol()],
         extraActiveProtocols: [new CosmosProtocol()],
+        passiveSubProtocols: [[new TezosProtocol(), new TezosKtProtocol()]],
         extraPassiveSubProtocols: [[new TezosProtocol(), new TezosUSD()]],
+        activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]],
         extraActiveSubProtocols: [
           [
             new TezosProtocol(),
@@ -158,8 +160,8 @@ describe('ProtocolService', () => {
       () => ({
         passiveIdentifiers: [MainProtocolSymbols.AE],
         activeIdentifiers: [MainProtocolSymbols.BTC, MainProtocolSymbols.COSMOS],
-        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_USD, ...defaultPassiveSubIdentifiers],
-        activeSubIdentifiers: [SubProtocolSymbols.XTZ_STKR, ...defaultActiveSubIdentifiers]
+        passiveSubIdentifiers: [SubProtocolSymbols.XTZ_KT, SubProtocolSymbols.XTZ_USD],
+        activeSubIdentifiers: [SubProtocolSymbols.XTZ_BTC, SubProtocolSymbols.XTZ_STKR]
       })
     )
 

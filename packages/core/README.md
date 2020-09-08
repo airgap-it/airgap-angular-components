@@ -1,24 +1,55 @@
-# Core
+# @airgap/angular-core
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.2.
+[![npm](https://img.shields.io/npm/v/@airgap/angular-core.svg?colorB=brightgreen)](https://www.npmjs.com/package/@airgap/angular-core)
+[![build](https://img.shields.io/travis/airgap-it/angular-core.svg)](https://travis-ci.org/airgap-it/angular-core/)
+[![codecov](https://img.shields.io/codecov/c/gh/airgap-it/angular-core.svg)](https://codecov.io/gh/airgap-it/angular-core/)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-## Code scaffolding
+`@airgap/angular-core` consists of numerous utility functions and types as well as Angular components and services that can be used standalone in Angular based projects or as a base for more specific implementations.
 
-Run `ng generate component component-name --project core` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project core`.
-> Note: Don't forget to add `--project core` or else it will be added to the default project in your `angular.json` file. 
+## Requirements
 
-## Build
+Please check `peerDependencies` in `package.json` to see what dependencies are required for this library.
 
-Run `ng build core` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Install
 
-## Publishing
+```
+$ npm install --save @airgap/angular-core
+```
 
-After building your library with `ng build core`, go to the dist folder `cd dist/core` and run `npm publish`.
+## Development
 
-## Running unit tests
+### Requirements
 
-Run `ng test core` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Make sure you have statisfied the following requirements before building or testing the project:
+```
+npm >= 6
+```
 
-## Further help
+### Build
+Before building the library make sure you have installed the root project dependencies. If not, run:
+```
+$ cd ../..
+$ npm install
+$ cd packages/core
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+To build the `core` library run:
+
+```
+$ npm run build
+```
+
+### Run Tests
+Before running the tests make sure you have installed the root project dependencies. If not, run:
+```
+$ cd ../..
+$ npm install
+$ cd packages/core
+```
+
+To run tests for the `core` library run:
+
+```
+$ npm run test
+```
