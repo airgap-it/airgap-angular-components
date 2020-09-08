@@ -26,7 +26,6 @@ export * from './lib/pipes/fee-converter/fee-converter.pipe'
 // Services
 export * from './lib/services/clipboard/clipboard.service'
 export * from './lib/services/iac/base.iac.service'
-export * from './lib/services/iac-history/iac-history.service'
 export * from './lib/services/language/language.service'
 export * from './lib/services/protocol/protocol.service'
 export * from './lib/services/protocol/store/main/main-protocol-store.service'

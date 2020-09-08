@@ -2,7 +2,6 @@ import { IACMessageDefinitionObject, IACMessageType } from 'airgap-coin-lib'
 
 import { SerializerService } from '../serializer/serializer.service'
 import { to } from '../../utils/utils'
-import { IACHistoryService } from '../iac-history/iac-history.service'
 // import { ErrorCategory, handleErrorLocal } from '../error-handler/error-handler.service'
 import { UiEventService } from '../ui-event/ui-event.service'
 
@@ -37,7 +36,6 @@ export abstract class BaseIACService {
   constructor(
     protected readonly uiEventService: UiEventService,
     protected readonly serializerService: SerializerService,
-    protected readonly iacHistoryService: IACHistoryService,
     protected readonly isReady: Promise<void>,
     protected readonly customHandlers: IACMessageHandler[]
   ) {
@@ -53,9 +51,11 @@ export abstract class BaseIACService {
     }
   }
 
-  public async storeResult(message: string | string[], status: IACHanderStatus, transport: IACMessageTransport): Promise<IACHanderStatus> {
-    this.iacHistoryService.add(message, transport, false).catch(console.error)
-
+  public async storeResult(
+    _message: string | string[],
+    status: IACHanderStatus,
+    _transport: IACMessageTransport
+  ): Promise<IACHanderStatus> {
     return status
   }
 
