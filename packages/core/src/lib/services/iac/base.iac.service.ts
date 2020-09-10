@@ -90,6 +90,8 @@ export abstract class BaseIACService {
       console.warn('Deserialization of sync failed', error)
       // TODO: Log error locally
 
+      await this.messageUnknownAlert(data, scanAgainCallback)
+
       return this.storeResult(data, IACHanderStatus.ERROR, transport)
     }
 
