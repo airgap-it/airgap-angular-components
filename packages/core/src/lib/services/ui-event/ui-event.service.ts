@@ -3,6 +3,9 @@ import { AlertController, LoadingController, ToastController } from '@ionic/angu
 import { AlertInput, AlertButton, AlertOptions, ToastOptions, ToastButton, LoadingOptions } from '@ionic/core'
 import { TranslateService } from '@ngx-translate/core'
 
+/**
+ * This class provides helper functions for translated UI elements such as alerts, toasts and loaders.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -14,12 +17,22 @@ export class UiEventService {
     private readonly loadingController: LoadingController
   ) {}
 
+  /**
+   * Create a translated loader and show it. If you want a reference to the loader, use `getTranslatedLoader` instead.
+   *
+   * @param optionsInput
+   */
   public async showTranslatedLoader(optionsInput: LoadingOptions): Promise<void> {
     const loader: HTMLIonLoadingElement = await this.getTranslatedLoader(optionsInput)
 
     return loader.present()
   }
 
+  /**
+   * Create a translated loader and return it.
+   *
+   * @param optionsInput
+   */
   public async getTranslatedLoader(optionsInput: LoadingOptions): Promise<HTMLIonLoadingElement> {
     const message = optionsInput.message?.toString()
 
@@ -44,12 +57,22 @@ export class UiEventService {
     return loader
   }
 
+  /**
+   * Create a translated toast and show it. If you want a reference to the toast, use `getTranslatedToast` instead.
+   *
+   * @param optionsInput
+   */
   public async showTranslatedToast(optionsInput: ToastOptions): Promise<void> {
     const toast: HTMLIonToastElement = await this.getTranslatedToast(optionsInput)
 
     return toast.present()
   }
 
+  /**
+   * Create a translated toast and return it.
+   *
+   * @param optionsInput
+   */
   public async getTranslatedToast(optionsInput: ToastOptions): Promise<HTMLIonToastElement> {
     const header = optionsInput.header
     const message = optionsInput.message?.toString()
@@ -89,12 +112,22 @@ export class UiEventService {
     return toast
   }
 
+  /**
+   * Create a translated alert and show it. If you want a reference to the alert, use `getTranslatedAlert` instead.
+   *
+   * @param optionsInput
+   */
   public async showTranslatedAlert(optionsInput: AlertOptions): Promise<void> {
     const alert: HTMLIonAlertElement = await this.getTranslatedAlert(optionsInput)
 
     return alert.present()
   }
 
+  /**
+   * Create a translated alert and return it.
+   *
+   * @param optionsInput
+   */
   public async getTranslatedAlert(optionsInput: AlertOptions): Promise<HTMLIonAlertElement> {
     const header = optionsInput.header
     const subHeader = optionsInput.subHeader
