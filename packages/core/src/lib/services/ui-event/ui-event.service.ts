@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@angular/core'
 import { AlertController, LoadingController, ToastController } from '@ionic/angular'
 import { AlertInput, AlertButton, AlertOptions, ToastOptions, ToastButton, LoadingOptions } from '@ionic/core'
 import { TranslateService } from '@ngx-translate/core'
-import { APP_CONFIG, AppConfig } from 'src/lib/config/app-config'
+import { APP_CONFIG, AppConfig } from '../../config/app-config'
 
 /**
  * This class provides helper functions for translated UI elements such as alerts, toasts and loaders.
