@@ -4,6 +4,7 @@ import { SerializerService } from '../serializer/serializer.service'
 import { to } from '../../utils/utils'
 // import { ErrorCategory, handleErrorLocal } from '../error-handler/error-handler.service'
 import { UiEventService } from '../ui-event/ui-event.service'
+import { IACMessageHandler } from './message-handler'
 
 export enum IACMessageTransport {
   QR_SCANNER = 'QR_SCANNER',
@@ -15,11 +16,6 @@ export enum IACHanderStatus {
   SUCCESS = 0,
   PARTIAL = 1,
   ERROR = 2
-}
-
-export interface IACMessageHandler {
-  canHandle(data: string | string[]): Promise<boolean>
-  handle(data: string | string[]): Promise<void>
 }
 
 type ScanAgainCallback = (scanResult?: Error | { currentPage: number; totalPageNumber: number }) => void
@@ -69,10 +65,14 @@ export abstract class BaseIACService {
 
     // Try to handle requests with custom handlers (eg. beacon, walletconnect, addresses, etc.)
     for (let i = 0; i < this.customHandlers.length; i++) {
-      if (await this.customHandlers[i].canHandle(data)) {
-        await this.customHandlers[i].handle(data)
+      try {
+        const handlerResult: boolean = await this.customHandlers[i].handle(data)
 
-        return this.storeResult(data, IACHanderStatus.SUCCESS, transport)
+        if (handlerResult) {
+          return this.storeResult(data, IACHanderStatus.SUCCESS, transport)
+        }
+      } catch (handlerError) {
+        console.log(`Error while handling ${this.customHandlers[i].name}`, handlerError)
       }
     }
 
@@ -125,7 +125,7 @@ export abstract class BaseIACService {
     const relayButton = {
       text: 'Relay',
       handler: () => {
-        this.relay(data)
+        this.relay(data).catch(console.error)
       }
     }
 
@@ -153,7 +153,7 @@ export abstract class BaseIACService {
     const relayButton = {
       text: 'Relay',
       handler: () => {
-        this.relay(data)
+        this.relay(data).catch(console.error)
       }
     }
 

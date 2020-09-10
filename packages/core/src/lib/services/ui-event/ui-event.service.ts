@@ -15,6 +15,12 @@ export class UiEventService {
   ) {}
 
   public async showTranslatedLoader(optionsInput: LoadingOptions): Promise<void> {
+    const loader: HTMLIonLoadingElement = await this.getTranslatedLoader(optionsInput)
+
+    return loader.present()
+  }
+
+  public async getTranslatedLoader(optionsInput: LoadingOptions): Promise<HTMLIonLoadingElement> {
     const message = optionsInput.message?.toString()
 
     const translationKeys: string[] = [message].filter((key: string | undefined): key is string => key !== undefined)
@@ -35,10 +41,16 @@ export class UiEventService {
       ...options // Overwrite translations
     })
 
-    return loader.present()
+    return loader
   }
 
   public async showTranslatedToast(optionsInput: ToastOptions): Promise<void> {
+    const toast: HTMLIonToastElement = await this.getTranslatedToast(optionsInput)
+
+    return toast.present()
+  }
+
+  public async getTranslatedToast(optionsInput: ToastOptions): Promise<HTMLIonToastElement> {
     const header = optionsInput.header
     const message = optionsInput.message?.toString()
     const buttons = optionsInput.buttons ?? []
@@ -74,10 +86,16 @@ export class UiEventService {
       ...options // Overwrite translations
     })
 
-    return toast.present()
+    return toast
   }
 
   public async showTranslatedAlert(optionsInput: AlertOptions): Promise<void> {
+    const alert: HTMLIonAlertElement = await this.getTranslatedAlert(optionsInput)
+
+    return alert.present()
+  }
+
+  public async getTranslatedAlert(optionsInput: AlertOptions): Promise<HTMLIonAlertElement> {
     const header = optionsInput.header
     const subHeader = optionsInput.subHeader
     const message = optionsInput.message?.toString()
@@ -142,7 +160,7 @@ export class UiEventService {
       ...options // Overwrite translations
     })
 
-    return alert.present()
+    return alert
   }
 
   private async translateButtons<T extends AlertButton | ToastButton>(
