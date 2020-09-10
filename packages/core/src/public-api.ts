@@ -37,6 +37,7 @@ export * from './lib/services/serializer/serializer.service'
 export * from './lib/services/storage/base.storage'
 export * from './lib/services/storage/storage.service'
 export * from './lib/services/ui-event/ui-event.service'
+export * from './lib/services/ui-event-elements/ui-event-elements.service'
 
 // Types
 export * from './lib/types/SupportedLanguage'

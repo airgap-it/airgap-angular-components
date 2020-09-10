@@ -3,7 +3,7 @@ import { IACMessageDefinitionObject, IACMessageType } from 'airgap-coin-lib'
 import { SerializerService } from '../serializer/serializer.service'
 import { to } from '../../utils/utils'
 // import { ErrorCategory, handleErrorLocal } from '../error-handler/error-handler.service'
-import { UiEventService } from '../ui-event/ui-event.service'
+import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { IACMessageHandler } from './message-handler'
 
 export enum IACMessageTransport {
@@ -30,7 +30,7 @@ export abstract class BaseIACService {
   }
 
   constructor(
-    protected readonly uiEventService: UiEventService,
+    protected readonly uiEventElementService: UiEventElementsService,
     protected readonly serializerService: SerializerService,
     protected readonly isReady: Promise<void>,
     protected readonly customHandlers: IACMessageHandler[]
@@ -115,34 +115,22 @@ export abstract class BaseIACService {
 
       return this.storeResult(data, IACHanderStatus.SUCCESS, transport)
     } else {
-      await this.messageNotSupportedAlert(data, scanAgainCallback)
+      await this.messageUnknownAlert(data, scanAgainCallback)
 
       return this.storeResult(data, IACHanderStatus.ERROR, transport)
     }
   }
 
-  protected async messageNotSupportedAlert(data: string | string[], scanAgainCallback: ScanAgainCallback): Promise<void> {
-    const relayButton = {
-      text: 'Relay',
-      handler: () => {
-        this.relay(data).catch(console.error)
-      }
+  protected async messageUnknownAlert(data: string | string[], scanAgainCallback: ScanAgainCallback): Promise<void> {
+    const relayHandler = () => {
+      this.relay(data).catch(console.error)
     }
 
-    const cancelButton = {
-      text: 'tab-wallets.invalid-sync-operation_alert.okay_label',
-      role: 'cancel',
-      handler: () => {
-        scanAgainCallback()
-      }
+    const cancelHandler = () => {
+      scanAgainCallback()
     }
-    this.uiEventService
-      .showTranslatedAlert({
-        header: 'tab-wallets.invalid-sync-operation_alert.title',
-        message: 'tab-wallets.invalid-sync-operation_alert.text',
-        buttons: [relayButton, cancelButton]
-      })
-      .catch(console.error)
+
+    this.uiEventElementService.showIACMessageUnknownAlert(relayHandler, cancelHandler).catch(console.error)
   }
 
   protected async syncTypeNotSupportedAlert(
@@ -150,28 +138,15 @@ export abstract class BaseIACService {
     _deserializedSyncProtocols: IACMessageDefinitionObject[],
     scanAgainCallback: ScanAgainCallback
   ): Promise<boolean> {
-    const relayButton = {
-      text: 'Relay',
-      handler: () => {
-        this.relay(data).catch(console.error)
-      }
+    const relayHandler = () => {
+      this.relay(data).catch(console.error)
     }
 
-    const cancelButton = {
-      text: 'tab-wallets.sync-operation-not-supported_alert.okay_label',
-      role: 'cancel',
-      handler: () => {
-        scanAgainCallback()
-      }
+    const cancelHandler = () => {
+      scanAgainCallback()
     }
 
-    this.uiEventService
-      .showTranslatedAlert({
-        header: 'tab-wallets.sync-operation-not-supported_alert.title',
-        message: 'tab-wallets.sync-operation-not-supported_alert.text',
-        buttons: [relayButton, cancelButton]
-      })
-      .catch(console.error)
+    this.uiEventElementService.showIACMessageNotSupportedAlert(relayHandler, cancelHandler).catch(console.error)
 
     return false
   }
