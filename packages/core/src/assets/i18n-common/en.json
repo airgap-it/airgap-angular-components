@@ -15,5 +15,19 @@
       "success_text": "Successfully copied to your clipboard!",
       "ok_label": "Ok"
     }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Incompatible code",
+      "message": "Could not parse message. Please make sure this is a valid AirGap message. You can try to handle this message in {{otherAppName}} by using the \"Relay\" button below.",
+      "relay_label": "Relay",
+      "okay_label": "Okay"
+    },
+    "message-not-supported_alert": {
+      "header": "Operation not supported",
+      "message": "Please use {{otherAppName}} to handle this message. You can click the \"Relay\" button below to do that.",
+      "relay_label": "Relay",
+      "okay_label": "Okay"
+    }
   }
 }

@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core'
+import { Injectable, Inject } from '@angular/core'
 import { AlertController, LoadingController, ToastController } from '@ionic/angular'
 import { AlertInput, AlertButton, AlertOptions, ToastOptions, ToastButton, LoadingOptions } from '@ionic/core'
 import { TranslateService } from '@ngx-translate/core'
+import { APP_CONFIG, AppConfig } from 'src/lib/config/app-config'
 
 /**
  * This class provides helper functions for translated UI elements such as alerts, toasts and loaders.
@@ -16,7 +17,8 @@ export class UiEventService {
     private readonly translateService: TranslateService,
     private readonly alertController: AlertController,
     private readonly toastController: ToastController,
-    private readonly loadingController: LoadingController
+    private readonly loadingController: LoadingController,
+    @Inject(APP_CONFIG) private readonly appConfig: AppConfig
   ) {}
 
   /**
@@ -43,7 +45,11 @@ export class UiEventService {
     const options: ToastOptions = {}
 
     if (translationKeys.length > 0) {
-      const values = await this.translateService.get(translationKeys).toPromise()
+      const values = await this.translateService
+        .get(translationKeys, {
+          otherAppName: this.appConfig.otherAppName
+        })
+        .toPromise()
 
       if (message) {
         options.message = values[message]

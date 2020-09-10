@@ -15,6 +15,9 @@ export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 export * from './lib/components/qr/qr.component'
 
+// Config
+export * from './lib/config/app-config'
+
 // Translation
 export * from './lib/translation/AirGapTranslateLoader'
 
