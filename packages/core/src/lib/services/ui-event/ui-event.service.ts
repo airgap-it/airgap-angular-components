@@ -5,6 +5,8 @@ import { TranslateService } from '@ngx-translate/core'
 
 /**
  * This class provides helper functions for translated UI elements such as alerts, toasts and loaders.
+ *
+ * This class should most likely not be called directly and instead be wrapped with something like the UiEventElementsService.
  */
 @Injectable({
   providedIn: 'root'
