@@ -45,11 +45,7 @@ export class UiEventService {
     const options: ToastOptions = {}
 
     if (translationKeys.length > 0) {
-      const values = await this.translateService
-        .get(translationKeys, {
-          otherAppName: this.appConfig.otherAppName
-        })
-        .toPromise()
+      const values = await this.translateService.get(translationKeys, this.appConfig).toPromise()
 
       if (message) {
         options.message = values[message]
@@ -95,7 +91,7 @@ export class UiEventService {
     const options: ToastOptions = {}
 
     if (translationKeys.length > 0) {
-      const values = await this.translateService.get(translationKeys).toPromise()
+      const values = await this.translateService.get(translationKeys, this.appConfig).toPromise()
 
       if (header) {
         options.header = values[header]
@@ -157,7 +153,7 @@ export class UiEventService {
     const options: AlertOptions = {}
 
     if (translationKeys.length > 0) {
-      const values = await this.translateService.get(translationKeys).toPromise()
+      const values = await this.translateService.get(translationKeys, this.appConfig).toPromise()
 
       if (header) {
         options.header = values[header]
