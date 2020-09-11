@@ -18,7 +18,8 @@ export class DeeplinkService {
   ) {}
 
   public sameDeviceDeeplink(url: string = `${this.appConfig.otherApp.urlScheme}://`): Promise<void> {
-    const deeplinkUrl: string = typeof url === 'string' && url.includes('://') ? url : serializedDataToUrlString(url)
+    const deeplinkUrl: string =
+      typeof url === 'string' && url.includes('://') ? url : serializedDataToUrlString(url, this.appConfig.otherApp.urlScheme)
 
     return new Promise((resolve, reject) => {
       this.app

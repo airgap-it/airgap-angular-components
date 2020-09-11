@@ -1,8 +1,9 @@
-import { Component, Input, OnDestroy } from '@angular/core'
+import { Component, Input, OnDestroy, Inject } from '@angular/core'
 
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 import { SerializerService } from '../../services/serializer/serializer.service'
 import { serializedDataToUrlString } from '../../utils/utils'
+import { APP_CONFIG, AppConfig } from '../../config/app-config'
 
 @Component({
   selector: 'airgap-qr',
@@ -36,7 +37,11 @@ export class QrComponent implements OnDestroy {
   private _shouldPrefixSingleQrWithUrl: boolean = true
 
   private readonly timeout: NodeJS.Timeout
-  constructor(private readonly clipboardService: ClipboardService, private readonly serializerService: SerializerService) {
+  constructor(
+    private readonly clipboardService: ClipboardService,
+    private readonly serializerService: SerializerService,
+    @Inject(APP_CONFIG) private readonly appConfig: AppConfig
+  ) {
     this.timeout = setInterval(() => {
       this.activeChunk = ++this.activeChunk % this.qrdataArray.length
     }, this.serializerService.displayTimePerChunk)
@@ -54,7 +59,7 @@ export class QrComponent implements OnDestroy {
       const chunk: string = this._rawValue[0]
       const shouldPrefix: boolean = !chunk.includes('://') && this._shouldPrefixSingleQrWithUrl
 
-      copyString = shouldPrefix ? serializedDataToUrlString(chunk) : chunk
+      copyString = shouldPrefix ? serializedDataToUrlString(chunk, this.appConfig.otherApp.urlScheme) : chunk
     } else {
       copyString = typeof this._rawValue === 'string' ? this._rawValue : this._rawValue.join(',')
     }
@@ -68,7 +73,7 @@ export class QrComponent implements OnDestroy {
       const chunk: string = array[0]
       const shouldPrefix: boolean = !chunk.includes('://') && this._shouldPrefixSingleQrWithUrl
 
-      this.qrdataArray = [shouldPrefix ? serializedDataToUrlString(chunk) : chunk]
+      this.qrdataArray = [shouldPrefix ? serializedDataToUrlString(chunk, this.appConfig.otherApp.urlScheme) : chunk]
     } else {
       this.qrdataArray = array
     }
