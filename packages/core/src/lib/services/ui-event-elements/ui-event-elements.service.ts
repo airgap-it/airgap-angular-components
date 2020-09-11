@@ -22,38 +22,38 @@ export class UiEventElementsService {
 
   public async showIACMessageUnknownAlert(relayHandler: () => void, cancelHandler: () => void): Promise<void> {
     const relayButton = {
-      text: 'Relay',
+      text: 'iac.message-unknown_alert.relay_label',
       handler: relayHandler
     }
 
     const cancelButton = {
-      text: 'tab-wallets.invalid-sync-operation_alert.okay_label',
+      text: 'iac.message-unknown_alert.okay_label',
       role: 'cancel',
       handler: cancelHandler
     }
 
     await this.uiEventService.showTranslatedAlert({
-      header: 'tab-wallets.invalid-sync-operation_alert.title',
-      message: 'tab-wallets.invalid-sync-operation_alert.text',
+      header: 'iac.message-unknown_alert.header',
+      message: 'iac.message-unknown_alert.message',
       buttons: [relayButton, cancelButton]
     })
   }
 
   public async showIACMessageNotSupportedAlert(relayHandler: () => void, cancelHandler: () => void): Promise<void> {
     const relayButton = {
-      text: 'Relay',
+      text: 'iac.message-not-supported_alert.relay_label',
       handler: relayHandler
     }
 
     const cancelButton = {
-      text: 'tab-wallets.sync-operation-not-supported_alert.okay_label',
+      text: 'iac.message-not-supported_alert.okay_label',
       role: 'cancel',
       handler: cancelHandler
     }
 
     await this.uiEventService.showTranslatedAlert({
-      header: 'tab-wallets.sync-operation-not-supported_alert.title',
-      message: 'tab-wallets.sync-operation-not-supported_alert.text',
+      header: 'iac.message-not-supported_alert.header',
+      message: 'iac.message-not-supported_alert.message',
       buttons: [relayButton, cancelButton]
     })
   }
