@@ -55,4 +55,5 @@ export * from './lib/utils/not-initialized'
 export * from './lib/utils/utils'
 
 // Capacitor
+export * from './lib/capacitor-plugins/definitions'
 export * from './lib/capacitor-plugins/injection-tokens'
