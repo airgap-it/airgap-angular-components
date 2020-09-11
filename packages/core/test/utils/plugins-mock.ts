@@ -26,3 +26,7 @@ export class ClipboardMock {
 export class AppPluginMock {
   public openUrl: jasmine.Spy = newSpy('openUrl', Promise.resolve({ value: 'text-from-clipboard' }))
 }
+
+export class PermissionsPluginMock {
+  public query: jasmine.Spy = newSpy('query', Promise.resolve({ value: true }))
+}

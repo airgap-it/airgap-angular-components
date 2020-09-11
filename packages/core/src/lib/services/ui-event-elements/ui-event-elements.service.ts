@@ -83,4 +83,22 @@ export class UiEventElementsService {
       ]
     })
   }
+
+  public async showOpenSettingsAlert(openSettingsHandler: () => void): Promise<void> {
+    await this.uiEventService.showTranslatedAlert({
+      header: 'Settings',
+      message: 'You can enable the missing permissions in the device settings.',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => undefined
+        },
+        {
+          text: 'Open settings',
+          handler: openSettingsHandler
+        }
+      ]
+    })
+  }
 }
