@@ -3,10 +3,10 @@ import { TestBedUtils } from '../../../../test/utils/test-bed'
 
 import { APP_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { AppPluginMock } from '../../../../test/utils/plugins-mock'
-import { DeepLinkService } from './deep-link.service'
+import { DeeplinkService } from './deeplink.service'
 
-describe('DeepLinkService', () => {
-  let service: DeepLinkService
+describe('DeeplinkService', () => {
+  let service: DeeplinkService
 
   let testBedUtils: TestBedUtils
 
@@ -18,7 +18,7 @@ describe('DeepLinkService', () => {
         providers: [{ provide: APP_PLUGIN, useValue: new AppPluginMock() }]
       })
     )
-    service = TestBed.inject(DeepLinkService)
+    service = TestBed.inject(DeeplinkService)
   })
 
   it('should be created', () => {

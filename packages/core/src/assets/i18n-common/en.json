@@ -30,7 +30,7 @@
       "okay_label": "Okay"
     }
   },
-  "deep-link": {
+  "deeplink": {
     "not-supported-alert": {
       "title": "Oops",
       "message": "Deeplinking is only supported on mobile devices.",

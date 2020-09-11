@@ -10,7 +10,7 @@ import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.s
 @Injectable({
   providedIn: 'root'
 })
-export class DeepLinkService {
+export class DeeplinkService {
   constructor(
     private readonly uiEventElementsService: UiEventElementsService,
     @Inject(APP_PLUGIN) private readonly app: AppPlugin,

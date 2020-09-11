@@ -60,11 +60,11 @@ export class UiEventElementsService {
 
   public async showDeeplinkOnlyAvailableOnDevicesAlert(): Promise<void> {
     await this.uiEventService.showTranslatedAlert({
-      header: 'deep-link.not-supported-alert.title',
-      message: 'deep-link.not-supported-alert.message',
+      header: 'deeplink.not-supported-alert.title',
+      message: 'deeplink.not-supported-alert.message',
       buttons: [
         {
-          text: 'deep-link.not-supported-alert.ok',
+          text: 'deeplink.not-supported-alert.ok',
           role: 'cancel'
         }
       ]
@@ -73,11 +73,11 @@ export class UiEventElementsService {
 
   public async showOtherAppNotFoundAlert(): Promise<void> {
     await this.uiEventService.showTranslatedAlert({
-      header: 'deep-link.app-not-found.title',
-      message: 'deep-link.app-not-found.message',
+      header: 'deeplink.app-not-found.title',
+      message: 'deeplink.app-not-found.message',
       buttons: [
         {
-          text: 'deep-link.app-not-found.ok',
+          text: 'deeplink.app-not-found.ok',
           role: 'cancel'
         }
       ]
