@@ -15,8 +15,17 @@ import { TranslateMock } from './translate-mock'
 export class TestBedUtils {
   public moduleDef(moduleMedatada: TestModuleMetadata, useIonicOnlyTestBed: boolean = false): TestModuleMetadata {
     const appConfig: AppConfig = {
-      appName: 'TestApp',
-      otherAppName: 'OtherApp'
+      // Remember that translations use these keys as well
+      app: {
+        name: 'TestApp',
+        urlScheme: 'testapp',
+        universalLink: 'testapp.airgap.it'
+      },
+      otherApp: {
+        name: 'OtherApp',
+        urlScheme: 'otherapp',
+        universalLink: 'otherapp.airgap.it'
+      }
     }
 
     const mandatoryDeclarations: any[] = []

@@ -57,4 +57,30 @@ export class UiEventElementsService {
       buttons: [relayButton, cancelButton]
     })
   }
+
+  public async showDeeplinkOnlyAvailableOnDevicesAlert(): Promise<void> {
+    await this.uiEventService.showTranslatedAlert({
+      header: 'deep-link.not-supported-alert.title',
+      message: 'deep-link.not-supported-alert.message',
+      buttons: [
+        {
+          text: 'deep-link.not-supported-alert.ok',
+          role: 'cancel'
+        }
+      ]
+    })
+  }
+
+  public async showOtherAppNotFoundAlert(): Promise<void> {
+    await this.uiEventService.showTranslatedAlert({
+      header: 'deep-link.app-not-found.title',
+      message: 'deep-link.app-not-found.message',
+      buttons: [
+        {
+          text: 'deep-link.app-not-found.ok',
+          role: 'cancel'
+        }
+      ]
+    })
+  }
 }

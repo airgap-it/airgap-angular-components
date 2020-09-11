@@ -22,3 +22,7 @@ export class ClipboardMock {
   public read: jasmine.Spy = newSpy('read', Promise.resolve({ value: 'text-from-clipboard' }))
   public write: jasmine.Spy = newSpy('write', Promise.resolve())
 }
+
+export class AppPluginMock {
+  public openUrl: jasmine.Spy = newSpy('openUrl', Promise.resolve({ value: 'text-from-clipboard' }))
+}
