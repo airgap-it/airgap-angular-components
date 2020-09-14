@@ -1,9 +1,7 @@
-import { Injectable, Inject } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { Diagnostic } from '@ionic-native/diagnostic/ngx'
 import { Platform } from '@ionic/angular'
-import { PermissionType, PermissionsPlugin } from '@capacitor/core'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
-import { PERMISSIONS_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 // import { ErrorCategory, handleErrorLocal } from '../error-handler/error-handler.service'
 
 export enum PermissionStatus {
@@ -26,20 +24,19 @@ export class PermissionsService {
   constructor(
     private readonly uiEventElementsService: UiEventElementsService,
     private readonly platform: Platform,
-    private readonly diagnostic: Diagnostic,
-    @Inject(PERMISSIONS_PLUGIN) private readonly permissions: PermissionsPlugin
+    private readonly diagnostic: Diagnostic
   ) {}
 
   public async hasCameraPermission(): Promise<PermissionStatus> {
-    return this.checkPermission(PermissionType.Camera)
+    const permission: PermissionStatus = await this.diagnostic.getCameraAuthorizationStatus(false)
+
+    return this.getPermissionStatus(permission)
   }
 
   public async hasMicrophonePermission(): Promise<PermissionStatus> {
-    return this.checkPermission(PermissionType.Microphone)
-  }
+    const permission: PermissionStatus = await this.diagnostic.getMicrophoneAuthorizationStatus()
 
-  public async hasNotificationsPermission(): Promise<PermissionStatus> {
-    return this.checkPermission(PermissionType.Notifications)
+    return this.getPermissionStatus(permission)
   }
 
   public async requestPermissions(permissions: PermissionTypes[]): Promise<void> {
@@ -106,13 +103,7 @@ export class PermissionsService {
     return canAskForPermission
   }
 
-  private async checkPermission(type: PermissionType): Promise<PermissionStatus> {
-    const permission = await this.permissions.query({ name: type })
-
-    return this.getPermissionStatus(permission.state)
-  }
-
-  private async getPermissionStatus(permission: string): Promise<PermissionStatus> {
+  private async getPermissionStatus(permission: PermissionStatus): Promise<PermissionStatus> {
     if (this.isGranted(permission)) {
       return PermissionStatus.GRANTED
     } else if (this.isNotRequested(permission)) {
@@ -126,19 +117,19 @@ export class PermissionsService {
     }
   }
 
-  private isGranted(permission: string): boolean {
+  private isGranted(permission: PermissionStatus): boolean {
     return permission === this.diagnostic.permissionStatus.GRANTED || permission === this.diagnostic.permissionStatus.GRANTED_WHEN_IN_USE
   }
 
-  private isNotRequested(permission: string): boolean {
+  private isNotRequested(permission: PermissionStatus): boolean {
     return permission === this.diagnostic.permissionStatus.NOT_REQUESTED
   }
 
-  private isDeniedAlways(permission: string): boolean {
+  private isDeniedAlways(permission: PermissionStatus): boolean {
     return permission === this.diagnostic.permissionStatus.DENIED_ALWAYS || permission === this.diagnostic.permissionStatus.RESTRICTED
   }
 
-  private isDenied(permission: string): boolean {
+  private isDenied(permission: PermissionStatus): boolean {
     return !(this.isGranted(permission) || this.isNotRequested(permission))
   }
 }
