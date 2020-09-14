@@ -59,7 +59,7 @@ export class QrComponent implements OnDestroy {
       const chunk: string = this._rawValue[0]
       const shouldPrefix: boolean = !chunk.includes('://') && this._shouldPrefixSingleQrWithUrl
 
-      copyString = shouldPrefix ? serializedDataToUrlString(chunk, this.appConfig.otherApp.urlScheme) : chunk
+      copyString = shouldPrefix ? serializedDataToUrlString(chunk, `${this.appConfig.otherApp.urlScheme}://`) : chunk
     } else {
       copyString = typeof this._rawValue === 'string' ? this._rawValue : this._rawValue.join(',')
     }
@@ -73,7 +73,7 @@ export class QrComponent implements OnDestroy {
       const chunk: string = array[0]
       const shouldPrefix: boolean = !chunk.includes('://') && this._shouldPrefixSingleQrWithUrl
 
-      this.qrdataArray = [shouldPrefix ? serializedDataToUrlString(chunk, this.appConfig.otherApp.urlScheme) : chunk]
+      this.qrdataArray = [shouldPrefix ? serializedDataToUrlString(chunk, `${this.appConfig.otherApp.urlScheme}://`) : chunk]
     } else {
       this.qrdataArray = array
     }
