@@ -8,50 +8,25 @@ declare let QRScanner: any
   providedIn: 'root'
 })
 export class QrScannerService {
-  public isShowing: boolean = false
+  /**
+   * Shows if the scanner is currently active (scanning) or not
+   */
+  public isActive: boolean = false
 
-  constructor(private readonly platform: Platform) {}
+  private readonly isMobile: boolean
 
-  public askForPermission(): void {
-    if (this.platform.is('hybrid')) {
-      QRScanner.openSettings()
-    }
+  constructor(private readonly platform: Platform) {
+    this.isMobile = this.platform.is('hybrid')
   }
 
-  public hasPermission(): Promise<boolean[]> {
-    if (this.platform.is('hybrid')) {
-      return new Promise((resolve, reject) => {
-        const onDone = (doneError: Error, status: { authorized: boolean; denied: boolean }) => {
-          if (doneError) {
-            // here we can handle errors and clean up any loose ends.
-            console.error('Scanner permission ', doneError)
-            reject([false, false])
-          }
-          if (status.authorized) {
-            console.log('Scanner permission granted')
-            resolve([true, true])
-          } else if (status.denied) {
-            console.warn('Scanner permission denied')
-            reject([false, true])
-            // The video preview will remain black, and scanning is disabled. We can
-            // try to ask the user to change their mind, but we'll have to send them
-            // to their device settings with `QRScanner.openSettings()`.
-          } else {
-            console.warn('Scanner permission denied')
-            reject([false, false])
-            // we didn't get permission, but we didn't get permanently denied. (On
-            // Android, a denial isn't permanent unless the user checks the "Don't
-            // ask again" box.) We can ask again at the next relevant opportunity.
-          }
-        }
-        QRScanner.prepare(onDone)
-      })
-    } else {
-      throw new Error('Permission status can only be requested on native devices')
-    }
-  }
-
+  /**
+   * Start the QR scanner. It will make the background of the page transparent and scan until a QR is detected.
+   *
+   * @param successCallback
+   * @param errorCallback
+   */
   public scan(successCallback: (text: string) => void, errorCallback: ((text: string) => void) | null = null): void {
+    this.show()
     const scanCallback = (scanError: Error, text: string) => {
       if (scanError) {
         console.error('Scanner scan error', scanError)
@@ -69,26 +44,20 @@ export class QrScannerService {
     QRScanner.scan(scanCallback)
   }
 
-  public show(): void {
-    if (this.platform.is('hybrid')) {
-      if (this.isShowing) {
+  public destroy(): void {
+    if (this.isMobile) {
+      this.isActive = false
+      QRScanner.destroy()
+    }
+  }
+
+  private show(): void {
+    if (this.isMobile) {
+      if (this.isActive) {
         return
       }
-      this.isShowing = true
+      this.isActive = true
       QRScanner.show()
-    }
-  }
-
-  public stopScan(): void {
-    if (this.platform.is('hybrid')) {
-      QRScanner.cancelScan(null)
-    }
-  }
-
-  public destroy(): void {
-    if (this.platform.is('hybrid')) {
-      this.isShowing = false
-      QRScanner.destroy()
     }
   }
 }
