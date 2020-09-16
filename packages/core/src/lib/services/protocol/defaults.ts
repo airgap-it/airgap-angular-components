@@ -20,8 +20,9 @@ import {
 import { SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
+import { top100Tokens } from './top100tokens'
 
-const activeEthTokens: Set<string> = new Set(['eth-erc20-xchf'])
+const activeEthTokens: Set<string> = new Set(['eth-erc20-xchf'].concat(top100Tokens.map((token) => token.identifier)))
 
 export function getDefaultPassiveProtocols(): ICoinProtocol[] {
   return []
