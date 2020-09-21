@@ -16,6 +16,7 @@
       ></airgap-titled-text>
 
       <airgap-titled-text 
+        *ngIf="transaction.amount"
         class="ion-padding-bottom"
         [title]="'from-to.amount_label' | translate" 
         [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier } | async"
