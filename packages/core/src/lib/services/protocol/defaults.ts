@@ -39,30 +39,7 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
 }
 
 export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-  const ethereumProtocol = new EthereumProtocol()
-
-  return [
-    [new TezosProtocol(), new TezosKtProtocol()],
-    ...ethTokens.map(
-      (token: Token) =>
-        [
-          ethereumProtocol,
-          new GenericERC20(
-            new EthereumERC20ProtocolOptions(
-              new EthereumProtocolNetwork(),
-              new EthereumERC20ProtocolConfig(
-                token.symbol,
-                token.name,
-                token.marketSymbol,
-                token.identifier as SubProtocolSymbols,
-                token.contractAddress,
-                token.decimals
-              )
-            )
-          )
-        ] as [EthereumProtocol, GenericERC20]
-    )
-  ]
+  return [[new TezosProtocol(), new TezosKtProtocol()]]
 }
 
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
