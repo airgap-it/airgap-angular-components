@@ -65,7 +65,15 @@ export class SerializerService {
   }
 
   public async serialize(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
-    if (!this.useV2 && !chunks.some((chunk: IACMessageDefinitionObject) => chunk.protocol === MainProtocolSymbols.COSMOS)) {
+    if (
+      !this.useV2 &&
+      !chunks.some(
+        (chunk: IACMessageDefinitionObject) =>
+          chunk.protocol === MainProtocolSymbols.COSMOS ||
+          chunk.protocol === MainProtocolSymbols.KUSAMA ||
+          chunk.protocol === MainProtocolSymbols.POLKADOT
+      )
+    ) {
       if (chunks[0].protocol === MainProtocolSymbols.BTC && chunks[0].type === 6) {
         // This expects a BigNumber, but we now have a string. So we need to convert it.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
