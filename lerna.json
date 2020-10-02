@@ -1,9 +1,14 @@
 {
-  "version": "0.0.3-beta.11",
-  "packages": ["packages/*"],
+  "version": "0.0.4-beta.0",
+  "packages": [
+    "packages/*"
+  ],
   "command": {
     "publish": {
-      "ignoreChanges": ["*.sh", "*.md"]
+      "ignoreChanges": [
+        "*.sh",
+        "*.md"
+      ]
     }
   }
 }
