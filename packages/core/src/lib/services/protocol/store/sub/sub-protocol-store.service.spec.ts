@@ -294,19 +294,11 @@ describe('SubProtocolStoreService', () => {
       SubProtocolSymbols.XTZ_KT,
       SubProtocolSymbols.XTZ_STKR,
       SubProtocolSymbols.XTZ_USD,
-      'eth-erc20-$ffc',
-      'eth-erc20-1wo'
+      'eth-erc20-bnb',
+      'eth-erc20-usdt'
     ]
 
-    const invalidIdentifiers: string[] = [
-      'qwerty',
-      'abcde',
-      'tzBTC',
-      'tzKT',
-      'tzSTKR',
-      'tzUSD',
-      'erc20',
-    ]
+    const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'tzBTC', 'tzKT', 'tzSTKR', 'tzUSD', 'erc20']
 
     it('should check if the identifier is valid', () => {
       service.init({

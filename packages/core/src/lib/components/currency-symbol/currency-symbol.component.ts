@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, Input, OnChanges } from '@angular/core'
-
 @Component({
   selector: 'airgap-currency-symbol',
   templateUrl: './currency-symbol.component.html',
@@ -9,7 +8,7 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
   public readonly symbol: string | undefined
 
-  public symbolURL: string = './assets/symbols/generic-coin.svg'
+  public symbolURL: string = '../../../assets/symbols/generic-coin.svg'
 
   public ngAfterViewInit(): void {
     this.loadImage()
@@ -19,15 +18,18 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
     this.loadImage()
   }
 
-  private loadImage(): void {
+  private loadImage(usefallBack: boolean = false): void {
     if (this.symbol !== undefined) {
-      const imageURL: string = `./assets/symbols/${this.symbol.toLowerCase()}.svg`
+      const imageURL: string = usefallBack
+        ? `../../../assets/symbols/${this.symbol.toLowerCase()}.png`
+        : `../../../assets/symbols/${this.symbol.toLowerCase()}.svg`
       const img: HTMLImageElement = new Image()
-
-      img.onload = () => {
-        this.symbolURL = imageURL
-      }
+      this.symbolURL = imageURL
       img.src = imageURL
     }
+  }
+
+  public useFallBackImage(): void {
+    this.loadImage(true)
   }
 }
