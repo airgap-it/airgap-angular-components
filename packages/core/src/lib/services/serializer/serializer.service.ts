@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { IACMessageDefinitionObject, IACMessageType, Serializer } from 'airgap-coin-lib'
+import { generateId, IACMessageDefinitionObject, IACMessageType, Serializer } from 'airgap-coin-lib'
 import { DeserializedSyncProtocol, EncodedType, SyncProtocolUtils } from 'airgap-coin-lib/dist/serializer/v1/serializer'
 import BigNumber from 'bignumber.js'
 
@@ -150,6 +150,7 @@ export class SerializerService {
     }
 
     const iacMessage: IACMessageDefinitionObject = {
+      id: generateId(10),
       type: v2Type,
       protocol: deserialized.protocol,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

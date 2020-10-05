@@ -36,8 +36,6 @@ export abstract class BaseIACService {
     protected readonly customHandlers: IACMessageHandler[]
   ) {
     this.serializerMessageHandlers = {
-      [IACMessageType.MetadataRequest]: this.syncTypeNotSupportedAlert.bind(this),
-      [IACMessageType.MetadataResponse]: this.syncTypeNotSupportedAlert.bind(this),
       [IACMessageType.AccountShareRequest]: this.syncTypeNotSupportedAlert.bind(this),
       [IACMessageType.AccountShareResponse]: this.syncTypeNotSupportedAlert.bind(this),
       [IACMessageType.TransactionSignRequest]: this.syncTypeNotSupportedAlert.bind(this),
