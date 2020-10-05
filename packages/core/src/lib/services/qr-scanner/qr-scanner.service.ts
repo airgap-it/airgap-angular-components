@@ -26,6 +26,7 @@ export class QrScannerService {
    * @param errorCallback
    */
   public scan(successCallback: (text: string) => void, errorCallback: ((text: string) => void) | null = null): void {
+    this.show()
     const scanCallback = (scanError: Error, text: string) => {
       if (scanError) {
         console.error('Scanner scan error', scanError)
@@ -41,7 +42,6 @@ export class QrScannerService {
     }
 
     QRScanner.scan(scanCallback)
-    this.show()
   }
 
   public destroy(): void {

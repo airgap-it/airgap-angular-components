@@ -15,6 +15,9 @@ export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
 export * from './lib/components/qr/qr.component'
 
+// Pages
+export * from './lib/pages/scan-base/scan-base'
+
 // Config
 export * from './lib/config/app-config'
 
