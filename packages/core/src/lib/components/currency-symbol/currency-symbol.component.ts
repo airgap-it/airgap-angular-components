@@ -23,9 +23,7 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
       const imageURL: string = usefallBack
         ? `../../../assets/symbols/${this.symbol.toLowerCase()}.png`
         : `../../../assets/symbols/${this.symbol.toLowerCase()}.svg`
-      const img: HTMLImageElement = new Image()
       this.symbolURL = imageURL
-      img.src = imageURL
     }
   }
 

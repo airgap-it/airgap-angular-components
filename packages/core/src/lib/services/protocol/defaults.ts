@@ -39,7 +39,7 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
 }
 
 export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-  return [[new TezosProtocol(), new TezosKtProtocol()]]
+  return []
 }
 
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
@@ -49,6 +49,7 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
   return [
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
+    [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens.map(
       (token: Token) =>
         [
