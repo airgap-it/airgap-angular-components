@@ -20,7 +20,8 @@
   "private": true,
   "dependencies": {
     "@airgap/angular-core": "file:packages/core",
-    "@airgap/angular-ngrx": "file:packages/ng-rx"
+    "@airgap/angular-ngrx": "file:packages/ng-rx",
+    "@zxing/ngx-scanner": "^3.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.5",
