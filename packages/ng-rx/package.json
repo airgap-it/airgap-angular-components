@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.4-beta.7",
+  "version": "0.0.4-beta.8",
   "publishConfig": {
     "access": "public"
   },
