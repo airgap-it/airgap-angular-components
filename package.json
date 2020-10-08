@@ -20,7 +20,8 @@
   "private": true,
   "dependencies": {
     "@airgap/angular-core": "file:packages/core",
-    "@airgap/angular-ngrx": "file:packages/ng-rx"
+    "@airgap/angular-ngrx": "file:packages/ng-rx",
+    "@zxing/ngx-scanner": "^3.0.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1000.5",
@@ -37,9 +38,13 @@
     "@angular/platform-browser": "^10.0.8",
     "@angular/platform-browser-dynamic": "^10.0.8",
     "@angular/router": "^10.0.8",
+    "@capacitor/core": "^2.4.0",
     "@download/blockies": "^1.0.3",
+    "@ionic-native/core": "^5.28.0",
+    "@ionic-native/diagnostic": "^5.28.0",
     "@ionic/angular": "^5.3.1",
     "@ionic/core": "^5.3.1",
+    "@ionic/storage": "^2.3.0",
     "@ngx-translate/core": "^13.0.0",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
@@ -47,7 +52,8 @@
     "@typescript-eslint/eslint-plugin": "^3.6.0",
     "@typescript-eslint/eslint-plugin-tslint": "^3.6.0",
     "@typescript-eslint/parser": "^3.6.0",
-    "airgap-coin-lib": "^0.9.0",
+    "airgap-coin-lib": "0.9.7-beta.4",
+    "angularx-qrcode": "^1.5.3",
     "bignumber.js": "^9.0.0",
     "codelyzer": "^6.0.0",
     "eslint": "^7.4.0",
