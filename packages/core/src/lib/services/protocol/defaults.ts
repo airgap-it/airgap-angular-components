@@ -44,7 +44,6 @@ export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtoco
   const ethereumProtocol = new EthereumProtocol()
 
   return [
-    [new TezosProtocol(), new TezosKtProtocol()],
     ...ethTokens
       .filter((token: Token, index: number, array: Token[]) => !activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
       .map(
@@ -76,6 +75,7 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
   return [
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
+    [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens
       .filter((token: Token, index: number, array: Token[]) => activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
       .map(
