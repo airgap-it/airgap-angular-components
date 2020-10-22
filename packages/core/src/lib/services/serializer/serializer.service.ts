@@ -121,9 +121,9 @@ export class SerializerService {
 
   private async serializeV1(chunk: IACMessageDefinitionObject): Promise<string> {
     const v1Type: EncodedType | undefined = this.v2Tov1Mapping.get(chunk.type)
-
-    if (!v1Type) {
-      throw new Error('Serializer V1 type not supported')
+    
+    if (v1Type === undefined) {
+      throw new Error(`Serializer V1 type not supported (${chunk.type})`)
     }
 
     const chunkToSerialize: DeserializedSyncProtocol = {
@@ -145,8 +145,8 @@ export class SerializerService {
 
     const v2Type: IACMessageType | undefined = this.v1Tov2Mapping.get(deserialized.type)
 
-    if (!v2Type) {
-      throw new Error('Serializer V2 type not supported')
+    if (v2Type === undefined) {
+      throw new Error(`Serializer V2 type not supported (${deserialized.type})`)
     }
 
     const iacMessage: IACMessageDefinitionObject = {
