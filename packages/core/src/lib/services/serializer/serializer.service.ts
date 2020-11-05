@@ -71,7 +71,8 @@ export class SerializerService {
         (chunk: IACMessageDefinitionObject) =>
           chunk.protocol === MainProtocolSymbols.COSMOS ||
           chunk.protocol === MainProtocolSymbols.KUSAMA ||
-          chunk.protocol === MainProtocolSymbols.POLKADOT
+          chunk.protocol === MainProtocolSymbols.POLKADOT ||
+          chunk.protocol === MainProtocolSymbols.GRS
       )
     ) {
       if (chunks[0].protocol === MainProtocolSymbols.BTC && chunks[0].type === 6) {
