@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.5-beta.2",
+  "version": "0.0.5",
   "publishConfig": {
     "access": "public"
   },
@@ -35,7 +35,7 @@
     "@ionic/core": "^5.3.1",
     "@ionic/storage": "^2.3.0",
     "@ngx-translate/core": "^13.0.0",
-    "airgap-coin-lib": "0.9.8-beta.4",
+    "airgap-coin-lib": "0.9.9",
     "angularx-qrcode": "^1.5.3",
     "bignumber.js": "^9.0.0",
     "moment": "^2.27.0",
