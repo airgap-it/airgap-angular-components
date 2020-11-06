@@ -1,6 +1,6 @@
-import { TestBed, async } from '@angular/core/testing'
-
+import { async, TestBed } from '@angular/core/testing'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
+
 import { LanguageService } from './language.service'
 
 describe('LanguageService', () => {

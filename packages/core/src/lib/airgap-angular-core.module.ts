@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core'
 import { TranslateModule } from '@ngx-translate/core'
+
 import { ComponentsModule } from './components/components.module'
 import { PipesModule } from './pipes/pipes.module'
 import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.pipe'
@@ -11,7 +12,7 @@ import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.p
       extend: true,
       isolate: false
     }),
-    ComponentsModule, 
+    ComponentsModule,
     PipesModule
   ],
   exports: [ComponentsModule, PipesModule],

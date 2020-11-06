@@ -21,8 +21,6 @@ import { SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 
-const activeEthTokens: Set<string> = new Set(['eth-erc20-xchf'])
-
 export function getDefaultPassiveProtocols(): ICoinProtocol[] {
   return []
 }
@@ -41,31 +39,7 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
 }
 
 export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-  const ethereumProtocol = new EthereumProtocol()
-
-  return [
-    ...ethTokens
-      .filter((token: Token, index: number, array: Token[]) => !activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
-      .map(
-        (token: Token) =>
-          [
-            ethereumProtocol,
-            new GenericERC20(
-              new EthereumERC20ProtocolOptions(
-                new EthereumProtocolNetwork(),
-                new EthereumERC20ProtocolConfig(
-                  token.symbol,
-                  token.name,
-                  token.marketSymbol,
-                  token.identifier as SubProtocolSymbols,
-                  token.contractAddress,
-                  token.decimals
-                )
-              )
-            )
-          ] as [EthereumProtocol, GenericERC20]
-      )
-  ]
+  return []
 }
 
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
@@ -76,26 +50,24 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
     [tezosProtocol, new TezosKtProtocol()],
-    ...ethTokens
-      .filter((token: Token, index: number, array: Token[]) => activeEthTokens.has(token.identifier) && array.indexOf(token) === index)
-      .map(
-        (token: Token) =>
-          [
-            ethereumProtocol,
-            new GenericERC20(
-              new EthereumERC20ProtocolOptions(
-                new EthereumProtocolNetwork(),
-                new EthereumERC20ProtocolConfig(
-                  token.symbol,
-                  token.name,
-                  token.marketSymbol,
-                  token.identifier as SubProtocolSymbols,
-                  token.contractAddress,
-                  token.decimals
-                )
+    ...ethTokens.map(
+      (token: Token) =>
+        [
+          ethereumProtocol,
+          new GenericERC20(
+            new EthereumERC20ProtocolOptions(
+              new EthereumProtocolNetwork(),
+              new EthereumERC20ProtocolConfig(
+                token.symbol,
+                token.name,
+                token.marketSymbol,
+                token.identifier as SubProtocolSymbols,
+                token.contractAddress,
+                token.decimals
               )
             )
-          ] as [EthereumProtocol, GenericERC20]
-      )
+          )
+        ] as [EthereumProtocol, GenericERC20]
+    )
   ]
 }
