@@ -8,7 +8,7 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
   public readonly symbol: string | undefined
 
-  public symbolURL: string = '../../../assets/symbols/generic-coin.svg'
+  public symbolURL: string = './assets/symbols/generic-coin.svg'
 
   public ngAfterViewInit(): void {
     this.loadImage()
@@ -18,16 +18,16 @@ export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
     this.loadImage()
   }
 
-  private loadImage(usefallBack: boolean = false): void {
-    if (this.symbol !== undefined) {
-      const imageURL: string = usefallBack
-        ? `../../../assets/symbols/${this.symbol.toLowerCase()}.png`
-        : `../../../assets/symbols/${this.symbol.toLowerCase()}.svg`
-      this.symbolURL = imageURL
-    }
+  public useFallbackImage(): void {
+    this.loadImage(true)
   }
 
-  public useFallBackImage(): void {
-    this.loadImage(true)
+  private loadImage(useFallback: boolean = false): void {
+    if (this.symbol !== undefined) {
+      const imageURL: string = useFallback
+        ? `./assets/symbols/${this.symbol.toLowerCase()}.png`
+        : `./assets/symbols/${this.symbol.toLowerCase()}.svg`
+      this.symbolURL = imageURL
+    }
   }
 }
