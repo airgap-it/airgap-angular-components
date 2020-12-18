@@ -33,13 +33,7 @@
     "fullTemplateTypeCheck": true
   },
   "paths": {
-    "core": [
-      "packages/core/dist/core",
-      "packages/core/dist"
-    ],
-    "ng-rx": [
-      "packages/ng-rx/dist/ng-rx",
-      "packages/ng-rx/dist"
-    ]
+    "core": ["packages/core/dist/core", "packages/core/dist"],
+    "ng-rx": ["packages/ng-rx/dist/ng-rx", "packages/ng-rx/dist"]
   }
 }

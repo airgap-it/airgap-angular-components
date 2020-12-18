@@ -7,6 +7,10 @@ import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
 import { parseIACUrl } from '../../utils/utils'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 
+export enum DefaultChunkSizes {
+  SINGLE = 350,
+  MULTI = 100
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -17,8 +21,9 @@ export class SerializerService {
   private readonly v1Tov2Mapping: Map<EncodedType, IACMessageType> = new Map<EncodedType, IACMessageType>()
   private readonly v2Tov1Mapping: Map<IACMessageType, EncodedType> = new Map<IACMessageType, EncodedType>()
 
-  private _useV2: boolean = false
-  private _chunkSize: number = 100
+  private _useV2: boolean = true
+  public _singleChunkSize: number = DefaultChunkSizes.SINGLE
+  public _multiChunkSize: number = DefaultChunkSizes.MULTI
   private _displayTimePerChunk: number = 500
 
   public get useV2(): boolean {
@@ -31,14 +36,24 @@ export class SerializerService {
     this._useV2 = value
   }
 
-  public get chunkSize(): number {
-    return this._chunkSize
+  public get singleChunkSize(): number {
+    return this._singleChunkSize
   }
 
-  public set chunkSize(value: number) {
+  public set singleChunkSize(value: number) {
     // eslint-disable-next-line no-console
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_CHUNK_SIZE, value).catch(console.error)
-    this._chunkSize = value
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, value).catch(console.error)
+    this._singleChunkSize = value
+  }
+
+  public get multiChunkSize(): number {
+    return this._multiChunkSize
+  }
+
+  public set multiChunkSize(value: number) {
+    // eslint-disable-next-line no-console
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, value).catch(console.error)
+    this._multiChunkSize = value
   }
 
   public get displayTimePerChunk(): number {
@@ -62,6 +77,13 @@ export class SerializerService {
 
     // eslint-disable-next-line no-console
     this.loadSettings().catch(console.error)
+  }
+
+  public resetChunkSizes() {
+    this._singleChunkSize = DefaultChunkSizes.SINGLE
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, DefaultChunkSizes.SINGLE)
+    this._multiChunkSize = DefaultChunkSizes.MULTI
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, DefaultChunkSizes.MULTI)
   }
 
   public async serialize(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
@@ -114,15 +136,20 @@ export class SerializerService {
       // eslint-disable-next-line no-console
       .catch(console.error)
     this.internalStorageService
-      .get(InternalStorageKey.SETTINGS_SERIALIZER_CHUNK_SIZE)
-      .then((setting) => (this._chunkSize = setting))
+      .get(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE)
+      .then((setting) => (this._singleChunkSize = setting))
+      // eslint-disable-next-line no-console
+      .catch(console.error)
+    this.internalStorageService
+      .get(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE)
+      .then((setting) => (this._multiChunkSize = setting))
       // eslint-disable-next-line no-console
       .catch(console.error)
   }
 
   private async serializeV1(chunk: IACMessageDefinitionObject): Promise<string> {
     const v1Type: EncodedType | undefined = this.v2Tov1Mapping.get(chunk.type)
-    
+
     if (v1Type === undefined) {
       throw new Error(`Serializer V1 type not supported (${chunk.type})`)
     }
@@ -138,7 +165,12 @@ export class SerializerService {
   }
 
   private async serializeV2(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
-    return this.serializer.serialize(chunks, this.chunkSize)
+    console.log('COMMON LIB chunks', JSON.stringify(chunks))
+    console.log('COMMON LIB single', this.singleChunkSize)
+    console.log('COMMON LIB multi', this.multiChunkSize)
+    const serialized = await this.serializer.serialize(chunks, this.singleChunkSize, this.multiChunkSize)
+    console.log('COMMON LIB EXPECTED LENGTH', serialized.length)
+    return this.serializer.serialize(chunks, this.singleChunkSize, this.multiChunkSize)
   }
 
   private async deserializeV1(chunk: string): Promise<IACMessageDefinitionObject> {
