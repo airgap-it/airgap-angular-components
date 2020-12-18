@@ -165,11 +165,6 @@ export class SerializerService {
   }
 
   private async serializeV2(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
-    console.log('COMMON LIB chunks', JSON.stringify(chunks))
-    console.log('COMMON LIB single', this.singleChunkSize)
-    console.log('COMMON LIB multi', this.multiChunkSize)
-    const serialized = await this.serializer.serialize(chunks, this.singleChunkSize, this.multiChunkSize)
-    console.log('COMMON LIB EXPECTED LENGTH', serialized.length)
     return this.serializer.serialize(chunks, this.singleChunkSize, this.multiChunkSize)
   }
 

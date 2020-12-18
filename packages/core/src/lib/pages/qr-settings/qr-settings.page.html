@@ -10,28 +10,34 @@
       <ion-toggle [(ngModel)]="serializerService.useV2" slot="end"></ion-toggle>
     </ion-item>
     <ion-item>
-      <ion-label>{{ 'qr-settings.page-time_label' | translate }} ({{ serializerService.displayTimePerChunk }} ms)</ion-label>
+      <ion-label>{{ 'qr-settings.page-time_label' | translate }} ({{ serializerService.displayTimePerChunk }} ms)
+      </ion-label>
     </ion-item>
     <ion-item>
-      <ion-range [(ngModel)]="serializerService.displayTimePerChunk" min="100" max="2000" step="50" pin snaps="false" color="secondary">
+      <ion-range [(ngModel)]="serializerService.displayTimePerChunk" min="100" max="2000" step="50" pin snaps="false"
+        color="secondary">
         <ion-label slot="start">100 ms</ion-label>
         <ion-label slot="end">2000 ms</ion-label>
       </ion-range>
     </ion-item>
     <ion-item>
-      <ion-label>{{ 'qr-settings.single-page-size_label' | translate }} ({{ serializerService.singleChunkSize }} bytes)</ion-label>
+      <ion-label>{{ 'qr-settings.single-page-size_label' | translate }} ({{ serializerService.singleChunkSize }} bytes)
+      </ion-label>
     </ion-item>
     <ion-item>
-      <ion-range [(ngModel)]="serializerService.singleChunkSize" min="10" max="2000" step="10" pin snaps="false" color="secondary">
+      <ion-range [(ngModel)]="serializerService.singleChunkSize" min="10" max="2000" step="10" pin snaps="false"
+        color="secondary">
         <ion-label slot="start">10 bytes</ion-label>
         <ion-label slot="end">2000 bytes</ion-label>
       </ion-range>
     </ion-item>
     <ion-item>
-      <ion-label>{{ 'qr-settings.multi-page-size_label' | translate }} ({{ serializerService.multiChunkSize }} bytes)</ion-label>
+      <ion-label>{{ 'qr-settings.multi-page-size_label' | translate }} ({{ serializerService.multiChunkSize }} bytes)
+      </ion-label>
     </ion-item>
     <ion-item>
-      <ion-range [(ngModel)]="serializerService.multiChunkSize" min="10" max="500" step="10" pin snaps="false" color="secondary">
+      <ion-range [(ngModel)]="serializerService.multiChunkSize" min="10" max="500" step="10" pin snaps="false"
+        color="secondary">
         <ion-label slot="start">10 bytes</ion-label>
         <ion-label slot="end">500 bytes</ion-label>
       </ion-range>

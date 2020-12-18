@@ -8,7 +8,7 @@ import { SerializerService } from '../../services/serializer/serializer.service'
   styleUrls: ['./qr-settings.page.scss']
 })
 export class QrSettingsPage {
-  constructor(public readonly serializerService: SerializerService, private readonly location: Location) {}
+  constructor(public readonly serializerService: SerializerService, private readonly location: Location) { }
 
   public resetChunkSizes() {
     this.serializerService.resetChunkSizes()
