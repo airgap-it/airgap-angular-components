@@ -52,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^3.6.0",
     "@typescript-eslint/eslint-plugin-tslint": "^3.6.0",
     "@typescript-eslint/parser": "^3.6.0",
-    "airgap-coin-lib": "0.9.13-beta.2",
+    "airgap-coin-lib": "0.9.15-beta.0",
     "angularx-qrcode": "^1.5.3",
     "bignumber.js": "^9.0.0",
     "codelyzer": "^6.0.0",
