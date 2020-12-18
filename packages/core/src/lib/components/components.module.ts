@@ -11,8 +11,11 @@ import { IdenticonComponent } from './identicon/identicon.component'
 import { NetworkBadgeComponent } from './network-badge/network-badge.component'
 import { TitledAddressComponent } from './titled-address/titled-address.component'
 import { TitledTextComponent } from './titled-text/titled-text.component'
+import { AccountItemComponent } from './account-item/account-item.component'
+import { AccountSelectionComponent } from './account-selection/account-selection.component'
 import { QrComponent } from './qr/qr.component'
 import { QRCodeModule } from 'angularx-qrcode'
+import { FormsModule } from '@angular/forms'
 
 @NgModule({
   declarations: [
@@ -22,9 +25,11 @@ import { QRCodeModule } from 'angularx-qrcode'
     TitledAddressComponent,
     CurrencySymbolComponent,
     NetworkBadgeComponent,
-    QrComponent
+    QrComponent,
+    AccountItemComponent,
+    AccountSelectionComponent
   ],
-  imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule],
+  imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule, FormsModule],
   exports: [
     FromToComponent,
     IdenticonComponent,
@@ -32,7 +37,9 @@ import { QRCodeModule } from 'angularx-qrcode'
     TitledAddressComponent,
     CurrencySymbolComponent,
     NetworkBadgeComponent,
+    AccountItemComponent,
+    AccountSelectionComponent,
     QrComponent
   ]
 })
-export class ComponentsModule {}
+export class ComponentsModule { }
