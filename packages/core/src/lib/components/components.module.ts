@@ -16,6 +16,7 @@ import { AccountSelectionComponent } from './account-selection/account-selection
 import { QrComponent } from './qr/qr.component'
 import { QRCodeModule } from 'angularx-qrcode'
 import { FormsModule } from '@angular/forms'
+import { QrSettingsComponent } from './qr-settings/qr-settings.component'
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { FormsModule } from '@angular/forms'
     NetworkBadgeComponent,
     QrComponent,
     AccountItemComponent,
-    AccountSelectionComponent
+    AccountSelectionComponent,
+    QrSettingsComponent
   ],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule, FormsModule],
   exports: [
@@ -39,7 +41,8 @@ import { FormsModule } from '@angular/forms'
     NetworkBadgeComponent,
     AccountItemComponent,
     AccountSelectionComponent,
-    QrComponent
+    QrComponent,
+    QrSettingsComponent
   ]
 })
-export class ComponentsModule { }
+export class ComponentsModule {}

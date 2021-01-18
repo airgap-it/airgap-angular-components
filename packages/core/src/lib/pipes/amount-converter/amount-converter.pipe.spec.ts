@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
 import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'

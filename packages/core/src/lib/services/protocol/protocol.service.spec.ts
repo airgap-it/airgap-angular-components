@@ -19,9 +19,9 @@ import {
   TezosBTCProtocolConfig,
   TezosKtProtocol,
   ICoinSubProtocol
-} from 'airgap-coin-lib'
-import { MainProtocolSymbols, SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { NetworkType, ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+} from '@airgap/coinlib-core'
+import { MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 import { removeDuplicates } from '../../utils/array/remove-duplicates'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'

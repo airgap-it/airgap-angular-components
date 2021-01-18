@@ -1,4 +1,4 @@
-import { ProtocolNetwork } from 'airgap-coin-lib'
+import { ProtocolNetwork } from '@airgap/coinlib-core'
 import { createNotInitialized } from '../../../utils/not-initialized'
 
 export interface BaseProtocolStoreConfig<T> {

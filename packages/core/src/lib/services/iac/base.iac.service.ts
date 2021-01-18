@@ -1,4 +1,4 @@
-import { IACMessageDefinitionObject, IACMessageType } from 'airgap-coin-lib'
+import { IACMessageDefinitionObject, IACMessageType } from '@airgap/coinlib-core'
 
 import { SerializerService } from '../serializer/serializer.service'
 import { to } from '../../utils/utils'
