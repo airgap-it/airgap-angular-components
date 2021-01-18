@@ -1,5 +1,5 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core'
-import { AirGapWallet } from 'airgap-coin-lib'
+import { AirGapWallet } from '@airgap/coinlib-core'
 @Component({
   selector: 'airgap-account-selection',
   templateUrl: './account-selection.component.html',
@@ -25,7 +25,7 @@ export class AccountSelectionComponent {
   @Output()
   private readonly dismissEmitter: EventEmitter<void> = new EventEmitter()
 
-  constructor() {}
+  constructor() { }
 
   public filterItems(event: any): void {
     function isValidSymbol(data: unknown): data is string {

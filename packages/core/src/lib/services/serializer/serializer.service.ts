@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core'
-import { generateId, IACMessageDefinitionObject, IACMessageType, Serializer } from 'airgap-coin-lib'
-import { DeserializedSyncProtocol, EncodedType, SyncProtocolUtils } from 'airgap-coin-lib/dist/serializer/v1/serializer'
+import { generateId, IACMessageDefinitionObject, IACMessageType, Serializer } from '@airgap/coinlib-core'
+import { DeserializedSyncProtocol, EncodedType, SyncProtocolUtils } from '@airgap/coinlib-core/serializer/v1/serializer'
 import BigNumber from 'bignumber.js'
 
-import { MainProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
+import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { parseIACUrl } from '../../utils/utils'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 
-export enum DefaultChunkSizes {
+export enum SerializerDefaults {
   SINGLE = 350,
-  MULTI = 100
+  MULTI = 100,
+  TIME = 500
 }
 @Injectable({
   providedIn: 'root'
@@ -22,9 +23,9 @@ export class SerializerService {
   private readonly v2Tov1Mapping: Map<IACMessageType, EncodedType> = new Map<IACMessageType, EncodedType>()
 
   private _useV2: boolean = true
-  public _singleChunkSize: number = DefaultChunkSizes.SINGLE
-  public _multiChunkSize: number = DefaultChunkSizes.MULTI
-  private _displayTimePerChunk: number = 500
+  public _singleChunkSize: number = SerializerDefaults.SINGLE
+  public _multiChunkSize: number = SerializerDefaults.MULTI
+  private _displayTimePerChunk: number = SerializerDefaults.TIME
 
   public get useV2(): boolean {
     return this._useV2
@@ -79,11 +80,12 @@ export class SerializerService {
     this.loadSettings().catch(console.error)
   }
 
-  public resetChunkSizes() {
-    this._singleChunkSize = DefaultChunkSizes.SINGLE
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, DefaultChunkSizes.SINGLE)
-    this._multiChunkSize = DefaultChunkSizes.MULTI
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, DefaultChunkSizes.MULTI)
+  public resetSettings() {
+    this._singleChunkSize = SerializerDefaults.SINGLE
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, SerializerDefaults.SINGLE)
+    this._multiChunkSize = SerializerDefaults.MULTI
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, SerializerDefaults.MULTI)
+    this._displayTimePerChunk = SerializerDefaults.TIME
   }
 
   public async serialize(chunks: IACMessageDefinitionObject[]): Promise<string[]> {

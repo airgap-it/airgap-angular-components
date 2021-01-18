@@ -1,10 +1,10 @@
 import { async, TestBed } from '@angular/core/testing'
-import { MainProtocolSymbols } from 'airgap-coin-lib'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 
 import { SerializerService } from './serializer.service'
 
-fdescribe('SerializerService', () => {
+describe('SerializerService', () => {
   let service: SerializerService
 
   let testBedUtils: TestBedUtils
@@ -25,7 +25,7 @@ fdescribe('SerializerService', () => {
     }
   ]
 
-  beforeAll(async(() => {
+  beforeEach(async(() => {
     testBedUtils = new TestBedUtils()
     TestBed.configureTestingModule(testBedUtils.moduleDef({}))
     service = TestBed.inject(SerializerService)

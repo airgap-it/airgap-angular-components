@@ -49,6 +49,6 @@
     "page-time_label": "QR Page Time",
     "single-page-size_label": "Single QR Max Size",
     "multi-page-size_label": "Multi QR Max Size",
-    "reset": "Reset chunk sizes"
+    "reset": "Reset values"
   }
 }

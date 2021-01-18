@@ -4,7 +4,6 @@ import { TranslateModule } from '@ngx-translate/core'
 import { ComponentsModule } from './components/components.module'
 import { PipesModule } from './pipes/pipes.module'
 import { AmountConverterPipe } from './pipes/amount-converter/amount-converter.pipe'
-import { PagesModule } from './pages/pages.module'
 
 @NgModule({
   declarations: [],
@@ -16,7 +15,7 @@ import { PagesModule } from './pages/pages.module'
     ComponentsModule,
     PipesModule
   ],
-  exports: [ComponentsModule, PipesModule, PagesModule],
+  exports: [ComponentsModule, PipesModule],
   providers: [AmountConverterPipe]
 })
 export class AirGapAngularCoreModule {}

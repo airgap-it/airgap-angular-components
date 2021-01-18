@@ -1,5 +1,5 @@
-import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { ICoinSubProtocol, ICoinProtocol } from 'airgap-coin-lib'
+import { ProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { ICoinSubProtocol, ICoinProtocol } from '@airgap/coinlib-core'
 import { SubProtocolsMap } from '../store/sub/sub-protocol-store.service'
 
 export function getIdentifiers(protocols: ICoinProtocol[]): ProtocolSymbols[] {
