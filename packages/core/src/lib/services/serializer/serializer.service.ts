@@ -68,6 +68,7 @@ export class SerializerService {
   }
 
   constructor(private readonly internalStorageService: InternalStorageService) {
+    this.useV2 = true
     this.v1Tov2Mapping.set(EncodedType.WALLET_SYNC, IACMessageType.AccountShareResponse) // AccountShareResponse
     this.v1Tov2Mapping.set(EncodedType.UNSIGNED_TRANSACTION, IACMessageType.TransactionSignRequest) // TransactionSignRequest
     this.v1Tov2Mapping.set(EncodedType.SIGNED_TRANSACTION, IACMessageType.TransactionSignResponse) // TransactionSignResponse
