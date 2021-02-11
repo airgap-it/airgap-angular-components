@@ -1,8 +1,10 @@
 import { async, TestBed } from '@angular/core/testing'
 import { AlertController, LoadingController, ToastController } from '@ionic/angular'
 import { AlertOptions, LoadingOptions, ToastOptions } from '@ionic/core'
+import { TranslateService } from '@ngx-translate/core'
 import { AlertControllerMock, LoadingControllerMock, ToastControllerMock } from '../../../../test/utils/ionic-mocks'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
+import { TranslateMock } from '../../../../test/utils/translate-mock'
 
 import { UiEventService } from './ui-event.service'
 
@@ -34,6 +36,7 @@ describe('UiEventService', () => {
     TestBed.configureTestingModule(
       testBedUtils.moduleDef({
         providers: [
+          { provide: TranslateService, useClass: TranslateMock },
           { provide: AlertController, useValue: alertControllerMock },
           { provide: ToastController, useValue: toastControllerMock },
           { provide: LoadingController, useValue: loadingControllerMock }

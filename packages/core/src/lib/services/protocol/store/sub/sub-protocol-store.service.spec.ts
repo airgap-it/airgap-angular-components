@@ -14,9 +14,9 @@ import {
   TezosKtProtocol,
   TezosStakerProtocolConfig,
   TezosStaker
-} from 'airgap-coin-lib'
-import { SubProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { NetworkType, ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+} from '@airgap/coinlib-core'
+import { SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 import { getSubIdentifiers } from '../../utils/test'
 import { SubProtocolStoreService, SubProtocolStoreConfig } from './sub-protocol-store.service'
 

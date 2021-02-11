@@ -1,0 +1,21 @@
+<ion-header class="ion-no-border">
+  <ion-grid fixed="true" class="ion-no-padding">
+    <ion-toolbar color="secondary">
+      <ion-button (click)="dismiss()" fill="clear" color="primary" float-right>
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-title color="primary">{{ title }}</ion-title>
+    </ion-toolbar>
+    <ion-toolbar color="secondary">
+      <ion-searchbar placeholder="{{ placeholder }}" (ionInput)="filterItems($event)"></ion-searchbar>
+    </ion-toolbar>
+  </ion-grid>
+</ion-header>
+
+<h3 [innerHTML]="heading" class="ion-padding"></h3>
+
+<ion-list class="ion-padding" *ngIf="wallets">
+  <ng-container *ngFor="let wallet of wallets | walletFilter: { symbol: symbolFilter }">
+    <airgap-account-item [wallet]="wallet" (click)="selectAccount(wallet)"></airgap-account-item>
+  </ng-container>
+</ion-list>

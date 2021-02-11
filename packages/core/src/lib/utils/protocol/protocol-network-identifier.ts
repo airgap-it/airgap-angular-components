@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/unified-signatures */
-import { ICoinProtocol } from 'airgap-coin-lib'
-import { ProtocolSymbols } from 'airgap-coin-lib/dist/utils/ProtocolSymbols'
-import { ProtocolNetwork } from 'airgap-coin-lib/dist/utils/ProtocolNetwork'
+import { ICoinProtocol } from '@airgap/coinlib-core'
+import { ProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 
 export function getProtocolAndNetworkIdentifier(protocol: ICoinProtocol): string
 export function getProtocolAndNetworkIdentifier(protocolIdentifier: ProtocolSymbols, network: ProtocolNetwork | string): string

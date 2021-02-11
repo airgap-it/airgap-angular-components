@@ -13,7 +13,10 @@ export * from './lib/components/identicon/identicon.component'
 export * from './lib/components/network-badge/network-badge.component'
 export * from './lib/components/titled-address/titled-address.component'
 export * from './lib/components/titled-text/titled-text.component'
+export * from './lib/components/account-item/account-item.component'
+export * from './lib/components/account-selection/account-selection.component'
 export * from './lib/components/qr/qr.component'
+export * from './lib/components/qr-settings/qr-settings.component'
 
 // Config
 export * from './lib/config/app-config'
