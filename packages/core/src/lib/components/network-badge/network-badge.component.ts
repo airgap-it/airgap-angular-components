@@ -8,7 +8,7 @@ import { ProtocolNetwork, NetworkType } from '@airgap/coinlib-core'
 })
 export class NetworkBadgeComponent {
   @Input()
-  public readonly network: ProtocolNetwork | undefined
+  public network: ProtocolNetwork | undefined
 
-  public readonly networkType: typeof NetworkType = NetworkType
+  public networkType: typeof NetworkType = NetworkType
 }

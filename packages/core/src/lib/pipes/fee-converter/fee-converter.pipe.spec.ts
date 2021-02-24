@@ -60,7 +60,6 @@ describe('FeeConverter Pipe', () => {
   it('should return an empty string when protocolIdentifier unknown', async () => {
     try {
       await feeConverterPipe.transform('1', {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         protocol: 'unknown-protocol' as any
       })
     } catch (error) {
@@ -68,7 +67,7 @@ describe('FeeConverter Pipe', () => {
     }
   })
 
-  function getTest(args) {
+  function getTest(args: any) {
     it(`Test with: ${JSON.stringify(args)}`, async () => {
       expect(
         await (async () => {
@@ -86,8 +85,8 @@ describe('FeeConverter Pipe', () => {
     })
   }
 
-  function makeTests(argsArray) {
-    argsArray.forEach((v) => {
+  function makeTests(argsArray: any) {
+    argsArray.forEach((v: any) => {
       getTest(v)
     })
   }

@@ -1,4 +1,4 @@
-import { async, TestBed } from '@angular/core/testing'
+import { TestBed } from '@angular/core/testing'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 
 import { LanguageService } from './language.service'
@@ -8,11 +8,11 @@ describe('LanguageService', () => {
 
   let testBedUtils: TestBedUtils
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     testBedUtils = new TestBedUtils()
     TestBed.configureTestingModule(testBedUtils.moduleDef({}))
     service = TestBed.inject(LanguageService)
-  }))
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy()

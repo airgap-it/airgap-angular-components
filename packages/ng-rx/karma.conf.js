@@ -43,6 +43,6 @@ module.exports = function (config) {
         flags: ['--headless', '--no-sandbox']
       }
     },
-    singleRun: false,
-  });
-};
+    singleRun: false
+  })
+}

@@ -4,6 +4,8 @@ import { IonicModule } from '@ionic/angular'
 import { TranslateModule } from '@ngx-translate/core'
 import { MomentModule } from 'ngx-moment'
 
+import { QRCodeModule } from 'angularx-qrcode'
+import { FormsModule } from '@angular/forms'
 import { PipesModule } from '../pipes/pipes.module'
 import { CurrencySymbolComponent } from './currency-symbol/currency-symbol.component'
 import { FromToComponent } from './from-to/from-to.component'
@@ -14,8 +16,6 @@ import { TitledTextComponent } from './titled-text/titled-text.component'
 import { AccountItemComponent } from './account-item/account-item.component'
 import { AccountSelectionComponent } from './account-selection/account-selection.component'
 import { QrComponent } from './qr/qr.component'
-import { QRCodeModule } from 'angularx-qrcode'
-import { FormsModule } from '@angular/forms'
 import { QrSettingsComponent } from './qr-settings/qr-settings.component'
 
 @NgModule({

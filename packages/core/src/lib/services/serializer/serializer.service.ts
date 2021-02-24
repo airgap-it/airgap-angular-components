@@ -13,6 +13,9 @@ export enum SerializerDefaults {
   providedIn: 'root'
 })
 export class SerializerService {
+  public _singleChunkSize: number = SerializerDefaults.SINGLE
+  public _multiChunkSize: number = SerializerDefaults.MULTI
+
   private readonly syncProtocolUtils: SyncProtocolUtils = new SyncProtocolUtils()
   private readonly serializer: Serializer = new Serializer()
 
@@ -20,8 +23,6 @@ export class SerializerService {
   private readonly v2Tov1Mapping: Map<IACMessageType, EncodedType> = new Map<IACMessageType, EncodedType>()
 
   private _useV2: boolean = true
-  public _singleChunkSize: number = SerializerDefaults.SINGLE
-  public _multiChunkSize: number = SerializerDefaults.MULTI
   private _displayTimePerChunk: number = SerializerDefaults.TIME
 
   public get useV2(): boolean {
@@ -78,12 +79,15 @@ export class SerializerService {
     this.loadSettings().catch(console.error)
   }
 
-  public resetSettings() {
+  public async resetSettings(): Promise<void> {
     this._singleChunkSize = SerializerDefaults.SINGLE
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, SerializerDefaults.SINGLE)
     this._multiChunkSize = SerializerDefaults.MULTI
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, SerializerDefaults.MULTI)
     this._displayTimePerChunk = SerializerDefaults.TIME
+
+    await Promise.all([
+      this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, SerializerDefaults.SINGLE),
+      this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, SerializerDefaults.MULTI)
+    ])
   }
 
   public async serialize(chunks: IACMessageDefinitionObject[]): Promise<string[]> {

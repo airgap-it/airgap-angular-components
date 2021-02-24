@@ -1,7 +1,6 @@
 <ion-label *ngIf="title" class="ion-text-uppercase">{{ title | translate }}</ion-label>
 <div *ngIf="text">
-  <span 
-    [ngClass]="{ 'text-selectable': selectable, 'ion-text-capitalize': capitalize }" 
-    class="typography--mono"
-  >{{ text | translate }}</span>
+  <span [ngClass]="{ 'text-selectable': selectable, 'ion-text-capitalize': capitalize }" class="typography--mono">
+    {{ text | translate }}
+  </span>
 </div>

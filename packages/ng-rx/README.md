@@ -22,12 +22,15 @@ $ npm install --save @airgap/angular-ngrx
 ### Requirements
 
 Make sure you have statisfied the following requirements before building or testing the project:
+
 ```
 npm >= 6
 ```
 
 ### Build
+
 Before building the library make sure you have installed the root project dependencies. If not, run:
+
 ```
 $ cd ../..
 $ npm install
@@ -41,7 +44,9 @@ $ npm run build
 ```
 
 ### Run Tests
+
 Before running the tests make sure you have installed the root project dependencies. If not, run:
+
 ```
 $ cd ../..
 $ npm install

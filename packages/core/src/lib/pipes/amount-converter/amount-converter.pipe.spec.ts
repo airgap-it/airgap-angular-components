@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import BigNumber from 'bignumber.js'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
@@ -12,7 +13,7 @@ describe('AmountConverter Pipe', () => {
   let protocolService: ProtocolService
   let amountConverterPipe: AmountConverterPipe
 
-  beforeAll(async () => {
+  beforeAll(() => {
     protocolService = new ProtocolService(new MainProtocolStoreService(), new SubProtocolStoreService())
     protocolService.init()
   })
@@ -166,7 +167,6 @@ describe('AmountConverter Pipe', () => {
   })
 
   it('should handle values that are empty object', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const value: any = {}
     try {
       await amountConverterPipe.transform(value, {
@@ -178,7 +178,7 @@ describe('AmountConverter Pipe', () => {
     }
   })
 
-  function getTest(args) {
+  function getTest(args: any) {
     it(`Test with: ${JSON.stringify(args)}`, async () => {
       expect(
         await (async () => {
@@ -198,8 +198,8 @@ describe('AmountConverter Pipe', () => {
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function makeTests(argsArray) {
-    argsArray.forEach((v) => {
+  function makeTests(argsArray: any) {
+    argsArray.forEach((v: any) => {
       getTest(v)
     })
   }

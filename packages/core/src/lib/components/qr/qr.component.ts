@@ -1,5 +1,6 @@
 import { Component, Input, OnDestroy, Inject } from '@angular/core'
 
+import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 import { SerializerService } from '../../services/serializer/serializer.service'
 import { serializedDataToUrlString } from '../../utils/utils'
@@ -12,10 +13,13 @@ import { APP_CONFIG, AppConfig } from '../../config/app-config'
 })
 export class QrComponent implements OnDestroy {
   @Input()
-  public level: string = 'L'
+  public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
 
   @Input()
   public size: number = 300
+
+  @Input()
+  public margin: number = 1
 
   @Input()
   public set qrdata(value: string | string[]) {

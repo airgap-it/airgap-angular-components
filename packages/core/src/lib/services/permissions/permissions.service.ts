@@ -57,6 +57,7 @@ export class PermissionsService {
         await this.diagnostic.requestMicrophoneAuthorization()
       }
     } else {
+      // eslint-disable-next-line no-console
       console.warn('requesting permission in browser')
     }
   }
@@ -75,6 +76,7 @@ export class PermissionsService {
       await this.requestPermissions(permissions)
     } else {
       await this.uiEventElementsService.showOpenSettingsAlert(() => {
+        // eslint-disable-next-line no-console
         this.diagnostic.switchToSettings().catch(console.error)
       })
     }
