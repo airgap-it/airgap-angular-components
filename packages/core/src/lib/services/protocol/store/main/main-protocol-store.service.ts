@@ -9,10 +9,10 @@ export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
   providedIn: 'root'
 })
 export class MainProtocolStoreService extends BaseProtocolStoreService<
-  ICoinProtocol,
-  MainProtocolSymbols,
-  ICoinProtocol[],
-  MainProtocolStoreConfig
+ICoinProtocol,
+MainProtocolSymbols,
+ICoinProtocol[],
+MainProtocolStoreConfig
 > {
   constructor() {
     super('MainProtocolService')

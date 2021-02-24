@@ -18,10 +18,8 @@ import {
   TezosUSDProtocolConfig,
   TezosBTCProtocolConfig,
   TezosKtProtocol,
-  ICoinSubProtocol
+  ICoinSubProtocol, MainProtocolSymbols, SubProtocolSymbols, NetworkType, ProtocolNetwork
 } from '@airgap/coinlib-core'
-import { MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core'
-import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core'
 import { removeDuplicates } from '../../utils/array/remove-duplicates'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'

@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core'
 import BigNumber from 'bignumber.js'
-import { ICoinProtocol } from '@airgap/coinlib-core'
-import { ProtocolSymbols } from '@airgap/coinlib-core'
+import { ICoinProtocol, ProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 type AmountConverterValue = BigNumber | string | number | null | undefined
@@ -34,7 +33,7 @@ export class AmountConverterPipe implements PipeTransform {
     groupSize: 3
   }
 
-  constructor(private readonly protocolsService: ProtocolService) {}
+  constructor(private readonly protocolsService: ProtocolService) { }
 
   public async transform(value: AmountConverterValue, args: AmountConverterArgs): Promise<string> {
     if (!args.protocol) {

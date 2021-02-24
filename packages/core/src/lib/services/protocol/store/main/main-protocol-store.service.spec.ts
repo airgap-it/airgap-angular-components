@@ -10,10 +10,10 @@ import {
   CosmosProtocolNetwork,
   BitcoinProtocolNetwork,
   BitcoinProtocolOptions,
-  CosmosProtocolOptions
+  CosmosProtocolOptions,
+  MainProtocolSymbols,
+  NetworkType, ProtocolNetwork
 } from '@airgap/coinlib-core'
-import { MainProtocolSymbols } from '@airgap/coinlib-core'
-import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core'
 import { getIdentifiers } from '../../utils/test'
 import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
