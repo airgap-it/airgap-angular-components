@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core'
-import { generateId, IACMessageDefinitionObject, IACMessageType, Serializer } from '@airgap/coinlib-core'
-import { DeserializedSyncProtocol, EncodedType, SyncProtocolUtils } from '@airgap/coinlib-core/serializer/v1/serializer'
+import {
+  generateId,
+  IACMessageDefinitionObject,
+  IACMessageType,
+  Serializer,
+  MainProtocolSymbols,
+  DeserializedSyncProtocol,
+  EncodedType,
+  SyncProtocolUtils
+} from '@airgap/coinlib-core'
 import BigNumber from 'bignumber.js'
-
-import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { parseIACUrl } from '../../utils/utils'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 

@@ -17,7 +17,7 @@ import {
   TezosBTC,
   TezosUSD
 } from '@airgap/coinlib-core'
-import { SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { SubProtocolSymbols } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 

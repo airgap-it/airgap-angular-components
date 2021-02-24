@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.7",
+  "version": "0.0.8-beta.10",
   "publishConfig": {
     "access": "public"
   },
@@ -20,7 +20,7 @@
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "^0.10.0",
+    "@airgap/coinlib-core": "0.10.4-beta.3",
     "@angular/animations": "^10.0.8",
     "@angular/common": "^10.0.8",
     "@angular/core": "^10.0.8",

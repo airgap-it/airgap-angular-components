@@ -25,7 +25,7 @@ export class AccountSelectionComponent {
   @Output()
   private readonly dismissEmitter: EventEmitter<void> = new EventEmitter()
 
-  constructor() { }
+  constructor() {}
 
   public filterItems(event: any): void {
     function isValidSymbol(data: unknown): data is string {
