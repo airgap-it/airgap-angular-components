@@ -1,14 +1,5 @@
 import { Injectable } from '@angular/core'
-import {
-  generateId,
-  IACMessageDefinitionObject,
-  IACMessageType,
-  Serializer,
-  MainProtocolSymbols,
-  DeserializedSyncProtocol,
-  EncodedType,
-  SyncProtocolUtils
-} from '@airgap/coinlib-core'
+import { generateId, IACMessageDefinitionObject, IACMessageType, Serializer, MainProtocolSymbols, DeserializedSyncProtocol, EncodedType, SyncProtocolUtils } from '@airgap/coinlib-core'
 import BigNumber from 'bignumber.js'
 import { parseIACUrl } from '../../utils/utils'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'

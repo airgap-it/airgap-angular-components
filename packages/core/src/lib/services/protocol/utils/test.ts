@@ -9,7 +9,7 @@ export function getSubIdentifiers(subProtocols: [ICoinProtocol, ICoinSubProtocol
   return Array.isArray(subProtocols)
     ? subProtocols.map((pair: [ICoinProtocol, ICoinSubProtocol]) => pair[1].identifier)
     : (Object.values(subProtocols)
-        .map((values) => Object.values(values).map((protocol: ICoinSubProtocol | undefined) => protocol?.identifier))
-        .reduce((flatten, toFlatten) => flatten.concat(toFlatten), [])
-        .filter((identifier: ProtocolSymbols | undefined) => identifier !== undefined) as ProtocolSymbols[])
+      .map((values) => Object.values(values).map((protocol: ICoinSubProtocol | undefined) => protocol?.identifier))
+      .reduce((flatten, toFlatten) => flatten.concat(toFlatten), [])
+      .filter((identifier: ProtocolSymbols | undefined) => identifier !== undefined) as ProtocolSymbols[])
 }

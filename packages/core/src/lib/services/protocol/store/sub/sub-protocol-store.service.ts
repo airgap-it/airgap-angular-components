@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork } from '@airgap/coinlib-core'
-import { SubProtocolSymbols, MainProtocolSymbols, isNetworkEqual, getProtocolOptionsByIdentifier } from '@airgap/coinlib-core'
+import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork, SubProtocolSymbols, MainProtocolSymbols, getProtocolOptionsByIdentifier, isNetworkEqual } from '@airgap/coinlib-core'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
@@ -22,10 +21,10 @@ export interface SubProtocolStoreConfig {
   providedIn: 'root'
 })
 export class SubProtocolStoreService extends BaseProtocolStoreService<
-  ICoinSubProtocol,
-  SubProtocolSymbols,
-  SubProtocolsMap,
-  SubProtocolStoreConfig
+ICoinSubProtocol,
+SubProtocolSymbols,
+SubProtocolsMap,
+SubProtocolStoreConfig
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 

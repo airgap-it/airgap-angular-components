@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core'
 import { createIcon } from '@download/blockies'
 import { BigNumber } from 'bignumber.js'
 import { toDataUrl } from 'myetherwallet-blockies'
-import { MainProtocolSymbols } from '@airgap/coinlib-core/'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 @Component({
@@ -25,7 +25,7 @@ export class IdenticonComponent {
 
   public identicon: string | undefined
 
-  constructor(private readonly protocolService: ProtocolService) {}
+  constructor(private readonly protocolService: ProtocolService) { }
 
   private async setAddress(value: string): Promise<void> {
     if (await this.protocolService.isAddressOfProtocol(MainProtocolSymbols.AE, value)) {
