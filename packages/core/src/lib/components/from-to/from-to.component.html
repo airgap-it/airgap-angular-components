@@ -1,5 +1,9 @@
 <ng-container *ngIf="transaction">
-  <airgap-titled-address *ngFor="let address of transaction.from" [address]="address" [title]="'from-to.from_label' | translate"></airgap-titled-address>
+  <airgap-titled-address
+    *ngFor="let address of transaction.from"
+    [address]="address"
+    [title]="'from-to.from_label' | translate"
+  ></airgap-titled-address>
 
   <ion-row class="ion-align-items-center ion-padding-top ion-padding-bottom">
     <ion-col size="3" class="ion-no-padding">
@@ -8,52 +12,55 @@
       </ion-row>
     </ion-col>
     <ion-col size="9">
-      <airgap-titled-text 
+      <airgap-titled-text
         *ngIf="transaction.extra && transaction.extra.type"
         class="ion-padding-bottom"
         [title]="'from-to.type_label' | translate"
         [text]="transaction.extra.type"
       ></airgap-titled-text>
 
-      <airgap-titled-text 
+      <airgap-titled-text
         *ngIf="transaction.amount"
         class="ion-padding-bottom"
-        [title]="'from-to.amount_label' | translate" 
+        [title]="'from-to.amount_label' | translate"
         [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
-      <airgap-titled-text 
+      <airgap-titled-text
         *ngIf="transaction.fee"
         [title]="'from-to.fee_label' | translate"
         [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier } | async"
       ></airgap-titled-text>
 
-      <airgap-titled-text 
-        *ngIf="transaction.status" 
+      <airgap-titled-text
+        *ngIf="transaction.status"
         class="ion-padding-top"
-        [title]="'from-to.status_label' | translate" 
+        [title]="'from-to.status_label' | translate"
         [text]="transaction.status"
         [capitalize]="true"
-      >
-      </airgap-titled-text>
+      ></airgap-titled-text>
 
-      <airgap-titled-text 
-        *ngIf="transaction.timestamp" 
+      <airgap-titled-text
+        *ngIf="transaction.timestamp"
         class="ion-padding-top"
-        [title]="'from-to.time_label' | translate" 
+        [title]="'from-to.time_label' | translate"
         [text]="transaction.timestamp | amFromUnix | amCalendar: { sameDay: '[Today at] HH:mm', sameElse: 'HH:mm [on] LL' }"
       ></airgap-titled-text>
 
-      <airgap-titled-text 
-        *ngIf="transaction.data" 
+      <airgap-titled-text
+        *ngIf="transaction.data"
         class="ion-padding-top"
-        [title]="'from-to.data_label' | translate" 
+        [title]="'from-to.data_label' | translate"
         [text]="transaction.data"
       ></airgap-titled-text>
     </ion-col>
   </ion-row>
 
-  <airgap-titled-address *ngFor="let address of transaction.to" [address]="address" [title]="'from-to.to_label' | translate"></airgap-titled-address>
+  <airgap-titled-address
+    *ngFor="let address of transaction.to"
+    [address]="address"
+    [title]="'from-to.to_label' | translate"
+  ></airgap-titled-address>
 
   <ion-row class="ion-align-items-center ion-padding-top">
     <ion-col size="9" offset="3">

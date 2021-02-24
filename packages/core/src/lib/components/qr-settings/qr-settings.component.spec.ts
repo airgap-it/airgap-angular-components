@@ -1,4 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { UrlSerializer } from '@angular/router'
+
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { QrSettingsComponent } from './qr-settings.component'
 
@@ -8,10 +10,16 @@ describe('QrSettingsComponent', () => {
 
   let testBedUtils: TestBedUtils
 
-  beforeEach(async(() => {
-    testBedUtils = new TestBedUtils()
-    TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents().catch(console.error)
-  }))
+  beforeEach(
+    waitForAsync(async () => {
+      testBedUtils = new TestBedUtils()
+      await TestBed.configureTestingModule(
+        testBedUtils.moduleDef({
+          providers: [UrlSerializer]
+        })
+      ).compileComponents()
+    })
+  )
 
   beforeEach(() => {
     fixture = TestBed.createComponent(QrSettingsComponent)

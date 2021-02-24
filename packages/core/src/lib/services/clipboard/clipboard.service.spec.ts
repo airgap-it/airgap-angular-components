@@ -1,4 +1,4 @@
-import { TestBed, async } from '@angular/core/testing'
+import { TestBed, waitForAsync } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { ClipboardMock } from '../../../../test/utils/plugins-mock'
@@ -11,16 +11,18 @@ describe('ClipboardService', () => {
 
   let clipboardPluginMock: ClipboardMock
 
-  beforeEach(async(() => {
-    testBedUtils = new TestBedUtils()
-    clipboardPluginMock = new ClipboardMock()
-    TestBed.configureTestingModule(
-      testBedUtils.moduleDef({
-        providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
-      })
-    )
-    service = TestBed.inject(ClipboardService)
-  }))
+  beforeEach(
+    waitForAsync(() => {
+      testBedUtils = new TestBedUtils()
+      clipboardPluginMock = new ClipboardMock()
+      TestBed.configureTestingModule(
+        testBedUtils.moduleDef({
+          providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
+        })
+      )
+      service = TestBed.inject(ClipboardService)
+    })
+  )
 
   it('should be created', () => {
     expect(service).toBeTruthy()

@@ -1,23 +1,43 @@
-/*
-  This is a "Solution Style" tsconfig.json file, and is used by editors and TypeScript’s language server to improve development experience.
-  It is not intended to be used to perform a compilation.
-
-  To learn more about this file see: https://angular.io/config/solution-tsconfig.
-*/
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./packages/core/tsconfig.lib.json"
-    },
-    {
-      "path": "./packages/core/tsconfig.spec.json"
-    },
-    {
-      "path": "./packages/ng-rx/tsconfig.lib.json"
-    },
-    {
-      "path": "./packages/ng-rx/tsconfig.spec.json"
-    }
-  ]
+  "compileOnSave": false,
+  "compilerOptions": {
+    "sourceMap": true,
+    "declaration": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "downlevelIteration": true, // To enable [].entries()
+    "target": "es5",
+    "lib": ["es2018", "dom"],
+    "skipLibCheck": true,
+    /* Strict Type-Checking Options */
+    "strict": true /* Enable all strict type-checking options. */,
+    "strictNullChecks": true /* Enable strict null checks. */,
+    "strictFunctionTypes": true /* Enable strict checking of function types. */,
+    "strictBindCallApply": true /* Enable strict 'bind', 'call', and 'apply' methods on functions. */,
+    "strictPropertyInitialization": true /* Enable strict checking of property initialization in classes. */,
+    "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
+    /* Additional Checks */
+    "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
+    "noImplicitThis": true /* Raise error on 'this' expressions with an implied 'any' type. */,
+    "noImplicitReturns": true /* Report error when not all code paths in function return a value. */,
+    "noUnusedLocals": true /* Report errors on unused locals. */,
+    "noUnusedParameters": true /* Report errors on unused parameters. */,
+    "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
+    "forceConsistentCasingInFileNames": true
+  },
+  "angularCompilerOptions": {
+    "enableIvy": false,
+    "strictInjectionParameters": true,
+    "fullTemplateTypeCheck": true,
+    "strictTemplates": true,
+    "strictInputAccessModifiers": true,
+    "strictMetadataEmit": true
+  },
+  "paths": {
+    "core": ["packages/core/dist/core", "packages/core/dist"],
+    "ng-rx": ["packages/ng-rx/dist/ng-rx", "packages/ng-rx/dist"]
+  }
 }

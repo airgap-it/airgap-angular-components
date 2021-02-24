@@ -8,8 +8,8 @@ import { IAirGapTransaction } from '@airgap/coinlib-core'
 })
 export class FromToComponent {
   @Input()
-  public readonly transaction: IAirGapTransaction | undefined
-  
+  public transaction: IAirGapTransaction | undefined
+
   @Input()
   public displayRawData: boolean = false
 

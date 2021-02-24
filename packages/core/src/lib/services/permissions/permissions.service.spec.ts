@@ -3,8 +3,8 @@ import { Diagnostic } from '@ionic-native/diagnostic/ngx'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 
 import { PERMISSIONS_PLUGIN } from '../../capacitor-plugins/injection-tokens'
-import { PermissionsService } from './permissions.service'
 import { PermissionsPluginMock } from '../../../../test/utils/plugins-mock'
+import { PermissionsService } from './permissions.service'
 
 describe('PermissionsService', () => {
   let service: PermissionsService

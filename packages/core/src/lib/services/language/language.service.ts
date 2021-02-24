@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core'
 import { TranslateService } from '@ngx-translate/core'
 import { SupportedLanguage } from '../../types/SupportedLanguage'
@@ -44,7 +43,7 @@ export class LanguageService {
     return this.changeLanguage(language)
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   public loadTranslation(language: string, translation: any, merge: boolean = true): void {
     this.translateService.setTranslation(language, translation, merge)
   }

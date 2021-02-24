@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 export class AlertControllerMock {
   public create: jasmine.Spy = jasmine.createSpy('create').and.returnValue(
     Promise.resolve({

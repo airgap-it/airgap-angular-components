@@ -20,10 +20,10 @@
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "@angular/common": "^10.0.8",
-    "@angular/core": "^10.0.8",
-    "@angular/platform-browser": "^10.0.8",
-    "@angular/platform-browser-dynamic": "^10.0.8",
+    "@angular/common": "^11.0.5",
+    "@angular/core": "^11.0.5",
+    "@angular/platform-browser": "^11.0.5",
+    "@angular/platform-browser-dynamic": "^11.0.5",
     "rxjs": "^6.6.2",
     "zone.js": "^0.10.3"
   }

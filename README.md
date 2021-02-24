@@ -5,6 +5,7 @@ A set of Angular libraries providing utilities, UI components and services used 
 ## Overview
 
 The project is split into the following packages:
+
 - `core`
 - `ng-rx`
 
@@ -12,13 +13,14 @@ The `core` package consists of numerous utility functions and types as well as A
 
 The `ng-rx` package extends `core` providing [NgRx](https://ngrx.io/) support for its components.
 
-For more information about a specific package, go to its respective folder in the `packages` directory. 
+For more information about a specific package, go to its respective folder in the `packages` directory.
 
 ## Development
 
 ### Requirements
 
 Make sure you have statisfied the following requirements before building or testing the project:
+
 ```
 npm >= 6
 ```
@@ -44,9 +46,11 @@ $ npm run test
 ### Update Version
 
 To bump the version of all the packages run:
+
 ```
 $ npm run bump:version
 ```
+
 You will be prompted to select the desired version.
 
 You can also run one of the commands listed below to skip the prompt and bump the version directly:

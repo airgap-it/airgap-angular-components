@@ -1,4 +1,4 @@
-import { async, TestBed } from '@angular/core/testing'
+import { TestBed } from '@angular/core/testing'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 
@@ -16,20 +16,20 @@ describe('SerializerService', () => {
     {
       id: 'WjiXqIQDFB',
       type: 8,
-      protocol: 'grs' as MainProtocolSymbols,
+      protocol: MainProtocolSymbols.GRS,
       payload: {
-        message: message,
+        message,
         publicKey: '444e1f4ab90c304a5ac003d367747aab63815f583ff2330ce159d12c1ecceba1',
         signature: 'edsigti9yVVCfq9DfmtPeYj2T4BpGt9qP26PW2Dz8eUWeE8UwLsCsnQ9G1cmCqaxjwAWkrDbLkHHeVs2C7dZVtw1w4LCyCCoVsy'
       }
     }
   ]
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     testBedUtils = new TestBedUtils()
     TestBed.configureTestingModule(testBedUtils.moduleDef({}))
     service = TestBed.inject(SerializerService)
-  }))
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy()

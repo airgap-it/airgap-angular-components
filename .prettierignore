@@ -9,3 +9,13 @@
 coverage
 dist
 node_modules
+
+Dockerfile
+
+.editorconfig
+.eslintignore
+
+*.sh
+
+*.png
+*.svg

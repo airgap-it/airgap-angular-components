@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { AccountSelectionComponent } from './account-selection.component'
@@ -9,15 +9,16 @@ describe('AccountSelectionComponent', () => {
 
   let testBedUtils: TestBedUtils
 
-  beforeEach(async(() => {
-    testBedUtils = new TestBedUtils()
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    TestBed.configureTestingModule(
-      testBedUtils.moduleDef({
-        declarations: []
-      })
-    ).compileComponents()
-  }))
+  beforeEach(
+    waitForAsync(async () => {
+      testBedUtils = new TestBedUtils()
+      await TestBed.configureTestingModule(
+        testBedUtils.moduleDef({
+          declarations: []
+        })
+      ).compileComponents()
+    })
+  )
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AccountSelectionComponent)

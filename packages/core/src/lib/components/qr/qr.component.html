@@ -1,1 +1,7 @@
-<qrcode [level]="level" [qrdata]="qrdataArray[activeChunk]" [size]="size" (click)="copyToClipboard()"></qrcode>
+<qrcode
+  [errorCorrectionLevel]="level"
+  [qrdata]="qrdataArray[activeChunk]"
+  [width]="size"
+  [margin]="margin"
+  (click)="copyToClipboard()"
+></qrcode>

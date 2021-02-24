@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class StorageMock {
   private readonly data: any = {}
 
@@ -16,6 +18,7 @@ export class StorageMock {
 
   public remove(key: string): Promise<void> {
     return new Promise((resolve, _reject) => {
+      // eslint-disable-next-line @typescript-eslint/tslint/config
       delete this.data[key]
       resolve()
     })

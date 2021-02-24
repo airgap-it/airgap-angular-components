@@ -1,4 +1,4 @@
-import { async, TestBed } from '@angular/core/testing'
+import { TestBed } from '@angular/core/testing'
 import { AlertController, LoadingController, ToastController } from '@ionic/angular'
 import { AlertControllerMock, LoadingControllerMock, ToastControllerMock } from '../../../../test/utils/ionic-mocks'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
@@ -14,7 +14,7 @@ describe('UiEventElementsService', () => {
   let toastControllerMock: ToastControllerMock
   let loadingControllerMock: LoadingControllerMock
 
-  beforeEach(async(() => {
+  beforeEach(() => {
     testBedUtils = new TestBedUtils()
     alertControllerMock = new AlertControllerMock()
     toastControllerMock = new ToastControllerMock()
@@ -30,7 +30,7 @@ describe('UiEventElementsService', () => {
       })
     )
     service = TestBed.inject(UiEventElementsService)
-  }))
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy()

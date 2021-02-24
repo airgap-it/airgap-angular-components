@@ -7,14 +7,14 @@ import { Component, Input } from '@angular/core'
 })
 export class TitledAddressComponent {
   @Input()
-  public readonly title: string | undefined
+  public title: string | undefined
 
   @Input()
-  public readonly address: string | undefined
+  public address: string | undefined
 
   @Input()
-  public readonly symbol: string | undefined
+  public symbol: string | undefined
 
   @Input()
-  public readonly hasSymbol: boolean = false
+  public hasSymbol: boolean = false
 }

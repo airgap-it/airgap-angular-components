@@ -9,7 +9,8 @@ import { SerializerService } from '../../services/serializer/serializer.service'
 export class QrSettingsComponent {
   constructor(public readonly serializerService: SerializerService) {}
 
-  public resetSettings() {
-    this.serializerService.resetSettings()
+  public resetSettings(): void {
+    // eslint-disable-next-line no-console
+    this.serializerService.resetSettings().catch(console.error)
   }
 }

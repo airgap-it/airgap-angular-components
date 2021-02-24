@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { IdenticonComponent } from './identicon.component'
@@ -9,10 +9,12 @@ describe('IdenticonComponent', () => {
 
   let testBedUtils: TestBedUtils
 
-  beforeEach(async(() => {
-    testBedUtils = new TestBedUtils()
-    TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
-  }))
+  beforeEach(
+    waitForAsync(async () => {
+      testBedUtils = new TestBedUtils()
+      await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+    })
+  )
 
   beforeEach(() => {
     fixture = TestBed.createComponent(IdenticonComponent)
