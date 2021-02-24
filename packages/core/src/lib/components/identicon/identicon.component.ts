@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core'
 import { createIcon } from '@download/blockies'
 import { BigNumber } from 'bignumber.js'
 import { toDataUrl } from 'myetherwallet-blockies'
-import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { MainProtocolSymbols } from '@airgap/coinlib-core/'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 @Component({

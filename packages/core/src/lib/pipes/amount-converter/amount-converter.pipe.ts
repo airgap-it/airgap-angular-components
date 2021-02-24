@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core'
 import BigNumber from 'bignumber.js'
 import { ICoinProtocol } from '@airgap/coinlib-core'
-import { ProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { ProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 type AmountConverterValue = BigNumber | string | number | null | undefined
@@ -92,7 +92,7 @@ export class AmountConverterPipe implements PipeTransform {
     if (maxDigits === 0) {
       return value.toFormat()
     }
-    
+
     let abbreviated: BigNumber = value
     let suffix: string = ''
 

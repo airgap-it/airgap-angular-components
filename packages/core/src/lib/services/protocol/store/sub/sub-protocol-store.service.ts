@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ICoinSubProtocol } from '@airgap/coinlib-core'
-import { ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
-import { SubProtocolSymbols, MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
-import { getProtocolOptionsByIdentifier } from '@airgap/coinlib-core/utils/protocolOptionsByIdentifier'
-import { isNetworkEqual } from '@airgap/coinlib-core/utils/Network'
+import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork } from '@airgap/coinlib-core'
+import { SubProtocolSymbols, MainProtocolSymbols, isNetworkEqual, getProtocolOptionsByIdentifier } from '@airgap/coinlib-core'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
@@ -54,13 +51,13 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     activeOnly: boolean = true
   ): ICoinSubProtocol | undefined {
     try {
-    const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
-    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
-    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+      const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
+      const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
+      const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
-    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+      const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
 
-    return (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+      return (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('[SubProtocolStore:getProtocolByIdentifer]', error)
