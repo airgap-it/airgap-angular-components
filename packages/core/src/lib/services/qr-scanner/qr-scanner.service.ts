@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { Platform } from '@ionic/angular'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let qrScanner: any
+declare let QRScanner: any
 
 @Injectable({
   providedIn: 'root'
@@ -43,13 +43,13 @@ export class QrScannerService {
       successCallback(text)
     }
 
-    qrScanner.scan(scanCallback)
+    QRScanner.scan(scanCallback)
   }
 
   public destroy(): void {
     if (this.isMobile) {
       this.isActive = false
-      qrScanner.destroy()
+      QRScanner.destroy()
     }
   }
 
@@ -59,7 +59,7 @@ export class QrScannerService {
         return
       }
       this.isActive = true
-      qrScanner.show()
+      QRScanner.show()
     }
   }
 }
