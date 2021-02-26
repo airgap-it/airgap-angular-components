@@ -55,6 +55,7 @@ module.exports = {
     '@typescript-eslint/no-unnecessary-qualifier': 'error',
     '@typescript-eslint/no-unnecessary-type-arguments': 'error',
     '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-use-before-define': 'error',
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-for-of': 'off',
@@ -78,22 +79,22 @@ module.exports = {
         selector: 'default',
         format: ['camelCase'],
         leadingUnderscore: 'allow',
-        trailingUnderscore: 'allow',
+        trailingUnderscore: 'allow'
       },
-    
+
       {
         selector: 'variable',
         format: ['camelCase', 'UPPER_CASE'],
         leadingUnderscore: 'allow',
-        trailingUnderscore: 'allow',
+        trailingUnderscore: 'allow'
       },
-    
+
       {
         selector: 'typeLike',
-        format: ['PascalCase'],
+        format: ['PascalCase']
       },
-      { 
-        selector: 'enumMember', 
+      {
+        selector: 'enumMember',
         format: ['PascalCase', 'UPPER_CASE']
       }
     ],
@@ -216,7 +217,6 @@ module.exports = {
           'no-mergeable-namespace': true,
           'no-reference-import': true,
           'no-unnecessary-callback-wrapper': true,
-          'no-unused-variable': true,
           'prefer-conditional-expression': true,
           'prefer-method-signature': true,
           'prefer-switch': true,

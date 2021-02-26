@@ -29,6 +29,7 @@ export class QrScannerService {
     this.show()
     const scanCallback = (scanError: Error, text: string) => {
       if (scanError) {
+        // eslint-disable-next-line no-console
         console.error('Scanner scan error', scanError)
         if (errorCallback) {
           // TODO: Check type
@@ -37,6 +38,7 @@ export class QrScannerService {
         }
       }
 
+      // eslint-disable-next-line no-console
       console.log('Scanner scan success', text)
       successCallback(text)
     }

@@ -10,10 +10,10 @@ import {
   CosmosProtocolNetwork,
   BitcoinProtocolNetwork,
   BitcoinProtocolOptions,
-  CosmosProtocolOptions
+  CosmosProtocolOptions,
+  MainProtocolSymbols,
+  NetworkType, ProtocolNetwork
 } from '@airgap/coinlib-core'
-import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
-import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 import { getIdentifiers } from '../../utils/test'
 import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
@@ -154,7 +154,7 @@ describe('MainProtocolStoreService', () => {
       const expectedPassiveIdentifiers = [MainProtocolSymbols.AE]
       const expectedActiveIdentifiers = [MainProtocolSymbols.BTC]
 
-      expect(service.isInitialized).toBeTrue()      
+      expect(service.isInitialized).toBeTrue()
 
       expect(supportedIdentifiers.sort()).toEqual(expectedActiveIdentifiers.concat(expectedPassiveIdentifiers).sort())
 
@@ -246,20 +246,10 @@ describe('MainProtocolStoreService', () => {
       MainProtocolSymbols.GRS,
       MainProtocolSymbols.KUSAMA,
       MainProtocolSymbols.POLKADOT,
-      MainProtocolSymbols.XTZ,
+      MainProtocolSymbols.XTZ
     ]
 
-    const invalidIdentifiers: string[] = [
-      'qwerty',
-      'abcde',
-      'aeternity',
-      'bitcoin',
-      'ethereum',
-      'tezos',
-      'ksm',
-      'dot',
-      'atom'
-    ]
+    const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'aeternity', 'bitcoin', 'ethereum', 'tezos', 'ksm', 'dot', 'atom']
 
     it('should check if the identifier is valid', () => {
       service.init({

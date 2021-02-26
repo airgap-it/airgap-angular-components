@@ -8,12 +8,11 @@ export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType exten
 
   public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
     const value: SettingsKeyReturnType[K] = (await this.storage.get(key)) || this.defaultValues[key]
-    // eslint-disable-next-line no-console
+
     return value
   }
 
   public async set<K extends SettingsKey>(key: K, value: SettingsKeyReturnType[K]): Promise<void> {
-    // eslint-disable-next-line no-console
     return this.storage.set(key, value)
   }
 

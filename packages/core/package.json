@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publishConfig": {
     "access": "public"
   },
@@ -20,14 +20,14 @@
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "^0.10.0",
-    "@angular/animations": "^10.0.8",
-    "@angular/common": "^10.0.8",
-    "@angular/core": "^10.0.8",
-    "@angular/forms": "^10.0.8",
-    "@angular/platform-browser": "^10.0.8",
-    "@angular/platform-browser-dynamic": "^10.0.8",
-    "@angular/router": "^10.0.8",
+    "@airgap/coinlib-core": "^0.10.5",
+    "@angular/animations": "^11.0.5",
+    "@angular/common": "^11.0.5",
+    "@angular/core": "^11.0.5",
+    "@angular/forms": "^11.0.5",
+    "@angular/platform-browser": "^11.0.5",
+    "@angular/platform-browser-dynamic": "^11.0.5",
+    "@angular/router": "^11.0.5",
     "@capacitor/core": "^2.4.0",
     "@download/blockies": "^1.0.3",
     "@ionic-native/core": "^5.28.0",
@@ -36,7 +36,7 @@
     "@ionic/core": "^5.3.1",
     "@ionic/storage": "^2.3.0",
     "@ngx-translate/core": "^13.0.0",
-    "angularx-qrcode": "^1.5.3",
+    "angularx-qrcode": "^11.0.0",
     "bignumber.js": "^9.0.0",
     "moment": "^2.27.0",
     "myetherwallet-blockies": "^0.1.1",

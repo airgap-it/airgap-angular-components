@@ -25,11 +25,14 @@ export class DeeplinkService {
       this.app
         .openUrl({ url: deeplinkUrl })
         .then(() => {
+          // eslint-disable-next-line no-console
           console.log('Deeplink called')
           resolve()
         })
         .catch((error) => {
+          // eslint-disable-next-line no-console
           console.error('deeplink error', deeplinkUrl, error)
+          // eslint-disable-next-line no-console
           this.uiEventElementsService.showOtherAppNotFoundAlert().catch(console.error)
 
           reject()

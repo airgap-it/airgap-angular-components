@@ -70,6 +70,7 @@ export abstract class BaseIACService {
           return this.storeResult(data, IACHanderStatus.SUCCESS, transport)
         }
       } catch (handlerError) {
+        // eslint-disable-next-line no-console
         console.log(`Error while handling ${this.customHandlers[i].name}`, handlerError)
       }
     }
@@ -85,6 +86,7 @@ export abstract class BaseIACService {
 
       return this.storeResult(data, IACHanderStatus.PARTIAL, transport)
     } else if (error && error.message) {
+      // eslint-disable-next-line no-console
       console.warn('Deserialization of sync failed', error)
       // TODO: Log error locally
 
@@ -103,10 +105,11 @@ export abstract class BaseIACService {
         if (type in IACMessageType) {
           // TODO: Improve types
           const typedType: IACMessageType = parseInt(type, 10)
+          // eslint-disable-next-line no-console
           this.serializerMessageHandlers[typedType](data, groupedByType[typedType] ?? [], scanAgainCallback).catch(console.error)
         } else {
           // TODO: Improve types
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
           this.syncTypeNotSupportedAlert(data, groupedByType[(type as any) as IACMessageType] ?? [], scanAgainCallback).catch(console.error)
 
           return this.storeResult(data, IACHanderStatus.ERROR, transport)
@@ -123,6 +126,7 @@ export abstract class BaseIACService {
 
   protected async messageUnknownAlert(data: string | string[], scanAgainCallback: ScanAgainCallback): Promise<void> {
     const relayHandler = () => {
+      // eslint-disable-next-line no-console
       this.relay(data).catch(console.error)
     }
 
@@ -130,6 +134,7 @@ export abstract class BaseIACService {
       scanAgainCallback()
     }
 
+    // eslint-disable-next-line no-console
     this.uiEventElementService.showIACMessageUnknownAlert(relayHandler, cancelHandler).catch(console.error)
   }
 
@@ -139,6 +144,7 @@ export abstract class BaseIACService {
     scanAgainCallback: ScanAgainCallback
   ): Promise<boolean> {
     const relayHandler = () => {
+      // eslint-disable-next-line no-console
       this.relay(data).catch(console.error)
     }
 
@@ -146,6 +152,7 @@ export abstract class BaseIACService {
       scanAgainCallback()
     }
 
+    // eslint-disable-next-line no-console
     this.uiEventElementService.showIACMessageNotSupportedAlert(relayHandler, cancelHandler).catch(console.error)
 
     return false

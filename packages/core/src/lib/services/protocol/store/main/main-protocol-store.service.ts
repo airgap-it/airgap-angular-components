@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol } from '@airgap/coinlib-core'
-import { ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
-import { MainProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
-import { getProtocolOptionsByIdentifier } from '@airgap/coinlib-core/utils/protocolOptionsByIdentifier'
-import { isNetworkEqual } from '@airgap/coinlib-core/utils/Network'
+import { ICoinProtocol, ProtocolNetwork, MainProtocolSymbols, getProtocolOptionsByIdentifier, isNetworkEqual } from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 
@@ -13,10 +9,10 @@ export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
   providedIn: 'root'
 })
 export class MainProtocolStoreService extends BaseProtocolStoreService<
-  ICoinProtocol,
-  MainProtocolSymbols,
-  ICoinProtocol[],
-  MainProtocolStoreConfig
+ICoinProtocol,
+MainProtocolSymbols,
+ICoinProtocol[],
+MainProtocolStoreConfig
 > {
   constructor() {
     super('MainProtocolService')

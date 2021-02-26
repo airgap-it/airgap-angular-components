@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { ClipboardMock } from '../../../../test/utils/plugins-mock'
@@ -13,16 +13,18 @@ describe('QrComponent', () => {
 
   let clipboardPluginMock: ClipboardMock
 
-  beforeEach(async(() => {
-    testBedUtils = new TestBedUtils()
-    clipboardPluginMock = new ClipboardMock()
+  beforeEach(
+    waitForAsync(async () => {
+      testBedUtils = new TestBedUtils()
+      clipboardPluginMock = new ClipboardMock()
 
-    TestBed.configureTestingModule(
-      testBedUtils.moduleDef({
-        providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
-      })
-    ).compileComponents()
-  }))
+      await TestBed.configureTestingModule(
+        testBedUtils.moduleDef({
+          providers: [{ provide: CLIPBOARD_PLUGIN, useValue: clipboardPluginMock }]
+        })
+      ).compileComponents()
+    })
+  )
 
   beforeEach(() => {
     fixture = TestBed.createComponent(QrComponent)

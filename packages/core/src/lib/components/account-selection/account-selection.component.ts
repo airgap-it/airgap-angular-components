@@ -17,7 +17,6 @@ export class AccountSelectionComponent {
 
   @Input()
   public wallets: AirGapWallet[] | undefined
-  public symbolFilter: string | undefined
 
   @Output()
   private readonly walletSetEmitter: EventEmitter<AirGapWallet> = new EventEmitter()
@@ -25,22 +24,25 @@ export class AccountSelectionComponent {
   @Output()
   private readonly dismissEmitter: EventEmitter<void> = new EventEmitter()
 
-  constructor() { }
+  public symbolFilter: string | undefined
 
-  public filterItems(event: any): void {
-    function isValidSymbol(data: unknown): data is string {
-      return data && typeof data === 'string' && data !== ''
-    }
-
-    const value: unknown = event.target.value
-
-    this.symbolFilter = isValidSymbol(value) ? value.trim().toLowerCase() : undefined
+  public filterItems(event: Event): void {
+    const value: unknown = this.isInputElement(event.target) ? event.target.value : undefined
+    this.symbolFilter = this.isValidFilterQuery(value) ? value.trim().toLowerCase() : undefined
   }
 
-  public selectAccount(wallet: AirGapWallet) {
+  public selectAccount(wallet: AirGapWallet): void {
     this.walletSetEmitter.emit(wallet)
   }
-  public dismiss() {
+  public dismiss(): void {
     this.dismissEmitter.emit()
+  }
+
+  private isInputElement(target: EventTarget | null): target is EventTarget & HTMLInputElement {
+    return target !== null && 'value' in target
+  }
+
+  private isValidFilterQuery(data: unknown): data is string {
+    return typeof data === 'string' && data.length > 0
   }
 }

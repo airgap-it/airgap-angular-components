@@ -43,7 +43,7 @@
     }
   },
   "qr-settings": {
-    "text": "QR Settings",
+    "title": "QR Settings",
     "paste-from-clipboard_label": "Paste code from clipboard",
     "enable-new-serializer_label": "Enable new serializer",
     "page-time_label": "QR Page Time",

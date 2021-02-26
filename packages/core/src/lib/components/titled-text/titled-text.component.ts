@@ -7,14 +7,14 @@ import { Component, Input } from '@angular/core'
 })
 export class TitledTextComponent {
   @Input()
-  public readonly title: string | undefined
+  public title: string | undefined | null
 
   @Input()
-  public readonly text: string | undefined
+  public text: string | undefined | null
 
   @Input()
-  public readonly selectable: boolean = false
+  public selectable: boolean = false
 
   @Input()
-  public readonly capitalize: boolean = false
+  public capitalize: boolean = false
 }

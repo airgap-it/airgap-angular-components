@@ -1,19 +1,12 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./",
+    "declarationMap": true,
     "outDir": "./out-tsc/ng-rx",
-    "typeRoots": [
-      "../../node_modules/@types",
-      "node_modules/@types"
-    ]
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types"]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "test/test.ts",
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["test/test.ts", "**/*.spec.ts"]
 }

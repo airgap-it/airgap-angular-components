@@ -15,9 +15,9 @@ import {
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig,
   TezosBTC,
-  TezosUSD
+  TezosUSD,
+  SubProtocolSymbols
 } from '@airgap/coinlib-core'
-import { SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 

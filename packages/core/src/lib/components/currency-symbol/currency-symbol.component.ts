@@ -6,7 +6,7 @@ import { AfterViewInit, Component, Input, OnChanges } from '@angular/core'
 })
 export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
-  public readonly symbol: string | undefined
+  public symbol: string | undefined
 
   public symbolURL: string = './assets/symbols/generic-coin.svg'
 
