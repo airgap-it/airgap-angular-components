@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing'
 
-import { NgRxService } from './ng-rx.service'
+import { KeyPairService } from './key-pair.service'
 
-describe('NgRxService', () => {
-  let service: NgRxService
+describe('KeypairService', () => {
+  let service: KeyPairService
 
   beforeEach(() => {
     TestBed.configureTestingModule({})
-    service = TestBed.inject(NgRxService)
+    service = TestBed.inject(KeyPairService)
   })
 
   it('should be created', () => {

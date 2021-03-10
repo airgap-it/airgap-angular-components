@@ -7,11 +7,11 @@ A set of Angular libraries providing utilities, UI components and services used 
 The project is split into the following packages:
 
 - `core`
-- `ng-rx`
+- `ngrx`
 
 The `core` package consists of numerous utility functions and types as well as Angular components and services that can be used standalone or as a base for more specific implementations.
 
-The `ng-rx` package extends `core` providing [NgRx](https://ngrx.io/) support for its components.
+The `ngrx` package extends `core` providing [NgRx](https://ngrx.io/) support for its components.
 
 For more information about a specific package, go to its respective folder in the `packages` directory.
 

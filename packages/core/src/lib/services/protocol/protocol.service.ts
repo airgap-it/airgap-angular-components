@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork, ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols, getProtocolOptionsByIdentifier } from '@airgap/coinlib-core'
+import {
+  ICoinProtocol,
+  ICoinSubProtocol,
+  ProtocolNetwork,
+  ProtocolSymbols,
+  SubProtocolSymbols,
+  MainProtocolSymbols,
+  getProtocolOptionsByIdentifier
+} from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
@@ -25,7 +33,7 @@ export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig &
 export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
 
-  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) { }
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized

@@ -34,10 +34,10 @@ Before building the library make sure you have installed the root project depend
 ```
 $ cd ../..
 $ npm install
-$ cd packages/ng-rx
+$ cd packages/ngrx
 ```
 
-To build the `ng-rx` library run:
+To build the `ngrx` library run:
 
 ```
 $ npm run build
@@ -50,10 +50,10 @@ Before running the tests make sure you have installed the root project dependenc
 ```
 $ cd ../..
 $ npm install
-$ cd packages/ng-rx
+$ cd packages/ngrx
 ```
 
-To run tests for the `ng-rx` library run:
+To run tests for the `ngrx` library run:
 
 ```
 $ npm run test

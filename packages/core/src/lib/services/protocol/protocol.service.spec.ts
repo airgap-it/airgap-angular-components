@@ -18,9 +18,11 @@ import {
   TezosUSDProtocolConfig,
   TezosBTCProtocolConfig,
   TezosKtProtocol,
-  ICoinSubProtocol, MainProtocolSymbols, SubProtocolSymbols, NetworkType, ProtocolNetwork
+  ICoinSubProtocol
 } from '@airgap/coinlib-core'
-import { removeDuplicates } from '../../utils/array/remove-duplicates'
+import { MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
+import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
+import { duplicatesRemoved } from '../../utils/array'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
 import {
@@ -41,10 +43,10 @@ describe('ProtocolService', () => {
   let defaultPassiveSubIdentifiers: SubProtocolSymbols[]
 
   beforeAll(() => {
-    defaultActiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultActiveProtocols()) as MainProtocolSymbols[])
-    defaultPassiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultPassiveProtocols()) as MainProtocolSymbols[])
-    defaultActiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultActiveSubProtocols()) as SubProtocolSymbols[])
-    defaultPassiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultPassiveSubProtocols()) as SubProtocolSymbols[])
+    defaultActiveIdentifiers = duplicatesRemoved(getIdentifiers(getDefaultActiveProtocols()) as MainProtocolSymbols[])
+    defaultPassiveIdentifiers = duplicatesRemoved(getIdentifiers(getDefaultPassiveProtocols()) as MainProtocolSymbols[])
+    defaultActiveSubIdentifiers = duplicatesRemoved(getSubIdentifiers(getDefaultActiveSubProtocols()) as SubProtocolSymbols[])
+    defaultPassiveSubIdentifiers = duplicatesRemoved(getSubIdentifiers(getDefaultPassiveSubProtocols()) as SubProtocolSymbols[])
   })
 
   beforeEach(() => {
@@ -64,9 +66,7 @@ describe('ProtocolService', () => {
     expect(service).toBeTruthy()
   })
 
-  /**
-   * Init
-   */
+  /**************** Init ****************/
 
   describe('Init', () => {
     function makeInitializationTest(
@@ -275,9 +275,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Check Protocol Status
-   */
+  /**************** Check Protocol Status ****************/
 
   describe('Check Protocol Status', () => {
     it('should check by an identifer if the protocol is active', async () => {
@@ -426,9 +424,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Find Protocols
-   */
+  /**************** Find Protocols ****************/
 
   describe('Find Protocols', () => {
     it('should find a protocol by an identifier', async () => {
@@ -634,9 +630,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Utils
-   */
+  /**************** Utils ****************/
 
   describe('Utils', () => {
     it('should find networks for the requested protocol by its identifier', async () => {
