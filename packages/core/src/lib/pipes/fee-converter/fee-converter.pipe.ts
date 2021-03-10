@@ -13,7 +13,7 @@ interface FeeConverterArgs {
   name: 'feeConverter'
 })
 export class FeeConverterPipe implements PipeTransform {
-  constructor(private readonly protocolsService: ProtocolService) { }
+  constructor(private readonly protocolsService: ProtocolService) {}
 
   public async transform(value: FeeConverterValue, args: FeeConverterArgs): Promise<string> {
     if (args.protocol === undefined || !args.protocol) {
