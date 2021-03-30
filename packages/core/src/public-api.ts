@@ -30,6 +30,7 @@ export * from './lib/pipes/amount-converter/amount-converter.pipe'
 export * from './lib/pipes/fee-converter/fee-converter.pipe'
 
 // Services
+export * from './lib/services/address/address.service'
 export * from './lib/services/clipboard/clipboard.service'
 export * from './lib/services/deeplink/deeplink.service'
 export * from './lib/services/iac/base.iac.service'
@@ -52,6 +53,7 @@ export * from './lib/services/ui-event-elements/ui-event-elements.service'
 // Types
 export * from './lib/types/ui/UIAction'
 export * from './lib/types/ui/UIResource'
+export * from './lib/types/ExternalAliasResolver'
 export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
 
