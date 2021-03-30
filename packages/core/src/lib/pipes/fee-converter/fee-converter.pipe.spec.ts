@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'

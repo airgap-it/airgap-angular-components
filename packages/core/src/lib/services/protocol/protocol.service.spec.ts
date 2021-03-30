@@ -18,10 +18,13 @@ import {
   TezosUSDProtocolConfig,
   TezosBTCProtocolConfig,
   TezosKtProtocol,
-  ICoinSubProtocol
+  ICoinSubProtocol,
+  MainProtocolSymbols,
+  SubProtocolSymbols,
+  NetworkType,
+  ProtocolNetwork,
+  ICoinProtocol
 } from '@airgap/coinlib-core'
-import { MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core/utils/ProtocolSymbols'
-import { NetworkType, ProtocolNetwork } from '@airgap/coinlib-core/utils/ProtocolNetwork'
 import { duplicatesRemoved } from '../../utils/array'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
@@ -774,6 +777,27 @@ describe('ProtocolService', () => {
 
       expect(allValid).toBeTrue()
       expect(allInvalid).toBeTrue()
+    })
+
+    it('should return an array of protocols for which the address is valid', async () => {
+      service.init()
+
+      const expectedWithActual: [ICoinProtocol, ICoinProtocol[]][] = await Promise.all(
+        validAddresses.map(
+          async (entry) =>
+            [await service.getProtocol(entry.protocol), await service.getProtocolsForAddress(entry.address)] as [
+              ICoinProtocol,
+              ICoinProtocol[]
+            ]
+        )
+      )
+
+      const matches: boolean = expectedWithActual.reduce(
+        (all: boolean, next: [ICoinProtocol, ICoinProtocol[]]) => all && next[1].includes(next[0]),
+        true
+      )
+
+      expect(matches).toBeTrue()
     })
   })
 })

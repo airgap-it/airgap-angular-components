@@ -24,11 +24,7 @@ export class KeyPairService {
     }
 
     if (withExtendedPrivateKey && this.isUnsignedTransaction(unsigned)) {
-      const extendedPrivateKey: string = await protocol.getExtendedPrivateKeyFromMnemonic(
-        mnemonic,
-        derivationPath,
-        password
-      )
+      const extendedPrivateKey: string = await protocol.getExtendedPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
 
       return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction)
     } else {
