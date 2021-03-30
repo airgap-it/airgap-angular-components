@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Platform } from '@ionic/angular'
+import { BehaviorSubject, Observable } from 'rxjs'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let qrScanner: any
@@ -12,6 +13,8 @@ export class QrScannerService {
    * Shows if the scanner is currently active (scanning) or not
    */
   public isActive: boolean = false
+
+  private initScan$ = new BehaviorSubject<boolean>(true)
 
   private readonly isMobile: boolean
 
@@ -51,6 +54,14 @@ export class QrScannerService {
       this.isActive = false
       qrScanner.destroy()
     }
+  }
+
+  public resetScanner(): void {
+    this.initScan$.next(true)
+  }
+
+  public getScanObservable(): Observable<boolean> {
+    return this.initScan$.asObservable()
   }
 
   private show(): void {
