@@ -169,12 +169,29 @@ export class ProtocolService {
       : this.subProtocolStore.getNetworksForProtocol(identifier as SubProtocolSymbols, activeOnly)
   }
 
-  public async isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): Promise<boolean> {
+  public async isAddressOfProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, address: string): Promise<boolean> {
     await this.waitReady()
 
-    const protocol: ICoinProtocol = await this.getProtocol(protocolSymbol)
+    const protocol: ICoinProtocol =
+      typeof protocolOrIdentifier === 'string' ? await this.getProtocol(protocolOrIdentifier) : protocolOrIdentifier
 
     return address.match(protocol.addressValidationPattern) !== null
+  }
+
+  public async getProtocolsForAddress(address: string): Promise<ICoinProtocol[]> {
+    await this.waitReady()
+
+    const protocols: ICoinProtocol[] = await this.getSupportedProtocols()
+
+    return (
+      await Promise.all(
+        protocols.map(async (protocol) => {
+          const isProtocolAddress: boolean = await this.isAddressOfProtocol(protocol, address)
+
+          return isProtocolAddress ? protocol : undefined
+        })
+      )
+    ).filter((protocol: ICoinProtocol | undefined) => protocol !== undefined) as ICoinProtocol[]
   }
 
   private async isProtocolRegistered(

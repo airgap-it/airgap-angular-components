@@ -27,7 +27,7 @@
     "@zxing/ngx-scanner": "^3.0.0"
   },
   "devDependencies": {
-    "@airgap/coinlib-core": "^0.10.5",
+    "@airgap/coinlib-core": "0.10.7-beta.3",
     "@angular-devkit/build-angular": "~0.1100.5",
     "@angular-devkit/core": "^11.0.5",
     "@angular-eslint/eslint-plugin": "1.2.0",

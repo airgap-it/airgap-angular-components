@@ -1,4 +1,13 @@
-import { EthereumERC20ProtocolConfig, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, GenericERC20, IAirGapTransaction, SignedTransaction, SubProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
+import {
+  EthereumERC20ProtocolConfig,
+  EthereumERC20ProtocolOptions,
+  EthereumProtocolNetwork,
+  GenericERC20,
+  IAirGapTransaction,
+  SignedTransaction,
+  SubProtocolSymbols,
+  UnsignedTransaction
+} from '@airgap/coinlib-core'
 import { Injectable } from '@angular/core'
 
 import { Token } from '../../types/Token'
@@ -8,7 +17,6 @@ import { ethTokens } from '../protocol/tokens'
   providedIn: 'root'
 })
 export class TokenService {
-
   public getRecipientToken(tx: IAirGapTransaction): Token | undefined {
     return ethTokens.find((token: Token) => token.contractAddress.toLowerCase() === tx.to[0].toLowerCase())
   }
@@ -47,8 +55,8 @@ export class TokenService {
   }
 
   public async getTokenTransferDetails(
-    tx: IAirGapTransaction, 
-    unsignedTransaction: UnsignedTransaction, 
+    tx: IAirGapTransaction,
+    unsignedTransaction: UnsignedTransaction,
     recipientToken?: Token
   ): Promise<IAirGapTransaction> {
     const token: Token | undefined = recipientToken ?? this.getRecipientToken(tx)
