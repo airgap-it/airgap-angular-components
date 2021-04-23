@@ -9,10 +9,10 @@ export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
   providedIn: 'root'
 })
 export class MainProtocolStoreService extends BaseProtocolStoreService<
-ICoinProtocol,
-MainProtocolSymbols,
-ICoinProtocol[],
-MainProtocolStoreConfig
+  ICoinProtocol,
+  MainProtocolSymbols,
+  ICoinProtocol[],
+  MainProtocolStoreConfig
 > {
   constructor() {
     super('MainProtocolService')
@@ -25,7 +25,8 @@ MainProtocolStoreConfig
   public getProtocolByIdentifier(
     identifier: MainProtocolSymbols,
     network?: ProtocolNetwork | string,
-    activeOnly: boolean = true
+    activeOnly: boolean = true,
+    retry: boolean = true
   ): ICoinProtocol | undefined {
     try {
       const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(identifier).network
@@ -36,7 +37,9 @@ MainProtocolStoreConfig
             ? protocol.options.network.identifier === targetNetwork
             : isNetworkEqual(protocol.options.network, targetNetwork))
       )
-
+      if (!found && retry) {
+        return this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+      }
       return found
     } catch (error) {
       // eslint-disable-next-line no-console

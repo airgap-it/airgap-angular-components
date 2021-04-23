@@ -30,10 +30,12 @@ export * from './lib/pipes/amount-converter/amount-converter.pipe'
 export * from './lib/pipes/fee-converter/fee-converter.pipe'
 
 // Services
+export * from './lib/services/address/address.service'
 export * from './lib/services/clipboard/clipboard.service'
 export * from './lib/services/deeplink/deeplink.service'
 export * from './lib/services/iac/base.iac.service'
 export * from './lib/services/iac/message-handler'
+export * from './lib/services/key-pair/key-pair.service'
 export * from './lib/services/language/language.service'
 export * from './lib/services/permissions/permissions.service'
 export * from './lib/services/protocol/protocol.service'
@@ -44,17 +46,22 @@ export * from './lib/services/qr-scanner/qr-scanner.service'
 export * from './lib/services/serializer/serializer.service'
 export * from './lib/services/storage/base.storage'
 export * from './lib/services/storage/storage.service'
+export * from './lib/services/transaction/transaction.service'
 export * from './lib/services/ui-event/ui-event.service'
 export * from './lib/services/ui-event-elements/ui-event-elements.service'
 
 // Types
+export * from './lib/types/ui/UIAction'
+export * from './lib/types/ui/UIResource'
+export * from './lib/types/ExternalAliasResolver'
 export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
 
 // Utils
-export * from './lib/utils/array/remove-duplicates'
 export * from './lib/utils/protocol/protocol-identifier'
 export * from './lib/utils/protocol/protocol-network-identifier'
+export * from './lib/utils/airgap-transaction'
+export * from './lib/utils/array'
 export * from './lib/utils/not-initialized'
 export * from './lib/utils/utils'
 

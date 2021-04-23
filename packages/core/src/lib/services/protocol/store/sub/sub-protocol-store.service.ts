@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork, SubProtocolSymbols, MainProtocolSymbols, getProtocolOptionsByIdentifier, isNetworkEqual } from '@airgap/coinlib-core'
+import {
+  ICoinProtocol,
+  ICoinSubProtocol,
+  ProtocolNetwork,
+  SubProtocolSymbols,
+  MainProtocolSymbols,
+  getProtocolOptionsByIdentifier,
+  isNetworkEqual
+} from '@airgap/coinlib-core'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
@@ -21,10 +29,10 @@ export interface SubProtocolStoreConfig {
   providedIn: 'root'
 })
 export class SubProtocolStoreService extends BaseProtocolStoreService<
-ICoinSubProtocol,
-SubProtocolSymbols,
-SubProtocolsMap,
-SubProtocolStoreConfig
+  ICoinSubProtocol,
+  SubProtocolSymbols,
+  SubProtocolsMap,
+  SubProtocolStoreConfig
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
@@ -47,7 +55,8 @@ SubProtocolStoreConfig
   public getProtocolByIdentifier(
     identifier: SubProtocolSymbols,
     network?: ProtocolNetwork | string,
-    activeOnly: boolean = true
+    activeOnly: boolean = true,
+    retry: boolean = true
   ): ICoinSubProtocol | undefined {
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
@@ -55,8 +64,12 @@ SubProtocolStoreConfig
       const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
       const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+      const found = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
 
-      return (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+      if (!found && retry) {
+        return this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+      }
+      return found
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('[SubProtocolStore:getProtocolByIdentifer]', error)

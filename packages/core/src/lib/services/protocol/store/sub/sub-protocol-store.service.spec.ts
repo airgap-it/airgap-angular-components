@@ -15,7 +15,8 @@ import {
   TezosStakerProtocolConfig,
   TezosStaker,
   SubProtocolSymbols,
-  NetworkType, ProtocolNetwork
+  NetworkType,
+  ProtocolNetwork
 } from '@airgap/coinlib-core'
 import { getSubIdentifiers } from '../../utils/test'
 import { SubProtocolStoreService, SubProtocolStoreConfig } from './sub-protocol-store.service'

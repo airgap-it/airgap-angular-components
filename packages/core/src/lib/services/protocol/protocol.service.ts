@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core'
-import { ICoinProtocol, ICoinSubProtocol, ProtocolNetwork, ProtocolSymbols, SubProtocolSymbols, MainProtocolSymbols, getProtocolOptionsByIdentifier } from '@airgap/coinlib-core'
+import {
+  ICoinProtocol,
+  ICoinSubProtocol,
+  ProtocolNetwork,
+  ProtocolSymbols,
+  SubProtocolSymbols,
+  MainProtocolSymbols,
+  getProtocolOptionsByIdentifier
+} from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
@@ -25,7 +33,7 @@ export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig &
 export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
 
-  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) { }
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
@@ -161,12 +169,29 @@ export class ProtocolService {
       : this.subProtocolStore.getNetworksForProtocol(identifier as SubProtocolSymbols, activeOnly)
   }
 
-  public async isAddressOfProtocol(protocolSymbol: ProtocolSymbols, address: string): Promise<boolean> {
+  public async isAddressOfProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, address: string): Promise<boolean> {
     await this.waitReady()
 
-    const protocol: ICoinProtocol = await this.getProtocol(protocolSymbol)
+    const protocol: ICoinProtocol =
+      typeof protocolOrIdentifier === 'string' ? await this.getProtocol(protocolOrIdentifier) : protocolOrIdentifier
 
     return address.match(protocol.addressValidationPattern) !== null
+  }
+
+  public async getProtocolsForAddress(address: string): Promise<ICoinProtocol[]> {
+    await this.waitReady()
+
+    const protocols: ICoinProtocol[] = await this.getSupportedProtocols()
+
+    return (
+      await Promise.all(
+        protocols.map(async (protocol) => {
+          const isProtocolAddress: boolean = await this.isAddressOfProtocol(protocol, address)
+
+          return isProtocolAddress ? protocol : undefined
+        })
+      )
+    ).filter((protocol: ICoinProtocol | undefined) => protocol !== undefined) as ICoinProtocol[]
   }
 
   private async isProtocolRegistered(

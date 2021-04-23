@@ -18,9 +18,14 @@ import {
   TezosUSDProtocolConfig,
   TezosBTCProtocolConfig,
   TezosKtProtocol,
-  ICoinSubProtocol, MainProtocolSymbols, SubProtocolSymbols, NetworkType, ProtocolNetwork
+  ICoinSubProtocol,
+  MainProtocolSymbols,
+  SubProtocolSymbols,
+  NetworkType,
+  ProtocolNetwork,
+  ICoinProtocol
 } from '@airgap/coinlib-core'
-import { removeDuplicates } from '../../utils/array/remove-duplicates'
+import { duplicatesRemoved } from '../../utils/array'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
 import {
@@ -34,6 +39,7 @@ describe('ProtocolService', () => {
   let service: ProtocolService
 
   let tezosTestnet: TezosProtocolNetwork
+  let tezosMainnet: TezosProtocolNetwork
 
   let defaultActiveIdentifiers: MainProtocolSymbols[]
   let defaultPassiveIdentifiers: MainProtocolSymbols[]
@@ -41,10 +47,10 @@ describe('ProtocolService', () => {
   let defaultPassiveSubIdentifiers: SubProtocolSymbols[]
 
   beforeAll(() => {
-    defaultActiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultActiveProtocols()) as MainProtocolSymbols[])
-    defaultPassiveIdentifiers = removeDuplicates(getIdentifiers(getDefaultPassiveProtocols()) as MainProtocolSymbols[])
-    defaultActiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultActiveSubProtocols()) as SubProtocolSymbols[])
-    defaultPassiveSubIdentifiers = removeDuplicates(getSubIdentifiers(getDefaultPassiveSubProtocols()) as SubProtocolSymbols[])
+    defaultActiveIdentifiers = duplicatesRemoved(getIdentifiers(getDefaultActiveProtocols()) as MainProtocolSymbols[])
+    defaultPassiveIdentifiers = duplicatesRemoved(getIdentifiers(getDefaultPassiveProtocols()) as MainProtocolSymbols[])
+    defaultActiveSubIdentifiers = duplicatesRemoved(getSubIdentifiers(getDefaultActiveSubProtocols()) as SubProtocolSymbols[])
+    defaultPassiveSubIdentifiers = duplicatesRemoved(getSubIdentifiers(getDefaultPassiveSubProtocols()) as SubProtocolSymbols[])
   })
 
   beforeEach(() => {
@@ -58,15 +64,20 @@ describe('ProtocolService', () => {
       new TezblockBlockExplorer(),
       new TezosProtocolNetworkExtras()
     )
+    tezosMainnet = new TezosProtocolNetwork(
+      'Mainnet',
+      NetworkType.MAINNET,
+      undefined,
+      new TezblockBlockExplorer(),
+      new TezosProtocolNetworkExtras()
+    )
   })
 
   it('should be created', () => {
     expect(service).toBeTruthy()
   })
 
-  /**
-   * Init
-   */
+  /**************** Init ****************/
 
   describe('Init', () => {
     function makeInitializationTest(
@@ -275,9 +286,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Check Protocol Status
-   */
+  /**************** Check Protocol Status ****************/
 
   describe('Check Protocol Status', () => {
     it('should check by an identifer if the protocol is active', async () => {
@@ -426,9 +435,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Find Protocols
-   */
+  /**************** Find Protocols ****************/
 
   describe('Find Protocols', () => {
     it('should find a protocol by an identifier', async () => {
@@ -532,17 +539,20 @@ describe('ProtocolService', () => {
       expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
     })
 
-    it('should not find a protocol by an identifier if network does not match', async () => {
+    it('should find a protocol by an identifier if network does not match by falling back to default network', async () => {
       service.init({
         activeProtocols: [new TezosProtocol()],
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundProtocolPromise = service.getProtocol(MainProtocolSymbols.XTZ, tezosTestnet)
-      const foundSubProtocolPromise = service.getProtocol(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+      const foundProtocol = await service.getProtocol(MainProtocolSymbols.XTZ, tezosTestnet)
+      const foundSubProtocol = await service.getProtocol(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
 
-      await expectAsync(foundProtocolPromise).toBeRejectedWithError(undefined, 'Protocol not supported')
-      await expectAsync(foundSubProtocolPromise).toBeRejectedWithError(undefined, 'Protocol not supported')
+      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocol?.options.network).toEqual(tezosMainnet)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toEqual(tezosMainnet)
     })
 
     it('should find sub protocols by a main protocol identifier', async () => {
@@ -634,9 +644,7 @@ describe('ProtocolService', () => {
     })
   })
 
-  /**
-   * Utils
-   */
+  /**************** Utils ****************/
 
   describe('Utils', () => {
     it('should find networks for the requested protocol by its identifier', async () => {
@@ -780,6 +788,27 @@ describe('ProtocolService', () => {
 
       expect(allValid).toBeTrue()
       expect(allInvalid).toBeTrue()
+    })
+
+    it('should return an array of protocols for which the address is valid', async () => {
+      service.init()
+
+      const expectedWithActual: [ICoinProtocol, ICoinProtocol[]][] = await Promise.all(
+        validAddresses.map(
+          async (entry) =>
+            [await service.getProtocol(entry.protocol), await service.getProtocolsForAddress(entry.address)] as [
+              ICoinProtocol,
+              ICoinProtocol[]
+            ]
+        )
+      )
+
+      const matches: boolean = expectedWithActual.reduce(
+        (all: boolean, next: [ICoinProtocol, ICoinProtocol[]]) => all && next[1].includes(next[0]),
+        true
+      )
+
+      expect(matches).toBeTrue()
     })
   })
 })

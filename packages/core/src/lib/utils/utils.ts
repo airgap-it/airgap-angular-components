@@ -45,20 +45,6 @@ export async function to<T, U = Error>(promise: Promise<T>, errorExt?: unknown):
     })
 }
 
-export function partition<T>(array: T[], isValid: (element: T) => boolean): [T[], T[]] {
-  const pass: T[] = []
-  const fail: T[] = []
-  array.forEach((element: T) => {
-    if (isValid(element)) {
-      pass.push(element)
-    } else {
-      fail.push(element)
-    }
-  })
-
-  return [pass, fail]
-}
-
 function readParameterFromUrl(url: string, parameter: string): string {
   try {
     const parsedUrl: URL = new URL(url)

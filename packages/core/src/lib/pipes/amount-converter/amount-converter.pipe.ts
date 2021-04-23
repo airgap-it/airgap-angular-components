@@ -33,7 +33,7 @@ export class AmountConverterPipe implements PipeTransform {
     groupSize: 3
   }
 
-  constructor(private readonly protocolsService: ProtocolService) { }
+  constructor(private readonly protocolsService: ProtocolService) {}
 
   public async transform(value: AmountConverterValue, args: AmountConverterArgs): Promise<string> {
     if (!args.protocol) {

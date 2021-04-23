@@ -1,20 +1,20 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "ng": "ng",
-    "build": "ng build ng-rx",
-    "build:prod": "ng build --prod ng-rx",
-    "test": "ng test ng-rx",
-    "test:ci": "ng test ng-rx --code-coverage --watch=false",
-    "test:lerna": "ng test ng-rx --watch=false",
+    "build": "ng build ngrx",
+    "build:prod": "ng build --prod ngrx",
+    "test": "ng test ngrx",
+    "test:ci": "ng test ngrx --code-coverage --watch=false",
+    "test:lerna": "ng test ngrx --watch=false",
     "lint": "npx eslint 'src/**/*.ts'",
     "lint:ci": "npx eslint 'src/**/*.ts' -f json -o ngrx_lintReport.json || true",
     "lint:fix": "npx eslint 'src/**/*/ts' --fix",
-    "e2e": "ng e2e ng-rx"
+    "e2e": "ng e2e ngrx"
   },
   "dependencies": {
     "tslib": "^2.0.0"
@@ -24,6 +24,7 @@
     "@angular/core": "^11.0.5",
     "@angular/platform-browser": "^11.0.5",
     "@angular/platform-browser-dynamic": "^11.0.5",
+    "@ngrx/store": "^11.0.1",
     "rxjs": "^6.6.2",
     "zone.js": "^0.10.3"
   }

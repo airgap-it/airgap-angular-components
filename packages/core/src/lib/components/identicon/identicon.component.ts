@@ -25,7 +25,7 @@ export class IdenticonComponent {
 
   public identicon: string | undefined
 
-  constructor(private readonly protocolService: ProtocolService) { }
+  constructor(private readonly protocolService: ProtocolService) {}
 
   private async setAddress(value: string): Promise<void> {
     if (await this.protocolService.isAddressOfProtocol(MainProtocolSymbols.AE, value)) {

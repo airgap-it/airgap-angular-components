@@ -23,11 +23,11 @@
   "private": true,
   "dependencies": {
     "@airgap/angular-core": "file:packages/core",
-    "@airgap/angular-ngrx": "file:packages/ng-rx",
+    "@airgap/angular-ngrx": "file:packages/ngrx",
     "@zxing/ngx-scanner": "^3.0.0"
   },
   "devDependencies": {
-    "@airgap/coinlib-core": "^0.10.5",
+    "@airgap/coinlib-core": "0.11.0",
     "@angular-devkit/build-angular": "~0.1100.5",
     "@angular-devkit/core": "^11.0.5",
     "@angular-eslint/eslint-plugin": "1.2.0",
@@ -49,6 +49,7 @@
     "@ionic/angular": "^5.5.2",
     "@ionic/core": "^5.5.2",
     "@ionic/storage": "^2.3.0",
+    "@ngrx/store": "^11.0.1",
     "@ngx-translate/core": "^13.0.0",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
