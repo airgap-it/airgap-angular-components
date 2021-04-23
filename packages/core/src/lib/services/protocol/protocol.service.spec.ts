@@ -39,6 +39,7 @@ describe('ProtocolService', () => {
   let service: ProtocolService
 
   let tezosTestnet: TezosProtocolNetwork
+  let tezosMainnet: TezosProtocolNetwork
 
   let defaultActiveIdentifiers: MainProtocolSymbols[]
   let defaultPassiveIdentifiers: MainProtocolSymbols[]
@@ -59,6 +60,13 @@ describe('ProtocolService', () => {
     tezosTestnet = new TezosProtocolNetwork(
       'Testnet',
       NetworkType.TESTNET,
+      undefined,
+      new TezblockBlockExplorer(),
+      new TezosProtocolNetworkExtras()
+    )
+    tezosMainnet = new TezosProtocolNetwork(
+      'Mainnet',
+      NetworkType.MAINNET,
       undefined,
       new TezblockBlockExplorer(),
       new TezosProtocolNetworkExtras()
@@ -531,17 +539,20 @@ describe('ProtocolService', () => {
       expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
     })
 
-    it('should not find a protocol by an identifier if network does not match', async () => {
+    it('should find a protocol by an identifier if network does not match by falling back to default network', async () => {
       service.init({
         activeProtocols: [new TezosProtocol()],
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]]
       })
 
-      const foundProtocolPromise = service.getProtocol(MainProtocolSymbols.XTZ, tezosTestnet)
-      const foundSubProtocolPromise = service.getProtocol(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+      const foundProtocol = await service.getProtocol(MainProtocolSymbols.XTZ, tezosTestnet)
+      const foundSubProtocol = await service.getProtocol(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
 
-      await expectAsync(foundProtocolPromise).toBeRejectedWithError(undefined, 'Protocol not supported')
-      await expectAsync(foundSubProtocolPromise).toBeRejectedWithError(undefined, 'Protocol not supported')
+      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocol?.options.network).toEqual(tezosMainnet)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toEqual(tezosMainnet)
     })
 
     it('should find sub protocols by a main protocol identifier', async () => {

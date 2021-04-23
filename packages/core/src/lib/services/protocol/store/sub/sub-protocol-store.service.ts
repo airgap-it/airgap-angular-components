@@ -55,7 +55,8 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
   public getProtocolByIdentifier(
     identifier: SubProtocolSymbols,
     network?: ProtocolNetwork | string,
-    activeOnly: boolean = true
+    activeOnly: boolean = true,
+    retry: boolean = true
   ): ICoinSubProtocol | undefined {
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
@@ -63,8 +64,12 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
       const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
       const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+      const found = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
 
-      return (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
+      if (!found && retry) {
+        return this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+      }
+      return found
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('[SubProtocolStore:getProtocolByIdentifer]', error)
