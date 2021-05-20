@@ -18,6 +18,14 @@ export class AppInfoMock {
   )
 }
 
+export class BarcodeScannerMock {
+  public prepare: jasmine.Spy = newSpy('prepare', Promise.resolve())
+  public hideBackground: jasmine.Spy = newSpy('hideBackground', Promise.resolve())
+  public showBackground: jasmine.Spy = newSpy('showBackground', Promise.resolve())
+  public startScan: jasmine.Spy = newSpy('startScan', Promise.resolve())
+  public stopScan: jasmine.Spy = newSpy('stopScan', Promise.resolve())
+}
+
 export class ClipboardMock {
   public read: jasmine.Spy = newSpy('read', Promise.resolve({ value: 'text-from-clipboard' }))
   public write: jasmine.Spy = newSpy('write', Promise.resolve())
