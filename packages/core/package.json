@@ -17,31 +17,33 @@
     "e2e": "ng e2e core"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.2.0"
   },
   "peerDependencies": {
     "@airgap/coinlib-core": "0.11.0",
-    "@angular/animations": "^11.0.5",
-    "@angular/common": "^11.0.5",
-    "@angular/core": "^11.0.5",
-    "@angular/forms": "^11.0.5",
-    "@angular/platform-browser": "^11.0.5",
-    "@angular/platform-browser-dynamic": "^11.0.5",
-    "@angular/router": "^11.0.5",
-    "@capacitor/core": "^2.4.0",
+    "@angular/animations": "^11.2.9",
+    "@angular/common": "^11.2.9",
+    "@angular/core": "^11.2.9",
+    "@angular/forms": "^11.2.9",
+    "@angular/platform-browser": "^11.2.9",
+    "@angular/platform-browser-dynamic": "^11.2.9",
+    "@angular/router": "^11.2.9",
+    "@capacitor-community/barcode-scanner": "^1.2.1",
+    "@capacitor/core": "^2.4.7",
     "@download/blockies": "^1.0.3",
-    "@ionic-native/core": "^5.28.0",
-    "@ionic-native/diagnostic": "^5.28.0",
-    "@ionic/angular": "^5.3.1",
-    "@ionic/core": "^5.3.1",
-    "@ionic/storage": "^2.3.0",
+    "@ionic-native/core": "^5.32.0",
+    "@ionic-native/diagnostic": "^5.32.0",
+    "@ionic/angular": "^5.6.4",
+    "@ionic/core": "^5.6.4",
+    "@ionic/storage": "^3.0.4",
+    "@ionic/storage-angular": "^3.0.6",
     "@ngx-translate/core": "^13.0.0",
     "angularx-qrcode": "^11.0.0",
-    "bignumber.js": "^9.0.0",
-    "moment": "^2.27.0",
+    "bignumber.js": "^9.0.1",
+    "moment": "^2.29.1",
     "myetherwallet-blockies": "^0.1.1",
     "ngx-moment": "^5.0.0",
-    "rxjs": "^6.6.2",
-    "zone.js": "^0.10.3"
+    "rxjs": "^6.6.7",
+    "zone.js": "^0.11.4"
   }
 }

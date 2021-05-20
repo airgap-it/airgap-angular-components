@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
+import { BarcodeScannerPlugin, ScanResult } from '@capacitor-community/barcode-scanner'
 import { Platform } from '@ionic/angular'
+import { BehaviorSubject, Observable } from 'rxjs'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let QRScanner: any
+import { BARCODE_SCANNER_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +14,16 @@ export class QrScannerService {
    */
   public isActive: boolean = false
 
+  private initScan$ = new BehaviorSubject<boolean>(true)
+
   private readonly isMobile: boolean
 
-  constructor(private readonly platform: Platform) {
+  constructor(private readonly platform: Platform, @Inject(BARCODE_SCANNER_PLUGIN) private readonly barcodeScanner: BarcodeScannerPlugin) {
     this.isMobile = this.platform.is('hybrid')
+  }
+
+  public async prepare(): Promise<void> {
+    return this.barcodeScanner.prepare()
   }
 
   /**
@@ -25,41 +32,40 @@ export class QrScannerService {
    * @param successCallback
    * @param errorCallback
    */
-  public scan(successCallback: (text: string) => void, errorCallback: ((text: string) => void) | null = null): void {
-    this.show()
-    const scanCallback = (scanError: Error, text: string) => {
-      if (scanError) {
-        // eslint-disable-next-line no-console
-        console.error('Scanner scan error', scanError)
-        if (errorCallback) {
-          // TODO: Check type
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          errorCallback(scanError as any)
-        }
-      }
+  public async scan(): Promise<string> {
+    await this.show()
 
-      // eslint-disable-next-line no-console
-      console.log('Scanner scan success', text)
-      successCallback(text)
+    const scanResult: ScanResult = await this.barcodeScanner.startScan({})
+    if (scanResult.hasContent) {
+      return scanResult.content || ''
+    } else {
+      throw new Error('Failed to scan QR code')
     }
-
-    QRScanner.scan(scanCallback)
   }
 
-  public destroy(): void {
+  public async destroy(): Promise<void> {
     if (this.isMobile) {
       this.isActive = false
-      QRScanner.destroy()
+      await this.barcodeScanner.showBackground()
+      await this.barcodeScanner.stopScan()
     }
   }
 
-  private show(): void {
+  public resetScanner(): void {
+    this.initScan$.next(true)
+  }
+
+  public getScanObservable(): Observable<boolean> {
+    return this.initScan$.asObservable()
+  }
+
+  private async show(): Promise<void> {
     if (this.isMobile) {
       if (this.isActive) {
         return
       }
       this.isActive = true
-      QRScanner.show()
+      await this.barcodeScanner.hideBackground()
     }
   }
 }
