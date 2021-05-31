@@ -1,6 +1,8 @@
 {
-  "version": "0.0.10-beta.1",
-  "packages": ["packages/*"],
+  "version": "0.0.10",
+  "packages": [
+    "packages/*"
+  ],
   "command": {
     "publish": {
       "ignoreChanges": [
