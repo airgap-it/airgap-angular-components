@@ -108,10 +108,10 @@ export const ethTokens: Token[] = [
   },
   {
     symbol: 'DAI',
-    name: 'Dai Stablecoin v1.0',
+    name: 'Dai Stabletoken',
     marketSymbol: 'dai',
     identifier: 'eth-erc20-dai',
-    contractAddress: '0x89d24A6b4CcB1B6fAA2625fE562bDD9a23260359',
+    contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
     decimals: 18
   },
   {
