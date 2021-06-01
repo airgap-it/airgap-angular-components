@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { Storage } from '@ionic/storage-angular'
+import { Storage } from '@ionic/storage'
 import { BaseStorage } from './base.storage'
 
 export enum InternalStorageKey {
