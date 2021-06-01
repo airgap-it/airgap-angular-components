@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "publishConfig": {
     "access": "public"
   },
@@ -35,8 +35,7 @@
     "@ionic-native/diagnostic": "^5.32.0",
     "@ionic/angular": "^5.6.4",
     "@ionic/core": "^5.6.4",
-    "@ionic/storage": "^3.0.4",
-    "@ionic/storage-angular": "^3.0.6",
+    "@ionic/storage": "2.2.0",
     "@ngx-translate/core": "^13.0.0",
     "angularx-qrcode": "^11.0.0",
     "bignumber.js": "^9.0.1",

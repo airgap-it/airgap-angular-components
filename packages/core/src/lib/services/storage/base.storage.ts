@@ -1,39 +1,28 @@
-import { Storage } from '@ionic/storage-angular'
+import { Storage } from '@ionic/storage'
 
 export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType extends Record<SettingsKey, unknown>> {
-  protected readonly waitReady: Promise<void>
 
   constructor(
     protected readonly storage: Storage,
     protected readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] }
-  ) {
-    this.waitReady = new Promise(async (resolve) => {
-      await this.storage.create()
-      await this.init()
-      resolve()
-    })
-  }
-
-  protected async init(): Promise<void> {
-    /* called after Storage has been created */
-  }
+  ) {}
 
   public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
-    await this.waitReady
+    await this.storage.ready()
     const value: SettingsKeyReturnType[K] = (await this.storage.get(key)) || this.defaultValues[key]
 
     return value
   }
 
   public async set<K extends SettingsKey>(key: K, value: SettingsKeyReturnType[K]): Promise<void> {
-    await this.waitReady
+    await this.storage.ready()
 
     return this.storage.set(key, value)
   }
 
   public async delete<K extends SettingsKey>(key: K): Promise<boolean> {
     try {
-      await this.waitReady
+      await this.storage.ready()
       await this.storage.remove(key)
 
       return true
