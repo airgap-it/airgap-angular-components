@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "publishConfig": {
     "access": "public"
   },
@@ -28,7 +28,6 @@
     "@angular/platform-browser": "^11.2.9",
     "@angular/platform-browser-dynamic": "^11.2.9",
     "@angular/router": "^11.2.9",
-    "@capacitor-community/barcode-scanner": "^1.2.1",
     "@capacitor/core": "^2.4.7",
     "@download/blockies": "^1.0.3",
     "@ionic-native/core": "^5.32.0",
