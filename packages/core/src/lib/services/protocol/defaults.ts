@@ -4,6 +4,7 @@ import {
   BitcoinSegwitProtocol,
   BitcoinProtocol,
   EthereumProtocol,
+  RskProtocol,
   GroestlcoinProtocol,
   TezosProtocol,
   CosmosProtocol,
@@ -12,11 +13,15 @@ import {
   ICoinSubProtocol,
   TezosKtProtocol,
   GenericERC20,
+  GenericRskERC20,
   EthereumERC20ProtocolOptions,
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig,
   TezosUUSD,
   TezosYOU,
+  RskERC20ProtocolOptions,
+  RskProtocolNetwork,
+  RskERC20ProtocolConfig,
   TezosBTC,
   TezosUSD,
   SubProtocolSymbols,
@@ -31,7 +36,7 @@ import {
   TezosQUIPU,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
-import { ethTokens } from './tokens'
+import { ethTokens, rskTokens } from './tokens'
 
 export function getDefaultPassiveProtocols(): ICoinProtocol[] {
   return []
@@ -41,6 +46,8 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
   return [
     new BitcoinSegwitProtocol(),
     new EthereumProtocol(),
+    new RskProtocol(),
+    new GroestlcoinProtocol(),
     new TezosProtocol(),
     new PolkadotProtocol(),
     new KusamaProtocol(),
@@ -68,6 +75,7 @@ export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtoco
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
   const tezosProtocol = new TezosProtocol()
   const ethereumProtocol = new EthereumProtocol()
+  const rskProtocol = new RskProtocol()
 
   return [
     [tezosProtocol, new TezosUUSD()],
@@ -98,6 +106,25 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
             )
           )
         ] as [EthereumProtocol, GenericERC20]
+    ),
+    ...rskTokens.map(
+      (token: Token) =>
+        [
+          rskProtocol,
+          new GenericRskERC20(
+            new RskERC20ProtocolOptions(
+              new RskProtocolNetwork(),
+              new RskERC20ProtocolConfig(
+                token.symbol,
+                token.name,
+                token.marketSymbol,
+                token.identifier as SubProtocolSymbols,
+                token.contractAddress,
+                token.decimals
+              )
+            )
+          )
+        ] as [RskProtocol, GenericRskERC20]
     )
   ]
 }

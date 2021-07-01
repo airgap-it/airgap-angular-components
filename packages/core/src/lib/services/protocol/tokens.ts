@@ -811,3 +811,134 @@ export const ethTokens: Token[] = [
     decimals: 18
   }
 ]
+
+export const rskTokens: Token[] = [
+  {
+    symbol: 'RIF',
+    name: 'RSK Infrastructure Framework',
+    marketSymbol: 'rif',
+    identifier: 'rbtc-erc20-rif',
+    contractAddress: '0x2acc95758f8b5f583470ba265eb685a8f45fc9d5',
+    decimals: 18
+  },
+  {
+    symbol: 'DOC',
+    name: 'Dollar on Chain',
+    marketSymbol: '', // TODO: DOC doesn't exist in the price api
+    identifier: 'rbtc-erc20-doc',
+    contractAddress: '0xE700691Da7B9851F2F35f8b8182C69C53ccad9DB',
+    decimals: 18
+  },
+  {
+    symbol: 'BPRO',
+    name: 'BitPRO',
+    marketSymbol: '', // TODO: BPRO doesn't exist in the price api
+    identifier: 'rbtc-erc20-bpro',
+    contractAddress: '0x440cd83c160de5c96ddb20246815ea44c7abbca8',
+    decimals: 18
+  },
+  {
+    symbol: 'rDAI',
+    name: 'Dai Stablecoin',
+    marketSymbol: 'dai', // TODO: rDAI doesn't exist in the price api
+    identifier: 'rbtc-erc20-rdai',
+    contractAddress: '0x6B1A73d547F4009a26B8485B63d7015d248Ad406',
+    decimals: 18
+  },
+  {
+    symbol: 'rDOC',
+    name: 'RIF Dollar on Chain',
+    marketSymbol: '', // TODO: rDOC doesn't exist in the price api
+    identifier: 'rbtc-erc20-rdoc',
+    contractAddress: '0x2d919F19D4892381D58edeBeca66D5642Cef1a1f',
+    decimals: 18
+  },
+  {
+    symbol: 'RPRO',
+    name: 'RIF PRO',
+    marketSymbol: '', // TODO: RPRO doesn't exist in the price api
+    identifier: 'rbtc-erc20-rpro',
+    contractAddress: '0xF4d27C56595eD59B66cC7f03CFF5193E4Bd74a61',
+    decimals: 18
+  },
+  {
+    symbol: 'rFLIXX',
+    name: 'Flixxo on RSK',
+    marketSymbol: '', // TODO: rFLIXX doesn't exist in the price api
+    identifier: 'rbtc-erc20-rflixx',
+    contractAddress: '0x73C08467E23F7DcB7DdbBc8d05041b74467A498A',
+    decimals: 18
+  },
+  {
+    symbol: 'rLINK',
+    name: 'ChainLink Token on RSK',
+    marketSymbol: 'link', // TODO: rLink doesn't exist in the price api
+    identifier: 'rbtc-erc20-rlink',
+    contractAddress: '0x14AdaE34beF7ca957Ce2dDe5ADD97ea050123827',
+    decimals: 18
+  },
+  {
+    symbol: 'rUSDC',
+    name: 'USD Coin on RSK',
+    marketSymbol: 'usdc', // TODO: rUSDC doesn't exist in the price api
+    identifier: 'rbtc-erc20-rusdc',
+    contractAddress: '0x1BDA44fda023f2aF8280A16FD1b01d1a493BA6C4',
+    decimals: 18
+  },
+  {
+    symbol: 'rUSDT',
+    name: 'Tether USD on RSK',
+    marketSymbol: 'usdt', // TODO: rUSDT doesn't exist in the price api
+    identifier: 'rbtc-erc20-rusdt',
+    contractAddress: '0xEf213441a85DF4d7acBdAe0Cf78004E1e486BB96',
+    decimals: 18
+  },
+  {
+    symbol: 'rRFOX',
+    name: 'RedFOX Labs on RSK',
+    marketSymbol: '', // TODO: rRFOX doesn't exist in the price api
+    identifier: 'rbtc-erc20-rrfox',
+    contractAddress: '0x9C3a5F8d686fadE293c0Ce989A62a34408C4e307',
+    decimals: 18
+  },
+  {
+    symbol: 'rBUND',
+    name: 'Bundles Finance on RSK',
+    marketSymbol: '', // TODO: rBUND doesn't exist in the price api
+    identifier: 'rbtc-erc20-rbund',
+    contractAddress: '0x4991516df6053121121274397a8c1dad608bc95b',
+    decimals: 18
+  },
+  {
+    symbol: 'rAMLT',
+    name: 'AMLT Coinfirm on RSK',
+    marketSymbol: '', // TODO: rAMLT doesn't exist in the price api
+    identifier: 'rbtc-erc20-ramlt',
+    contractAddress: '0xff9ea341d9ea91cb7c54342354377f5104fd403f',
+    decimals: 18
+  },
+  {
+    symbol: 'SOV',
+    name: 'Sovryn Token',
+    marketSymbol: 'sovryn',
+    identifier: 'rbtc-erc20-sov',
+    contractAddress: '0xefc78fc7d48b64958315949279ba181c2114abbd',
+    decimals: 18
+  },
+  {
+    symbol: 'MOC',
+    name: 'MoC Token',
+    marketSymbol: '', // TODO: MOC doesn't exist in the price api
+    identifier: 'rbtc-erc20-moc',
+    contractAddress: '0x9ac7fe28967b30e3a4e6e03286d715b42b453d10',
+    decimals: 18
+  },
+  {
+    symbol: 'rUBI',
+    name: 'Universal Basic Income Token',
+    marketSymbol: '', // TODO: rUBI doesn't exist in the price api
+    identifier: 'rbtc-erc20-rubi',
+    contractAddress: '0x70566d8541beabe984c8babf8a816ed908514ba8',
+    decimals: 18
+  },
+]
