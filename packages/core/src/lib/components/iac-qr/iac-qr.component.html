@@ -1,0 +1,19 @@
+<airgap-qr
+  *ngIf="qrdata"
+  [level]="level"
+  [size]="size"
+  [margin]="margin"
+  [qrdata]="qrdata"
+  [disableClipboard]="true"
+  (click)="copyToClipboard()"
+></airgap-qr>
+
+<ion-select slot="end" [ngModel]="qrType" interface="popover" (ngModelChange)="updateGenerator($event)">
+  <ion-select-option *ngFor="let availableQRType of availableQRTypes" [value]="availableQRType">
+    <ion-text>
+      {{ availableQRType }}
+    </ion-text>
+  </ion-select-option>
+</ion-select>
+
+<p *ngIf="numberOfParts > 1">{{ numberOfParts }} QR codes</p>

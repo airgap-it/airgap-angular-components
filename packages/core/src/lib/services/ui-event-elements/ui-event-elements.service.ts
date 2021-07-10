@@ -20,14 +20,19 @@ export class UiEventElementsService {
     })
   }
 
-  public async showIACMessageUnknownAlert(relayHandler: () => void, cancelHandler: () => void): Promise<void> {
+  public async showIACMessageUnknownAlert(relayHandler: () => void, copyHandler: () => void, cancelHandler: () => void): Promise<void> {
     const relayButton = {
       text: 'iac.message-unknown_alert.relay_label',
       handler: relayHandler
     }
 
+    const copyButton = {
+      text: 'iac.message-unknown_alert.copy_label',
+      handler: copyHandler
+    }
+
     const cancelButton = {
-      text: 'iac.message-unknown_alert.okay_label',
+      text: 'iac.message-unknown_alert.cancel_label',
       role: 'cancel',
       handler: cancelHandler
     }
@@ -35,18 +40,27 @@ export class UiEventElementsService {
     await this.uiEventService.showTranslatedAlert({
       header: 'iac.message-unknown_alert.header',
       message: 'iac.message-unknown_alert.message',
-      buttons: [relayButton, cancelButton]
+      buttons: [relayButton, copyButton, cancelButton]
     })
   }
 
-  public async showIACMessageNotSupportedAlert(relayHandler: () => void, cancelHandler: () => void): Promise<void> {
+  public async showIACMessageNotSupportedAlert(
+    relayHandler: () => void,
+    copyHandler: () => void,
+    cancelHandler: () => void
+  ): Promise<void> {
     const relayButton = {
       text: 'iac.message-not-supported_alert.relay_label',
       handler: relayHandler
     }
 
+    const copyButton = {
+      text: 'iac.message-not-supported_alert.copy_label',
+      handler: copyHandler
+    }
+
     const cancelButton = {
-      text: 'iac.message-not-supported_alert.okay_label',
+      text: 'iac.message-not-supported_alert.cancel_label',
       role: 'cancel',
       handler: cancelHandler
     }
@@ -54,7 +68,7 @@ export class UiEventElementsService {
     await this.uiEventService.showTranslatedAlert({
       header: 'iac.message-not-supported_alert.header',
       message: 'iac.message-not-supported_alert.message',
-      buttons: [relayButton, cancelButton]
+      buttons: [relayButton, copyButton, cancelButton]
     })
   }
 

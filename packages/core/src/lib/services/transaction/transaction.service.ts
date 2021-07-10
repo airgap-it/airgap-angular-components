@@ -1,5 +1,5 @@
 import {
-  IACMessageDefinitionObject,
+  IACMessageDefinitionObjectV3,
   IACMessageType,
   IAirGapTransaction,
   ICoinProtocol,
@@ -26,12 +26,12 @@ export class TransactionService {
   constructor(private readonly protocolService: ProtocolService, private readonly tokenService: TokenService) {}
 
   public async getDetailsFromIACMessages(
-    messages: IACMessageDefinitionObject[],
+    messages: IACMessageDefinitionObjectV3[],
     config?: IACMessagesDetailsConfig
   ): Promise<IAirGapTransaction[]> {
     const supportedMessageTypes: IACMessageType[] = [IACMessageType.TransactionSignRequest, IACMessageType.TransactionSignResponse]
     const details: IAirGapTransaction[][] = await Promise.all(
-      messages.map(async (message: IACMessageDefinitionObject) => {
+      messages.map(async (message: IACMessageDefinitionObjectV3) => {
         if (!supportedMessageTypes.includes(message.type)) {
           return []
         }

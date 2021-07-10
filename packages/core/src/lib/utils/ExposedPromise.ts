@@ -1,3 +1,5 @@
+/* eslint-disable max-classes-per-file */
+
 export enum ExposedPromiseStatus {
   PENDING = 'pending',
   RESOLVED = 'resolved',
@@ -99,5 +101,43 @@ export class ExposedPromise<T = unknown, U = unknown> {
 
   public isSettled(): boolean {
     return this.isResolved() || this.isRejected()
+  }
+}
+
+type ResolveTypes<K extends string> = Record<K, unknown>
+type RejectTypes<K extends string> = Record<K, unknown> | unknown
+type Error<K extends string, E extends RejectTypes<K>> = E extends Record<K, unknown> ? E[K] : unknown
+export class ExposedPromiseRegistry<
+  Key extends string,
+  ResolveType extends ResolveTypes<Key>,
+  RejectType extends RejectTypes<Key> = unknown
+> {
+  private readonly exposedPromises: { [key in Key]?: ExposedPromise<ResolveType[key], Error<key, RejectType>> } = {}
+
+  public resolve<K extends Key>(key: K, value: ResolveType[K]): void {
+    this.getIfNotSettled(key)?.resolve(value)
+  }
+
+  public reject<K extends Key>(key: K, error: Error<K, RejectType>): void {
+    this.getIfNotSettled(key)?.reject(error)
+  }
+
+  public async yield<K extends Key>(key: K): Promise<ResolveType[K]> {
+    const exposedPromise: ExposedPromise<ResolveType[K], Error<K, RejectType>> = new ExposedPromise()
+    this.exposedPromises[key] = exposedPromise
+
+    const value: ResolveType[K] = await exposedPromise.promise
+    this.exposedPromises[key] = undefined
+
+    return value
+  }
+
+  private getIfNotSettled<K extends Key>(key: K): ExposedPromise<ResolveType[K], Error<K, RejectType>> | undefined {
+    const promise: ExposedPromise<ResolveType[K], Error<K, RejectType>> | undefined = this.exposedPromises[key]
+    if (promise?.isSettled()) {
+      throw new Error('Promise is already settled')
+    }
+
+    return promise
   }
 }
