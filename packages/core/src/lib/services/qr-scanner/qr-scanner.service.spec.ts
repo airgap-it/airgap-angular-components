@@ -18,4 +18,3 @@ describe('QrScannerService', () => {
     expect(service).toBeTruthy()
   })
 })
-
