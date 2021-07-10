@@ -14,7 +14,6 @@
     "skipLibCheck": true,
     /* Strict Type-Checking Options */
     "strict": false /* Enable all strict type-checking options. */,
-
     "skipDefaultLibCheck": true
   },
   "angularCompilerOptions": {
@@ -23,7 +22,7 @@
     "fullTemplateTypeCheck": true,
     "strictTemplates": true,
     "strictInputAccessModifiers": true,
-    "strictMetadataEmit": true
+    "strictMetadataEmit": false
   },
   "paths": {
     "core": ["packages/core/dist/core", "packages/core/dist"],
