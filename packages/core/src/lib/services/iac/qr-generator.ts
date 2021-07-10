@@ -10,4 +10,8 @@ export abstract class IACQrGenerator {
   protected async prefixSingle(data: string, prefix: string, parameter: string): Promise<string> {
     return serializedDataToUrlString(data, `${prefix}://`, parameter)
   }
+
+  public static async canHandle(_data: IACMessageDefinitionObjectV3[]): Promise<boolean> {
+    return true
+  }
 }

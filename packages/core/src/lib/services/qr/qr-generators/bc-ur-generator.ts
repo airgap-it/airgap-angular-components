@@ -1,4 +1,10 @@
-import { bufferFrom, AccountShareResponse, IACMessageDefinitionObjectV3, UnsignedBitcoinTransaction } from '@airgap/coinlib-core'
+import {
+  bufferFrom,
+  AccountShareResponse,
+  IACMessageDefinitionObjectV3,
+  UnsignedBitcoinTransaction,
+  MainProtocolSymbols
+} from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../../iac/qr-generator'
 import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
@@ -45,7 +51,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
   }
 
   public async create(data: IACMessageDefinitionObjectV3[], multiFragmentLength: number, singleFragmentLength: number): Promise<void> {
-    if (data.length > 1) {
+    if (!(await BCURTypesGenerator.canHandle(data))) {
       return
     }
 
@@ -67,6 +73,18 @@ export class BCURTypesGenerator extends IACQrGenerator {
     if (this.encoder.fragmentsLength !== 1) {
       this.encoder = result.toUREncoder(multiFragmentLength)
     }
+  }
+
+  public static async canHandle(data: IACMessageDefinitionObjectV3[]): Promise<boolean> {
+    if (data.length === 1) {
+      const element = data[0]
+      return (
+        element.protocol === MainProtocolSymbols.BTC_SEGWIT &&
+        [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse].includes(element.type)
+      )
+    }
+
+    return false
   }
 
   public async nextPart(): Promise<string> {

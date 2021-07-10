@@ -8,10 +8,12 @@ import { IACQrGenerator } from '../../services/iac/qr-generator'
 import { SerializerV3Generator } from '../../services/qr/qr-generators/serializer-v3-generator'
 import { SerializerV2Generator } from '../../services/qr/qr-generators/serializer-v2-generator'
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
+import { BCURTypesGenerator } from '../../services/qr/qr-generators/bc-ur-generator'
 
 export enum QRType {
+  V3 = 'V3',
   V2 = 'V2',
-  V3 = 'V3'
+  BC_UR = 'BC UR'
 }
 
 @Component({
@@ -60,8 +62,10 @@ export class IACQrComponent implements OnDestroy {
     this.singleChunkSize = this.serializerService.singleChunkSize
     this.multiChunkSize = this.serializerService.multiChunkSize
     this.generatorsMap = new Map()
+
     this.generatorsMap.set(QRType.V3, new SerializerV3Generator())
     this.generatorsMap.set(QRType.V2, new SerializerV2Generator())
+    this.generatorsMap.set(QRType.BC_UR, new BCURTypesGenerator())
 
     this.timeout = setInterval(async () => {
       this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
@@ -89,6 +93,15 @@ export class IACQrComponent implements OnDestroy {
   }
 
   private async convertToDataArray(): Promise<void> {
+    if (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects)) {
+      if (!this.availableQRTypes.includes(QRType.BC_UR)) {
+        this.availableQRTypes.push(QRType.BC_UR)
+      }
+    } else {
+      this.availableQRTypes = this.availableQRTypes.filter((el) => el !== QRType.BC_UR)
+      this.activeGenerator = this.generatorsMap.get(QRType.V3)
+    }
+
     if (this.activeGenerator) {
       await this.activeGenerator.create(this._messageDefinitionObjects, this.multiChunkSize, this.singleChunkSize)
       this.qrdata = await this.activeGenerator.nextPart()

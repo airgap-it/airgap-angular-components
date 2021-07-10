@@ -185,7 +185,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
   private convertPSBT(psbt: string): IACMessageDefinitionObjectV3 {
     return {
       id: generateId(8),
-      protocol: MainProtocolSymbols.BTC,
+      protocol: MainProtocolSymbols.BTC_SEGWIT,
       type: 5,
       payload: {
         transaction: psbt,
