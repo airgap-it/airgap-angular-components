@@ -12,29 +12,29 @@ describe('BCURTypesGenerator', () => {
     expect(generator).toBeTruthy()
   })
 
-  // it('should generate an account share message', async () => {
-  //   const data: IACMessageDefinitionObjectV3 = {
-  //     id: 79370700,
-  //     protocol: MainProtocolSymbols.BTC,
-  //     type: 4,
-  //     payload: {
-  //       publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
-  //       isExtendedPublicKey: true,
-  //       derivationPath: "m/84'/0'/0'/0/1",
-  //       masterFingerprint: '6f01ffc8',
-  //       isActive: true,
-  //       groupId: '6f01ffc8',
-  //       groupLabel: 'Test'
-  //     }
-  //   }
+  it('should generate an account share message', async () => {
+    const data: IACMessageDefinitionObjectV3 = {
+      id: 79370700,
+      protocol: MainProtocolSymbols.BTC_SEGWIT,
+      type: 4,
+      payload: {
+        publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
+        isExtendedPublicKey: true,
+        derivationPath: "m/84'/0'/0'/0/1",
+        masterFingerprint: '6f01ffc8',
+        isActive: true,
+        groupId: '6f01ffc8',
+        groupLabel: 'Test'
+      }
+    }
 
-  //   await generator.create([data], 300, 150)
-  //   const part = await generator.nextPart()
-  //   console.log('part', part)
-  //   expect(part).toBe(
-  //     'UR:BYTES/HDIOCTLUAYAEAEAEAEAEAEAXJEIDJTJZIHIEGAPLDEPTMOIDTADPKKOLRYDYHGURSSDKFXURTIUOSPEYFXURAELRHHNLFWZOQDHGDAKGRHRKKEZCAOHSFLDEEYGTEHETQZOLZMOYLSGTTOWYKTHFEOENTORLRLUEKGIADMHPVEVATSKKMNJZGRGWFHBYBAAAAECPGMDTROHGAEAEAEKBHEEYHG'
-  //   )
-  // })
+    await generator.create([data], 300, 150)
+    const part = await generator.nextPart()
+    console.log('part', part)
+    expect(part).toBe(
+      'UR:CRYPTO-ACCOUNT/OEADCYJLADZMSPAOLYTAADMWTAADDLONAXHDCLAXBNCYCPMEJNKBRFDTBGHPLPTTWDEHRTRDOTHGFHYNYASACWAYPELNNLSWSGPYKNGRAAHDCXRPVTUOCKCTRPOYMDLGESRLGLKSGDDARPPTECJZJOWZADRPDAMSDPGUHFAXWNMHMOAMTAADDYOTADLECSGHYKAEYKAEYKAEWKADWKAOCYLTKBDKMDAXAXAYCYUYJOPSVWASIEGHIHJKJYHLBEVTAE'
+    )
+  })
 
   it('should generate a PSBT message', async () => {
     const data: IACMessageDefinitionObjectV3 = {

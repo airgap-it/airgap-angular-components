@@ -10,7 +10,7 @@ import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import * as bip32 from 'bip32'
 
-import { CryptoHDKey, CryptoOutput, ScriptExpressions, CryptoAccount, PathComponent, CryptoPSBT } from '@keystonehq/bc-ur-registry'
+import { CryptoKeypath, CryptoHDKey, CryptoOutput, ScriptExpressions, CryptoAccount, PathComponent, CryptoPSBT } from './registry/'
 import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
 
 class ExtendedPublicKey {
@@ -138,11 +138,11 @@ export class BCURTypesGenerator extends IACQrGenerator {
         [ScriptExpressions.WITNESS_PUBLIC_KEY_HASH],
         new CryptoHDKey({
           isMaster: false,
-          key: x.publicKey
-          //   chainCode: x.chainCode,
-          //   origin: new CryptoKeypath(cryptoKeyPathComponents, x.fingerprint, x.depth),
-          //   parentFingerprint: bufferFrom(new Int32Array([x.parentFingerprint]).buffer),
-          //   name: account.groupLabel
+          key: x.publicKey,
+          chainCode: x.chainCode,
+          origin: new CryptoKeypath(cryptoKeyPathComponents, x.fingerprint, x.depth),
+          parentFingerprint: bufferFrom(new Int32Array([x.parentFingerprint]).buffer, undefined),
+          name: account.groupLabel
         })
       )
     ])
