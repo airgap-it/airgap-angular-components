@@ -1,6 +1,5 @@
 // @ts-nocheck
-
-const { DataItem } = require('./DataItem')
+import { DataItem } from './DataItem'
 export const CBOR = (function () {
   function BinaryHex(hex) {
     this.$hex = hex
