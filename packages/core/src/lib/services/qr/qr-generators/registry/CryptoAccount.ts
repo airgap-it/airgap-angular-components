@@ -1,5 +1,5 @@
 import { CryptoOutput } from '.'
-const CBOR = require('./lib/cbor-sync')
+import { CBOR } from './lib/cbor-sync'
 import { DataItem } from './lib/DataItem'
 import { RegistryItem } from './RegistryItem'
 import { RegistryTypes } from './RegistryType'

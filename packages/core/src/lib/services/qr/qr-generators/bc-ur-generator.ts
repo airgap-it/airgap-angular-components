@@ -44,7 +44,7 @@ class ExtendedPublicKey {
 export class BCURTypesGenerator extends IACQrGenerator {
   private encoder: UREncoder | undefined
 
-  private ur: UR | undefined
+  private data: CryptoAccount | CryptoPSBT | undefined
 
   constructor() {
     super()
@@ -57,21 +57,20 @@ export class BCURTypesGenerator extends IACQrGenerator {
 
     const element = data[0]
 
-    let result: CryptoAccount | CryptoPSBT
     if (element.type === IACMessageType.AccountShareResponse) {
-      result = await this.generateCryptoAccountMessage(element)
+      this.data = await this.generateCryptoAccountMessage(element)
     } else if (element.type === IACMessageType.TransactionSignResponse) {
-      result = await this.generatePSBTMessage(element)
+      this.data = await this.generatePSBTMessage(element)
     } else {
       throw new Error('Not Supported')
     }
 
     // We first try to create a larger "single chunk" fragment
-    this.encoder = result.toUREncoder(singleFragmentLength)
+    this.encoder = this.data.toUREncoder(singleFragmentLength)
 
     // If this is not possible, we use the multiFragmentLength
     if (this.encoder.fragmentsLength !== 1) {
-      this.encoder = result.toUREncoder(multiFragmentLength)
+      this.encoder = this.data.toUREncoder(multiFragmentLength)
     }
   }
 
@@ -95,13 +94,9 @@ export class BCURTypesGenerator extends IACQrGenerator {
     }
   }
 
-  public async getSingle(prefix: string): Promise<string> {
-    if (this.ur) {
-      const part = new UREncoder(this.ur, Number.MAX_SAFE_INTEGER).nextPart()
-      const regex = /([^/]+$)/g
-      const match = part.match(regex)
-      const data = match && match[0] ? match[0] : part
-      return this.prefixSingle(data.toUpperCase(), prefix, 'ur')
+  public async getSingle(): Promise<string> {
+    if (this.data) {
+      return this.data.toUREncoder(Number.MAX_SAFE_INTEGER).nextPart()
     } else {
       return ''
     }

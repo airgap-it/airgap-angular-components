@@ -1,4 +1,4 @@
-const CBOR = require('./lib/cbor-sync')
+import { CBOR } from './lib/cbor-sync'
 import { DataItem } from './lib/DataItem'
 import { RegistryTypes } from './RegistryType'
 import { ScriptExpressions } from './ScriptExpression'

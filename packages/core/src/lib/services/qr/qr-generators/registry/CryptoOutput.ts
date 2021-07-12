@@ -1,6 +1,6 @@
 import { CryptoECKey } from './CryptoECKey'
 import { CryptoHDKey } from './CryptoHDKey'
-const CBOR = require('./lib/cbor-sync')
+import { CBOR } from './lib/cbor-sync'
 import { DataItem } from './lib/DataItem'
 import { MultiKey } from './MultiKey'
 import { RegistryItem } from './RegistryItem'

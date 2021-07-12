@@ -1,4 +1,4 @@
-const CBOR = require('./lib/cbor-sync')
+import { CBOR } from './lib/cbor-sync'
 import { DataItem } from './lib/DataItem'
 import { PathComponent } from './PathComponent'
 import { RegistryItem } from './RegistryItem'
