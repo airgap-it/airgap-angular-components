@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core'
 import { IAirGapTransaction } from '@airgap/coinlib-core'
+import { ClipboardService } from '../../services/clipboard/clipboard.service'
 
 @Component({
   selector: 'airgap-from-to',
@@ -13,7 +14,13 @@ export class FromToComponent {
   @Input()
   public displayRawData: boolean = false
 
+  constructor(private readonly clipboardService: ClipboardService) {}
+
   public toggleDisplayRawData(): void {
     this.displayRawData = !this.displayRawData
+  }
+
+  public copyToClipboard(): void {
+    this.clipboardService.copyAndShowToast(JSON.stringify(this.transaction.transactionDetails))
   }
 }
