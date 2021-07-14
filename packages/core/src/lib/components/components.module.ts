@@ -17,6 +17,7 @@ import { AccountItemComponent } from './account-item/account-item.component'
 import { AccountSelectionComponent } from './account-selection/account-selection.component'
 import { QrComponent } from './qr/qr.component'
 import { QrSettingsComponent } from './qr-settings/qr-settings.component'
+import { IACQrComponent } from './iac-qr/iac-qr.component'
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { QrSettingsComponent } from './qr-settings/qr-settings.component'
     CurrencySymbolComponent,
     NetworkBadgeComponent,
     QrComponent,
+    IACQrComponent,
     AccountItemComponent,
     AccountSelectionComponent,
     QrSettingsComponent
@@ -42,6 +44,7 @@ import { QrSettingsComponent } from './qr-settings/qr-settings.component'
     AccountItemComponent,
     AccountSelectionComponent,
     QrComponent,
+    IACQrComponent,
     QrSettingsComponent
   ]
 })

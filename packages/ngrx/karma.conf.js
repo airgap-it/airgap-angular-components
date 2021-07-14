@@ -19,7 +19,6 @@ module.exports = function (config) {
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     coverageReporter: {
-      // specify a common output directory
       dir: './coverage',
       reporters: [
         { type: 'lcov', subdir: 'report-lcov' },

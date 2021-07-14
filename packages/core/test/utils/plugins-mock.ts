@@ -30,3 +30,7 @@ export class AppPluginMock {
 export class PermissionsPluginMock {
   public query: jasmine.Spy = newSpy('query', Promise.resolve({ value: true }))
 }
+
+export class InternalStorageServiceMock {
+  public set: jasmine.Spy = newSpy('set', Promise.resolve({}))
+}

@@ -2,22 +2,78 @@ import { Injectable } from '@angular/core'
 import {
   generateId,
   IACMessageDefinitionObject,
+  IACMessageDefinitionObjectV3,
   IACMessageType,
   Serializer,
-  MainProtocolSymbols,
-  DeserializedSyncProtocol,
-  EncodedType,
-  SyncProtocolUtils
+  SerializerV3
 } from '@airgap/coinlib-core'
-import BigNumber from 'bignumber.js'
 import { parseIACUrl } from '../../utils/utils'
 import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
+import { IACMessages as IACMessagesV3 } from '@airgap/coinlib-core/serializer-v3/message' // TODO: Import from index
+import { IACMessages as IACMessagesV2 } from '@airgap/coinlib-core/serializer/message' // TODO: Import from index
+import { AccountShareResponse as AccountShareResponseV3 } from '@airgap/coinlib-core/serializer-v3/schemas/definitions/account-share-response' // TODO: Import from index
+import { AccountShareResponse as AccountShareResponseV2 } from '@airgap/coinlib-core/serializer/schemas/definitions/account-share-response' // TODO: Import from index
 
 export enum SerializerDefaults {
-  SINGLE = 350,
-  MULTI = 100,
-  TIME = 500
+  SINGLE = 500,
+  MULTI = 250,
+  TIME = 200
 }
+
+export const convertV2ToV3 = async (chunks: IACMessageDefinitionObject[]): Promise<IACMessageDefinitionObjectV3[]> => {
+  return chunks.map((message: IACMessageDefinitionObject) => {
+    let newPayload: IACMessagesV3
+    switch (message.type) {
+      case IACMessageType.AccountShareResponse:
+        newPayload = {
+          ...message.payload,
+          masterFingerprint: '',
+          isActive: true,
+          groupId: '',
+          groupLabel: ''
+        }
+        break
+
+      default:
+        newPayload = message.payload as Exclude<IACMessagesV2, AccountShareResponseV2>
+        break
+    }
+
+    return {
+      id: generateId(8),
+      type: message.type,
+      protocol: message.protocol,
+      payload: newPayload
+    }
+  })
+}
+
+export const convertV3ToV2 = async (chunks: IACMessageDefinitionObjectV3[]): Promise<IACMessageDefinitionObject[]> => {
+  return chunks.map((message: IACMessageDefinitionObjectV3) => {
+    let newPayload: IACMessagesV2
+    switch (message.type) {
+      case IACMessageType.AccountShareResponse:
+        const { masterFingerprint, isActive, groupId, groupLabel, ...rest } = message.payload as AccountShareResponseV3
+        newPayload = {
+          ...message.payload
+        }
+        newPayload = rest
+        break
+
+      default:
+        newPayload = message.payload as Exclude<IACMessagesV3, AccountShareResponseV3>
+        break
+    }
+
+    return {
+      id: message.id.toString().repeat(10).slice(0, 10), // We need to assume the id is "0", so we need to repeat it 10 times
+      type: message.type,
+      protocol: message.protocol,
+      payload: newPayload
+    }
+  })
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,23 +81,20 @@ export class SerializerService {
   public _singleChunkSize: number = SerializerDefaults.SINGLE
   public _multiChunkSize: number = SerializerDefaults.MULTI
 
-  private readonly syncProtocolUtils: SyncProtocolUtils = new SyncProtocolUtils()
   private readonly serializer: Serializer = new Serializer()
+  private readonly serializerV3: SerializerV3 = new SerializerV3()
 
-  private readonly v1Tov2Mapping: Map<EncodedType, IACMessageType> = new Map<EncodedType, IACMessageType>()
-  private readonly v2Tov1Mapping: Map<IACMessageType, EncodedType> = new Map<IACMessageType, EncodedType>()
-
-  private _useV2: boolean = true
+  private _useV3: boolean = false
   private _displayTimePerChunk: number = SerializerDefaults.TIME
 
-  public get useV2(): boolean {
-    return this._useV2
+  public get useV3(): boolean {
+    return this._useV3
   }
 
-  public set useV2(value: boolean) {
+  public set useV3(value: boolean) {
     // eslint-disable-next-line no-console
-    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V2, value).catch(console.error)
-    this._useV2 = value
+    this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V3, value).catch(console.error)
+    this._useV3 = value
   }
 
   public get singleChunkSize(): number {
@@ -75,14 +128,7 @@ export class SerializerService {
   }
 
   constructor(private readonly internalStorageService: InternalStorageService) {
-    this.useV2 = true
-    this.v1Tov2Mapping.set(EncodedType.WALLET_SYNC, IACMessageType.AccountShareResponse) // AccountShareResponse
-    this.v1Tov2Mapping.set(EncodedType.UNSIGNED_TRANSACTION, IACMessageType.TransactionSignRequest) // TransactionSignRequest
-    this.v1Tov2Mapping.set(EncodedType.SIGNED_TRANSACTION, IACMessageType.TransactionSignResponse) // TransactionSignResponse
-
-    Array.from(this.v1Tov2Mapping.entries()).forEach((value: [EncodedType, number]) => {
-      this.v2Tov1Mapping.set(value[1], value[0])
-    })
+    this.useV3 = true
 
     // eslint-disable-next-line no-console
     this.loadSettings().catch(console.error)
@@ -99,48 +145,35 @@ export class SerializerService {
     ])
   }
 
-  public async serialize(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
-    if (
-      !this.useV2 &&
-      !chunks.some(
-        (chunk: IACMessageDefinitionObject) =>
-          chunk.protocol === MainProtocolSymbols.COSMOS ||
-          chunk.protocol === MainProtocolSymbols.KUSAMA ||
-          chunk.protocol === MainProtocolSymbols.POLKADOT ||
-          chunk.protocol === MainProtocolSymbols.GRS
-      )
-    ) {
-      if (chunks[0].protocol === MainProtocolSymbols.BTC && chunks[0].type === 6) {
-        // This expects a BigNumber, but we now have a string. So we need to convert it.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const legacyPayload: any = chunks[0].payload
-        legacyPayload.amount = new BigNumber(legacyPayload.amount)
-        legacyPayload.fee = new BigNumber(legacyPayload.fee)
-      }
-
-      return [await this.serializeV1(chunks[0])]
+  public async serialize(chunks: IACMessageDefinitionObjectV3[]): Promise<string[] | string> {
+    if (this.useV3) {
+      return this.serializeV3(chunks)
     } else {
       return this.serializeV2(chunks)
     }
   }
 
-  public async deserialize(chunks: string | string[]): Promise<IACMessageDefinitionObject[]> {
+  public async deserialize(chunks: string | string[]): Promise<IACMessageDefinitionObjectV3[]> {
     const parsedChunks: string[] = parseIACUrl(chunks, 'd')
     try {
-      return await this.deserializeV2(parsedChunks)
+      return this.deserializeV2(parsedChunks)
     } catch (error) {
       if (error && error.availablePages && error.totalPages) {
         throw error
       }
 
-      return [await this.deserializeV1(parsedChunks[0])]
+      if (parsedChunks.length === 1) {
+        return this.deserializeV3(parsedChunks[0])
+      } else {
+        throw new Error('Could not deserialize input')
+      }
     }
   }
 
   private async loadSettings() {
     this.internalStorageService
-      .get(InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V2)
-      .then((setting) => (this._useV2 = setting))
+      .get(InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V3)
+      .then((setting) => (this._useV3 = setting))
       // eslint-disable-next-line no-console
       .catch(console.error)
     this.internalStorageService
@@ -160,48 +193,23 @@ export class SerializerService {
       .catch(console.error)
   }
 
-  private async serializeV1(chunk: IACMessageDefinitionObject): Promise<string> {
-    const v1Type: EncodedType | undefined = this.v2Tov1Mapping.get(chunk.type)
+  private async serializeV2(chunks: IACMessageDefinitionObjectV3[]): Promise<string[]> {
+    const dataV2 = await convertV3ToV2(chunks)
 
-    if (v1Type === undefined) {
-      throw new Error(`Serializer V1 type not supported (${chunk.type})`)
-    }
-
-    const chunkToSerialize: DeserializedSyncProtocol = {
-      type: v1Type,
-      protocol: chunk.protocol,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload: chunk.payload as any
-    }
-
-    return this.syncProtocolUtils.serialize(chunkToSerialize)
+    return this.serializer.serialize(dataV2, this.singleChunkSize, this.multiChunkSize)
   }
 
-  private async serializeV2(chunks: IACMessageDefinitionObject[]): Promise<string[]> {
-    return this.serializer.serialize(chunks, this.singleChunkSize, this.multiChunkSize)
+  private async deserializeV2(chunks: string[]): Promise<IACMessageDefinitionObjectV3[]> {
+    const v2Data = await this.serializer.deserialize(chunks)
+
+    return convertV2ToV3(v2Data)
   }
 
-  private async deserializeV1(chunk: string): Promise<IACMessageDefinitionObject> {
-    const deserialized: DeserializedSyncProtocol = await this.syncProtocolUtils.deserialize(chunk)
-
-    const v2Type: IACMessageType | undefined = this.v1Tov2Mapping.get(deserialized.type)
-
-    if (v2Type === undefined) {
-      throw new Error(`Serializer V2 type not supported (${deserialized.type})`)
-    }
-
-    const iacMessage: IACMessageDefinitionObject = {
-      id: generateId(10),
-      type: v2Type,
-      protocol: deserialized.protocol,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload: deserialized.payload as any
-    }
-
-    return iacMessage
+  private async serializeV3(chunks: IACMessageDefinitionObjectV3[]): Promise<string> {
+    return this.serializerV3.serialize(chunks)
   }
 
-  private async deserializeV2(chunks: string[]): Promise<IACMessageDefinitionObject[]> {
-    return this.serializer.deserialize(chunks)
+  private async deserializeV3(chunks: string): Promise<IACMessageDefinitionObjectV3[]> {
+    return this.serializerV3.deserialize(chunks)
   }
 }

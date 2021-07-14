@@ -21,7 +21,7 @@ module.exports = function (config) {
     coverageReporter: {
       dir: './coverage',
       reporters: [
-        { type: 'lcov', subdir: 'report-lcov' }, 
+        { type: 'lcov', subdir: 'report-lcov' },
         { type: 'text', subdir: '.', file: 'text.txt' }
       ],
       fixWebpackSourcePaths: true

@@ -1,7 +1,6 @@
 import { Storage } from '@ionic/storage'
 
 export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType extends Record<SettingsKey, unknown>> {
-
   constructor(
     protected readonly storage: Storage,
     protected readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] }
