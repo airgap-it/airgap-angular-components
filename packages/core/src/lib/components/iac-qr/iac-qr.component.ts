@@ -10,8 +10,8 @@ import { SerializerV2Generator } from '../../services/qr/qr-generators/serialize
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 
 export enum QRType {
-  V2 = 'V2',
-  V3 = 'V3'
+  V2 = 'QR Code V2',
+  V3 = 'QR Code V3'
 }
 
 @Component({
@@ -28,7 +28,7 @@ export class IACQrComponent implements OnDestroy {
   private readonly singleChunkSize: number = SerializerDefaults.SINGLE
   private readonly multiChunkSize: number = SerializerDefaults.MULTI
 
-  private activeGenerator: IACQrGenerator = new SerializerV3Generator()
+  private activeGenerator: IACQrGenerator
   @Input()
   public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
 
@@ -60,8 +60,16 @@ export class IACQrComponent implements OnDestroy {
     this.singleChunkSize = this.serializerService.singleChunkSize
     this.multiChunkSize = this.serializerService.multiChunkSize
     this.generatorsMap = new Map()
-    this.generatorsMap.set(QRType.V3, new SerializerV3Generator())
-    this.generatorsMap.set(QRType.V2, new SerializerV2Generator())
+    const v3Generator = new SerializerV3Generator()
+    const v2Generator = new SerializerV2Generator()
+    this.generatorsMap.set(QRType.V3, v3Generator)
+    this.generatorsMap.set(QRType.V2, v2Generator)
+
+    this.activeGenerator = v3Generator
+
+    if (!this.serializerService.useV3) {
+      this.activeGenerator = v2Generator
+    }
 
     this.timeout = setInterval(async () => {
       this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
