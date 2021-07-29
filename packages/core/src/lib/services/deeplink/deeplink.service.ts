@@ -23,10 +23,21 @@ export class DeeplinkService {
 
   public async sameDeviceDeeplink(data: string | IACMessageDefinitionObjectV3[]): Promise<void> {
     let deeplinkUrl = ''
+    let generator: IACQrGenerator
     if (data && typeof data !== 'string') {
-      const generator: IACQrGenerator = this.serializerService.useV3 ? new SerializerV3Generator() : new SerializerV2Generator()
-      await generator.create(data, Number.MAX_SAFE_INTEGER)
-      deeplinkUrl = await generator.getSingle(this.appConfig.otherApp.urlScheme)
+      try {
+        generator = this.serializerService.useV3 ? new SerializerV3Generator() : new SerializerV2Generator()
+        await generator.create(data, Number.MAX_SAFE_INTEGER)
+      } catch (error) {
+        try {
+          generator = this.serializerService.useV3 ? new SerializerV2Generator() : new SerializerV3Generator()
+          await generator.create(data, Number.MAX_SAFE_INTEGER)
+        } catch (error) {
+          this.uiEventElementsService.invalidDeeplinkAlert().catch(console.error)
+        }
+      }
+
+      deeplinkUrl = await generator!.getSingle(this.appConfig.otherApp.urlScheme)
     } else if (typeof data === 'string') {
       deeplinkUrl = data
     }

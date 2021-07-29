@@ -8,7 +8,9 @@
   (click)="copyToClipboard()"
 ></airgap-qr>
 
-<ion-select slot="end" [ngModel]="qrType" interface="popover" (ngModelChange)="updateGenerator($event)">
+<p *ngIf="qrError">{{ qrError }}</p>
+
+<ion-select *ngIf="availableQRTypes.length > 0" slot="end" [ngModel]="qrType" interface="popover" (ngModelChange)="updateGenerator($event)">
   <ion-select-option *ngFor="let availableQRType of availableQRTypes" [value]="availableQRType">
     <ion-text>
       {{ availableQRType }}
