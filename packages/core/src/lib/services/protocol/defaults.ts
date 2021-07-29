@@ -14,9 +14,11 @@ import {
   EthereumERC20ProtocolOptions,
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig,
+  TezosUUSD,
+  TezosYOU,
   TezosBTC,
   TezosUSD,
-  SubProtocolSymbols
+  SubProtocolSymbols,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -34,7 +36,7 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new TezosProtocol(),
     new CosmosProtocol(),
     new PolkadotProtocol(),
-    new KusamaProtocol()
+    new KusamaProtocol(),
   ]
 }
 
@@ -47,6 +49,8 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
   const ethereumProtocol = new EthereumProtocol()
 
   return [
+    [tezosProtocol, new TezosUUSD()],
+    [tezosProtocol, new TezosYOU()],
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
     [tezosProtocol, new TezosKtProtocol()],

@@ -23,10 +23,15 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
       await this.serializer.deserialize([part])
       return true
     } catch (error) {
-      if (error.availablePages && error.totalPages) {
+      try {
+        await this.serializer.deserialize(part.split(','))
         return true
-      } else {
-        return false
+      } catch (error) {
+        if (error.availablePages && error.totalPages) {
+          return true
+        } else {
+          return false
+        }
       }
     }
   }

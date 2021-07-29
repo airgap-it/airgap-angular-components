@@ -18,11 +18,11 @@ interface InternalStorageKeyReturnType {
 
 type InternalStorageKeyReturnDefaults = { [key in InternalStorageKey]: InternalStorageKeyReturnType[key] }
 
-const defaultValues: InternalStorageKeyReturnDefaults = {
-  [InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V3]: false,
-  [InternalStorageKey.SETTINGS_SERIALIZER_CHUNK_TIME]: 500,
-  [InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE]: 350,
-  [InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE]: 100
+export const defaultValues: InternalStorageKeyReturnDefaults = {
+  [InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V3]: true,
+  [InternalStorageKey.SETTINGS_SERIALIZER_CHUNK_TIME]: 200,
+  [InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE]: 500,
+  [InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE]: 250
 }
 
 @Injectable({

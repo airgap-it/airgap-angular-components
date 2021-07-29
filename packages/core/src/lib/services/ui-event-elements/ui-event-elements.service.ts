@@ -85,6 +85,19 @@ export class UiEventElementsService {
     })
   }
 
+  public async invalidDeeplinkAlert(): Promise<void> {
+    await this.uiEventService.showTranslatedAlert({
+      header: 'deeplink.invalid.title',
+      message: 'deeplink.invalid.message',
+      buttons: [
+        {
+          text: 'deeplink.invalid.ok',
+          role: 'cancel'
+        }
+      ]
+    })
+  }
+
   public async showOtherAppNotFoundAlert(): Promise<void> {
     await this.uiEventService.showTranslatedAlert({
       header: 'deeplink.app-not-found.title',
