@@ -8,17 +8,11 @@ import {
   SerializerV3
 } from '@airgap/coinlib-core'
 import { parseIACUrl } from '../../utils/utils'
-import { InternalStorageKey, InternalStorageService } from '../storage/storage.service'
+import { defaultValues, InternalStorageKey, InternalStorageService } from '../storage/storage.service'
 import { IACMessages as IACMessagesV3 } from '@airgap/coinlib-core/serializer-v3/message' // TODO: Import from index
 import { IACMessages as IACMessagesV2 } from '@airgap/coinlib-core/serializer/message' // TODO: Import from index
 import { AccountShareResponse as AccountShareResponseV3 } from '@airgap/coinlib-core/serializer-v3/schemas/definitions/account-share-response' // TODO: Import from index
 import { AccountShareResponse as AccountShareResponseV2 } from '@airgap/coinlib-core/serializer/schemas/definitions/account-share-response' // TODO: Import from index
-
-export enum SerializerDefaults {
-  SINGLE = 500,
-  MULTI = 250,
-  TIME = 200
-}
 
 export const convertV2ToV3 = async (chunks: IACMessageDefinitionObject[]): Promise<IACMessageDefinitionObjectV3[]> => {
   return chunks.map((message: IACMessageDefinitionObject) => {
@@ -78,14 +72,14 @@ export const convertV3ToV2 = async (chunks: IACMessageDefinitionObjectV3[]): Pro
   providedIn: 'root'
 })
 export class SerializerService {
-  public _singleChunkSize: number = SerializerDefaults.SINGLE
-  public _multiChunkSize: number = SerializerDefaults.MULTI
+  public _singleChunkSize: number = defaultValues.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE
+  public _multiChunkSize: number = defaultValues.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE
 
   private readonly serializer: Serializer = new Serializer()
   private readonly serializerV3: SerializerV3 = new SerializerV3()
 
-  private _useV3: boolean = false
-  private _displayTimePerChunk: number = SerializerDefaults.TIME
+  private _useV3: boolean = defaultValues.SETTINGS_SERIALIZER_ENABLE_V3
+  private _displayTimePerChunk: number = defaultValues.SETTINGS_SERIALIZER_CHUNK_TIME
 
   public get useV3(): boolean {
     return this._useV3
@@ -128,20 +122,21 @@ export class SerializerService {
   }
 
   constructor(private readonly internalStorageService: InternalStorageService) {
-    this.useV3 = true
-
     // eslint-disable-next-line no-console
     this.loadSettings().catch(console.error)
   }
 
   public async resetSettings(): Promise<void> {
-    this._singleChunkSize = SerializerDefaults.SINGLE
-    this._multiChunkSize = SerializerDefaults.MULTI
-    this._displayTimePerChunk = SerializerDefaults.TIME
+    this._useV3 = defaultValues.SETTINGS_SERIALIZER_ENABLE_V3
+    this._singleChunkSize = defaultValues.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE
+    this._multiChunkSize = defaultValues.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE
+    this._displayTimePerChunk = defaultValues.SETTINGS_SERIALIZER_CHUNK_TIME
 
     await Promise.all([
-      this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE, SerializerDefaults.SINGLE),
-      this.internalStorageService.set(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE, SerializerDefaults.MULTI)
+      this.internalStorageService.delete(InternalStorageKey.SETTINGS_SERIALIZER_ENABLE_V3),
+      this.internalStorageService.delete(InternalStorageKey.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE),
+      this.internalStorageService.delete(InternalStorageKey.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE),
+      this.internalStorageService.delete(InternalStorageKey.SETTINGS_SERIALIZER_CHUNK_TIME)
     ])
   }
 

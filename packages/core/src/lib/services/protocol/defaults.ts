@@ -15,6 +15,8 @@ import {
   EthereumERC20ProtocolOptions,
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig,
+  TezosUUSD,
+  TezosYOU,
   TezosBTC,
   TezosUSD,
   SubProtocolSymbols
@@ -49,6 +51,8 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
   const ethereumProtocol = new EthereumProtocol()
 
   return [
+    [tezosProtocol, new TezosUUSD()],
+    [tezosProtocol, new TezosYOU()],
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
     [tezosProtocol, new TezosKtProtocol()],

@@ -2,17 +2,18 @@ import { Component, Input, OnDestroy, Inject } from '@angular/core'
 
 import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
-import { SerializerDefaults, SerializerService } from '../../services/serializer/serializer.service'
+import { SerializerService } from '../../services/serializer/serializer.service'
 import { APP_CONFIG, AppConfig } from '../../config/app-config'
 import { IACQrGenerator } from '../../services/iac/qr-generator'
 import { SerializerV3Generator } from '../../services/qr/qr-generators/serializer-v3-generator'
 import { SerializerV2Generator } from '../../services/qr/qr-generators/serializer-v2-generator'
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { BCURTypesGenerator } from '../../services/qr/qr-generators/bc-ur-generator'
+import { defaultValues } from '../../services/storage/storage.service'
 
 export enum QRType {
-  V3 = 'V3',
-  V2 = 'V2',
+  V2 = 'QR Code V2',
+  V3 = 'QR Code V3',
   BC_UR = 'BC UR'
 }
 
@@ -22,15 +23,15 @@ export enum QRType {
   styleUrls: ['./iac-qr.component.scss']
 })
 export class IACQrComponent implements OnDestroy {
-  public availableQRTypes = [QRType.V2, QRType.V3]
+  public availableQRTypes: QRType[] = []
   public numberOfParts: number = 0
 
-  private readonly generatorsMap: Map<string, IACQrGenerator>
+  private readonly generatorsMap: Map<string, IACQrGenerator> = new Map()
 
-  private readonly singleChunkSize: number = SerializerDefaults.SINGLE
-  private readonly multiChunkSize: number = SerializerDefaults.MULTI
+  private readonly singleChunkSize: number = defaultValues.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE
+  private readonly multiChunkSize: number = defaultValues.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE
 
-  private activeGenerator: IACQrGenerator = new SerializerV3Generator()
+  private activeGenerator: IACQrGenerator | undefined
   @Input()
   public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
 
@@ -46,14 +47,15 @@ export class IACQrComponent implements OnDestroy {
     this.convertToDataArray()
   }
 
-  public qrdataArray: string[] = ['']
-
-  public qrType: QRType = QRType.V3
+  public qrType: QRType
   public qrdata: string = ''
+
+  public qrError: string = ''
 
   private _messageDefinitionObjects: IACMessageDefinitionObjectV3[] = []
 
-  private readonly timeout: NodeJS.Timeout
+  private timeout?: NodeJS.Timeout
+
   constructor(
     private readonly clipboardService: ClipboardService,
     private readonly serializerService: SerializerService,
@@ -61,12 +63,26 @@ export class IACQrComponent implements OnDestroy {
   ) {
     this.singleChunkSize = this.serializerService.singleChunkSize
     this.multiChunkSize = this.serializerService.multiChunkSize
-    this.generatorsMap = new Map()
 
-    this.generatorsMap.set(QRType.V3, new SerializerV3Generator())
-    this.generatorsMap.set(QRType.V2, new SerializerV2Generator())
+    const v3Generator = new SerializerV3Generator()
+    const v2Generator = new SerializerV2Generator()
+
+    this.generatorsMap.set(QRType.V3, v3Generator)
+    this.availableQRTypes.push(QRType.V3)
+    this.generatorsMap.set(QRType.V2, v2Generator)
+    this.availableQRTypes.push(QRType.V2)
     this.generatorsMap.set(QRType.BC_UR, new BCURTypesGenerator())
 
+    if (this.serializerService.useV3) {
+      this.activeGenerator = v3Generator
+      this.qrType = QRType.V3
+    } else {
+      this.activeGenerator = v2Generator
+      this.qrType = QRType.V2
+    }
+  }
+
+  ngOnInit() {
     this.timeout = setInterval(async () => {
       this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
     }, this.serializerService.displayTimePerChunk)
@@ -77,6 +93,8 @@ export class IACQrComponent implements OnDestroy {
     if (generator) {
       this.activeGenerator = generator
       this.convertToDataArray()
+    } else {
+      console.error('NO GENERATOR FOUND FOR ', value)
     }
   }
 
@@ -87,27 +105,31 @@ export class IACQrComponent implements OnDestroy {
   }
 
   public async copyToClipboard(): Promise<void> {
-    let copyString: string = await this.activeGenerator.getSingle(this.appConfig.otherApp.urlScheme)
+    let copyString: string = this.activeGenerator ? await this.activeGenerator.getSingle(this.appConfig.otherApp.urlScheme) : ''
 
     await this.clipboardService.copyAndShowToast(copyString)
   }
 
   private async convertToDataArray(): Promise<void> {
-    if (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects)) {
-      if (!this.availableQRTypes.includes(QRType.BC_UR)) {
-        this.availableQRTypes.push(QRType.BC_UR)
-      }
-    } else {
-      this.availableQRTypes = this.availableQRTypes.filter((el) => el !== QRType.BC_UR)
-      this.activeGenerator = this.generatorsMap.get(QRType.V3)
+    // Add BC_UR type
+    if (!this.availableQRTypes.includes(QRType.BC_UR) && (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects))) {
+      this.availableQRTypes.push(QRType.BC_UR)
     }
 
+    this.qrError = ''
     if (this.activeGenerator) {
-      await this.activeGenerator.create(this._messageDefinitionObjects, this.multiChunkSize, this.singleChunkSize)
-      this.qrdata = await this.activeGenerator.nextPart()
-      this.numberOfParts = await this.activeGenerator.getNumberOfParts()
+      try {
+        await this.activeGenerator.create(this._messageDefinitionObjects, this.multiChunkSize, this.singleChunkSize)
+        this.qrdata = await this.activeGenerator.nextPart()
+        this.qrError = ''
+        this.numberOfParts = await this.activeGenerator.getNumberOfParts()
+      } catch (e) {
+        console.log('QR generation error', e)
+        this.qrError = 'Message is not compatible with the selected QR code type. Please select another one.'
+      }
     } else {
       this.qrdata = ''
+      this.qrError = 'No QR type selected.'
       this.numberOfParts = 0
     }
   }

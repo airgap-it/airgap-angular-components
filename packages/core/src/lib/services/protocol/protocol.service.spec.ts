@@ -23,7 +23,7 @@ import {
   SubProtocolSymbols,
   NetworkType,
   ProtocolNetwork,
-  ICoinProtocol
+  ICoinProtocol,
 } from '@airgap/coinlib-core'
 import { duplicatesRemoved } from '../../utils/array'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
@@ -35,7 +35,7 @@ import {
   getDefaultPassiveSubProtocols
 } from './defaults'
 
-describe('ProtocolService', () => {
+fdescribe('ProtocolService', () => {
   let service: ProtocolService
 
   let tezosTestnet: TezosProtocolNetwork
