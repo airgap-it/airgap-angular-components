@@ -10,11 +10,15 @@ import { SerializerV2Generator } from '../../services/qr/qr-generators/serialize
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { BCURTypesGenerator } from '../../services/qr/qr-generators/bc-ur-generator'
 import { defaultValues } from '../../services/storage/storage.service'
+import { XPubGenerator } from '../../services/qr/qr-generators/xpub-generator'
+import { OutputDescriptorGenerator } from '../../services/qr/qr-generators/output-descriptor-generator'
 
 export enum QRType {
   V2 = 'QR Code V2',
   V3 = 'QR Code V3',
-  BC_UR = 'BC UR'
+  BC_UR = 'BC UR',
+  XPUB = 'xPub',
+  OUTPUT_DESCRIPTOR = 'Output Descriptor'
 }
 
 @Component({
@@ -72,6 +76,8 @@ export class IACQrComponent implements OnDestroy {
     this.generatorsMap.set(QRType.V2, v2Generator)
     this.availableQRTypes.push(QRType.V2)
     this.generatorsMap.set(QRType.BC_UR, new BCURTypesGenerator())
+    this.generatorsMap.set(QRType.OUTPUT_DESCRIPTOR, new OutputDescriptorGenerator())
+    this.generatorsMap.set(QRType.XPUB, new XPubGenerator())
 
     if (this.serializerService.useV3) {
       this.activeGenerator = v3Generator
@@ -114,6 +120,17 @@ export class IACQrComponent implements OnDestroy {
     // Add BC_UR type
     if (!this.availableQRTypes.includes(QRType.BC_UR) && (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects))) {
       this.availableQRTypes.push(QRType.BC_UR)
+    }
+    // Add Ouput Descriptor
+    if (
+      !this.availableQRTypes.includes(QRType.OUTPUT_DESCRIPTOR) &&
+      (await OutputDescriptorGenerator.canHandle(this._messageDefinitionObjects))
+    ) {
+      this.availableQRTypes.push(QRType.OUTPUT_DESCRIPTOR)
+    }
+    // Add xPub
+    if (!this.availableQRTypes.includes(QRType.XPUB) && (await XPubGenerator.canHandle(this._messageDefinitionObjects))) {
+      this.availableQRTypes.push(QRType.XPUB)
     }
 
     this.qrError = ''

@@ -30,14 +30,14 @@ export function getDefaultPassiveProtocols(): ICoinProtocol[] {
 
 export function getDefaultActiveProtocols(): ICoinProtocol[] {
   return [
-    new AeternityProtocol(),
     new BitcoinSegwitProtocol(),
     new EthereumProtocol(),
-    new GroestlcoinProtocol(),
     new TezosProtocol(),
-    new CosmosProtocol(),
     new PolkadotProtocol(),
     new KusamaProtocol(),
+    new CosmosProtocol(),
+    new AeternityProtocol(),
+    new GroestlcoinProtocol(),
     new BitcoinProtocol()
   ]
 }
