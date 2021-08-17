@@ -18,6 +18,8 @@ import {
   TezosYOU,
   TezosBTC,
   TezosUSD,
+  TezosETH,
+  TezosWrapped,
   SubProtocolSymbols,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
@@ -53,6 +55,8 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
     [tezosProtocol, new TezosYOU()],
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
+    [tezosProtocol, new TezosETH()],
+    [tezosProtocol, new TezosWrapped()],
     [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens.map(
       (token: Token) =>
