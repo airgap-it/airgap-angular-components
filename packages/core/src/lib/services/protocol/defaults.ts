@@ -19,6 +19,7 @@ import {
   TezosBTC,
   TezosUSD,
   SubProtocolSymbols,
+  MoonriverProtocol,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -37,6 +38,7 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new CosmosProtocol(),
     new PolkadotProtocol(),
     new KusamaProtocol(),
+    new MoonriverProtocol()
   ]
 }
 
