@@ -46,6 +46,11 @@ export abstract class BaseProtocolStoreService<
     return this._activeProtocols ?? this.notInitialized()
   }
 
+  public addActiveProtocols(protocols: CollectionType): void {
+    const activeProtocols: CollectionType = this._activeProtocols ?? this.notInitialized()
+    this._activeProtocols = this.mergeProtocols(protocols, activeProtocols)
+  }
+
   public init(config: ConfigType): void {
     if (this.isInitialized) {
       // eslint-disable-next-line no-console
