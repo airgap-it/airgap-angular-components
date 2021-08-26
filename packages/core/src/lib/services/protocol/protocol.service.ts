@@ -138,6 +138,26 @@ export class ProtocolService {
     }
   }
 
+  public async addActiveProtocol(protocol: ICoinProtocol): Promise<void> {
+    await this.waitReady()
+    if (this.mainProtocolStore.isIdentifierValid(protocol.identifier)) {
+      this.mainProtocolStore.addActiveProtocols([protocol])
+    }
+  }
+
+  public async isProtocolAvailable(protocolIdentifier: ProtocolSymbols, networkIdentifier: string): Promise<boolean> {
+    await this.waitReady()
+
+    const protocol: ICoinProtocol | undefined = this.mainProtocolStore.isIdentifierValid(protocolIdentifier)
+      ? this.mainProtocolStore.getProtocolByIdentifier(protocolIdentifier as MainProtocolSymbols, networkIdentifier, true, false)
+      : this.subProtocolStore.getProtocolByIdentifier(protocolIdentifier as SubProtocolSymbols, networkIdentifier, true, false)
+
+    if (protocol === undefined) {
+      return false
+    }
+    return true
+  }
+
   public async getSubProtocols(
     mainProtocol: ICoinProtocol | MainProtocolSymbols,
     network?: ProtocolNetwork | string,
