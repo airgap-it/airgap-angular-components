@@ -22,26 +22,7 @@ export class DeeplinkService {
   ) {}
 
   public async sameDeviceDeeplink(data: string | IACMessageDefinitionObjectV3[]): Promise<void> {
-    let deeplinkUrl = ''
-    let generator: IACQrGenerator
-    if (data && typeof data !== 'string') {
-      try {
-        generator = this.serializerService.useV3 ? new SerializerV3Generator() : new SerializerV2Generator()
-        await generator.create(data, Number.MAX_SAFE_INTEGER)
-      } catch (error) {
-        try {
-          generator = this.serializerService.useV3 ? new SerializerV2Generator() : new SerializerV3Generator()
-          await generator.create(data, Number.MAX_SAFE_INTEGER)
-        } catch (error) {
-          this.uiEventElementsService.invalidDeeplinkAlert().catch(console.error)
-        }
-      }
-
-      deeplinkUrl = await generator!.getSingle(this.appConfig.otherApp.urlScheme)
-    } else if (typeof data === 'string') {
-      deeplinkUrl = data
-    }
-
+    const deeplinkUrl = await this.generateDeepLinkUrl(data)
     return new Promise((resolve, reject) => {
       this.app
         .openUrl({ url: deeplinkUrl })
@@ -59,5 +40,26 @@ export class DeeplinkService {
           reject()
         })
     })
+  }
+
+  public async generateDeepLinkUrl(data: string | IACMessageDefinitionObjectV3[]): Promise<string> {
+    let generator: IACQrGenerator
+    if (data && typeof data !== 'string') {
+      try {
+        generator = this.serializerService.useV3 ? new SerializerV3Generator() : new SerializerV2Generator()
+        await generator.create(data, Number.MAX_SAFE_INTEGER)
+      } catch (error) {
+        try {
+          generator = this.serializerService.useV3 ? new SerializerV2Generator() : new SerializerV3Generator()
+          await generator.create(data, Number.MAX_SAFE_INTEGER)
+        } catch (error) {
+          this.uiEventElementsService.invalidDeeplinkAlert().catch(console.error)
+        }
+      }
+      return await generator!.getSingle(this.appConfig.otherApp.urlScheme)
+    } else if (typeof data === 'string') {
+      return data
+    }
+    return ''
   }
 }
