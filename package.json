@@ -24,8 +24,8 @@
   "dependencies": {
     "@airgap/angular-core": "file:packages/core",
     "@airgap/angular-ngrx": "file:packages/ngrx",
-    "@keystonehq/bc-ur-registry": "^0.3.1",
-    "bip32": "^2.0.6"
+    "@keystonehq/bc-ur-registry": "0.4.4",
+    "bip32": "2.0.6"
   },
   "devDependencies": {
     "@airgap/coinlib-core": "0.11.15-beta.1",
