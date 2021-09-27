@@ -28,7 +28,7 @@
     "bip32": "2.0.6"
   },
   "devDependencies": {
-    "@airgap/coinlib-core": "0.11.15-beta.1",
+    "@airgap/coinlib-core": "0.11.15-beta.2",
     "@angular-devkit/build-angular": "~0.1102.8",
     "@angular-devkit/core": "^11.2.9",
     "@angular-eslint/eslint-plugin": "2.1.0",
