@@ -86,7 +86,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   public async getProgress(): Promise<number> {
-    return Number(this.decoder.getProgress().toFixed(2))
+    return Number(this.decoder.estimatedPercentComplete().toFixed(2))
   }
 
   public async getResult(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
