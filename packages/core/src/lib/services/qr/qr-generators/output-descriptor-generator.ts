@@ -1,16 +1,7 @@
-import {
-  bufferFrom,
-  AccountShareResponse,
-  IACMessageDefinitionObjectV3,
-  UnsignedBitcoinTransaction,
-  MainProtocolSymbols
-} from '@airgap/coinlib-core'
+import { bufferFrom, AccountShareResponse, IACMessageDefinitionObjectV3, MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../../iac/qr-generator'
-import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
-import * as bip32 from 'bip32'
 
-import { CryptoKeypath, CryptoHDKey, CryptoOutput, ScriptExpressions, CryptoAccount, PathComponent, CryptoPSBT } from './registry'
 import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
 
 class ExtendedPublicKey {

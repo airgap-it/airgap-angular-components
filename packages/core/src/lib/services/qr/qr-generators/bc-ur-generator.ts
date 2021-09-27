@@ -10,7 +10,15 @@ import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import * as bip32 from 'bip32'
 
-import { CryptoKeypath, CryptoHDKey, CryptoOutput, ScriptExpressions, CryptoAccount, PathComponent, CryptoPSBT } from './registry/'
+import {
+  CryptoKeypath,
+  CryptoHDKey,
+  CryptoOutput,
+  ScriptExpressions,
+  CryptoAccount,
+  PathComponent,
+  CryptoPSBT
+} from '@keystonehq/bc-ur-registry'
 import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
 
 class ExtendedPublicKey {

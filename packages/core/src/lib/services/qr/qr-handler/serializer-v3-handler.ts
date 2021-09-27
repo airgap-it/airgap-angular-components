@@ -2,7 +2,7 @@ import { generateId, IACMessageDefinitionObjectV3, MainProtocolSymbols, Serializ
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
-import { CryptoPSBT } from '../qr-generators/registry'
+import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'
