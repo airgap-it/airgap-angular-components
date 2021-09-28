@@ -1,4 +1,4 @@
-import { generateId, IACMessageDefinitionObjectV3, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
+import { generateId, IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
@@ -129,7 +129,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     return {
       id: generateId(8),
       protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: 5,
+      type: IACMessageType.TransactionSignRequest,
       payload: {
         transaction: psbt,
         accountIdentifier: ''

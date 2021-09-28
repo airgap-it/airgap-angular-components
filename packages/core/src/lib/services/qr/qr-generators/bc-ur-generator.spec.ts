@@ -1,4 +1,4 @@
-import { IACMessageDefinitionObjectV3, MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols } from '@airgap/coinlib-core'
 import { BCURTypesGenerator } from './bc-ur-generator'
 
 describe('BCURTypesGenerator', () => {
@@ -16,7 +16,7 @@ describe('BCURTypesGenerator', () => {
     const data: IACMessageDefinitionObjectV3 = {
       id: 79370700,
       protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: 4,
+      type: IACMessageType.AccountShareResponse,
       payload: {
         publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
         isExtendedPublicKey: true,
@@ -39,7 +39,7 @@ describe('BCURTypesGenerator', () => {
   it('should generate a PSBT message', async () => {
     const data: IACMessageDefinitionObjectV3 = {
       id: 49255571,
-      type: 6,
+      type: IACMessageType.TransactionSignResponse,
       protocol: 'btc_segwit' as MainProtocolSymbols.BTC,
       payload: {
         transaction:

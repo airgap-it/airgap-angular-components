@@ -1,4 +1,4 @@
-import { generateId, IACMessageDefinitionObjectV3, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
+import { generateId, IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
 
@@ -98,6 +98,8 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
         return [this.convertPSBT(psbt)]
       }
 
+      // TODO: This will be needed in the future to import other accounts, eg. for a multisig setup
+
       // if (decoded.type === 'bytes') {
       //   const b = Bytes.fromCBOR(decoded.cbor);
       //   return b.getData();
@@ -130,6 +132,8 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
     this.parts = new Set()
     return
   }
+
+  // TODO: This will be necessary to import other accounts, eg. for a multisig setup
 
   // private convertCryptoAccount(cryptoAccount: CryptoAccount): IACMessageDefinitionObjectV3 {
   //   const descriptor = cryptoAccount.getOutputDescriptors()[0]
@@ -168,8 +172,8 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
 
   //   return {
   //     id: generateId(8),
-  //     protocol: MainProtocolSymbols.BTC,
-  //     type: 4,
+  //     protocol: MainProtocolSymbols.BTC_SEGWIT,
+  //     type: IACMessageType.AccountShareResponse,
   //     payload: {
   //       publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
   //       isExtendedPublicKey: true,
@@ -186,7 +190,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
     return {
       id: generateId(8),
       protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: 5,
+      type: IACMessageType.TransactionSignRequest,
       payload: {
         transaction: psbt,
         accountIdentifier: ''

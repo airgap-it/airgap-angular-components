@@ -1,4 +1,4 @@
-import { IACMessageDefinitionObjectV3, MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols } from '@airgap/coinlib-core'
 import { OutputDescriptorGenerator } from './output-descriptor-generator'
 
 describe('OutputDescriptorGenerator', () => {
@@ -16,7 +16,7 @@ describe('OutputDescriptorGenerator', () => {
     const data: IACMessageDefinitionObjectV3 = {
       id: 79370700,
       protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: 4,
+      type: IACMessageType.AccountShareResponse,
       payload: {
         publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
         isExtendedPublicKey: true,

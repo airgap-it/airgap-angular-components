@@ -20,6 +20,7 @@ import {
   CryptoPSBT
 } from '@keystonehq/bc-ur-registry'
 import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
+import { UnsignedBitcoinSegwitTransaction } from '@airgap/coinlib-core/serializer-v3/schemas/definitions/unsigned-transaction-bitcoin-segwit' // TODO: Use import from index
 
 class ExtendedPublicKey {
   private readonly rawKey: Buffer
@@ -117,9 +118,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
   private async generateCryptoAccountMessage(data: IACMessageDefinitionObjectV3) {
     const account = data.payload as AccountShareResponse
 
-    const key = new ExtendedPublicKey(account.publicKey)
-    console.log('key.getRawKey()', bufferFrom(key.getRawKey(), undefined))
-    const x = bip32.fromBase58(new ExtendedPublicKey(account.publicKey).toXpub())
+    const extendedPublicKey = bip32.fromBase58(new ExtendedPublicKey(account.publicKey).toXpub())
 
     const cryptoKeyPathComponents = []
     for (const component of account.derivationPath.split('/')) {
@@ -129,22 +128,15 @@ export class BCURTypesGenerator extends IACQrGenerator {
       cryptoKeyPathComponents.push(new PathComponent({ index, hardened }))
     }
 
-    console.log('account.masterFingerprint', bufferFrom(account.masterFingerprint, 'hex'))
-    console.log('x.publicKey', x.publicKey)
-    console.log('x.chainCode', x.chainCode)
-    console.log('x.parentFingerprint', x.parentFingerprint, bufferFrom(new Int32Array([x.parentFingerprint]).buffer, undefined))
-
-    // console.log('details', details)
-
     const cryptoAccount = new CryptoAccount(bufferFrom(account.masterFingerprint, 'hex'), [
       new CryptoOutput(
         [ScriptExpressions.WITNESS_PUBLIC_KEY_HASH],
         new CryptoHDKey({
           isMaster: false,
-          key: x.publicKey,
-          chainCode: x.chainCode,
-          origin: new CryptoKeypath(cryptoKeyPathComponents, x.fingerprint, x.depth),
-          parentFingerprint: bufferFrom(new Int32Array([x.parentFingerprint]).buffer, undefined),
+          key: extendedPublicKey.publicKey,
+          chainCode: extendedPublicKey.chainCode,
+          origin: new CryptoKeypath(cryptoKeyPathComponents, extendedPublicKey.fingerprint, extendedPublicKey.depth),
+          parentFingerprint: bufferFrom(new Int32Array([extendedPublicKey.parentFingerprint]).buffer, undefined),
           name: account.groupLabel
         })
       )
@@ -154,9 +146,10 @@ export class BCURTypesGenerator extends IACQrGenerator {
   }
 
   private async generatePSBTMessage(data: IACMessageDefinitionObjectV3): Promise<CryptoPSBT> {
-    const transaction = data.payload as UnsignedBitcoinTransaction // TODO: BitcoinSegwit
+    const transaction = data.payload as UnsignedBitcoinSegwitTransaction
 
-    const psbt = bufferFrom(transaction.transaction as any, 'hex')
+    const psbt = bufferFrom(transaction.transaction, 'hex')
+
     const cryptoPSBT = new CryptoPSBT(psbt)
 
     return cryptoPSBT
