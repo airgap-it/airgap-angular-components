@@ -9,9 +9,7 @@
     "paths": {
       "rxjs": ["../../node_modules/rxjs"],
       "rxjs/*": ["../../node_modules/rxjs/*"]
-    },
-    "strict": false,
-    "skipLibCheck": true
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/test.ts", "**/*.spec.ts", "src/typings"]

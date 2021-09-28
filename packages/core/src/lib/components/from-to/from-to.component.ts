@@ -21,6 +21,8 @@ export class FromToComponent {
   }
 
   public copyToClipboard(): void {
-    this.clipboardService.copyAndShowToast(JSON.stringify(this.transaction.transactionDetails))
+    if (this.transaction) {
+      this.clipboardService.copyAndShowToast(JSON.stringify(this.transaction.transactionDetails))
+    }
   }
 }
