@@ -53,8 +53,6 @@ export class OutputDescriptorGenerator extends IACQrGenerator {
     const dpWithoutPrefix = account.derivationPath.slice(1)
     const dpWithoutUnhardened = dpWithoutPrefix.slice(0, dpWithoutPrefix.lastIndexOf("'") + 1)
 
-    // TODO: Checksum? It doesn't seem to be necessary, but we should still find out how to generate it and add it
-    // TODO: Is 0/* correct? How should we handle custom derivation paths?
     return `wpkh([${account.masterFingerprint}${dpWithoutUnhardened}]${account.publicKey}/0/*)`
   }
 }
