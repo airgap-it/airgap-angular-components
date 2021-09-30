@@ -8,11 +8,17 @@ import { IACQrGenerator } from '../../services/iac/qr-generator'
 import { SerializerV3Generator } from '../../services/qr/qr-generators/serializer-v3-generator'
 import { SerializerV2Generator } from '../../services/qr/qr-generators/serializer-v2-generator'
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
+import { BCURTypesGenerator } from '../../services/qr/qr-generators/bc-ur-generator'
 import { defaultValues } from '../../services/storage/storage.service'
+import { XPubGenerator } from '../../services/qr/qr-generators/xpub-generator'
+import { OutputDescriptorGenerator } from '../../services/qr/qr-generators/output-descriptor-generator'
 
 export enum QRType {
   V2 = 'QR Code V2',
-  V3 = 'QR Code V3'
+  V3 = 'QR Code V3',
+  BC_UR = 'BC UR (Beta)',
+  XPUB = 'xPub (Beta)',
+  OUTPUT_DESCRIPTOR = 'Output Descriptor (Beta)'
 }
 
 @Component({
@@ -66,8 +72,12 @@ export class IACQrComponent implements OnDestroy {
     const v2Generator = new SerializerV2Generator()
 
     this.generatorsMap.set(QRType.V3, v3Generator)
-    this.availableQRTypes.push(QRType.V3)
     this.generatorsMap.set(QRType.V2, v2Generator)
+    this.generatorsMap.set(QRType.BC_UR, new BCURTypesGenerator())
+    this.generatorsMap.set(QRType.OUTPUT_DESCRIPTOR, new OutputDescriptorGenerator())
+    this.generatorsMap.set(QRType.XPUB, new XPubGenerator())
+
+    this.availableQRTypes.push(QRType.V3)
     this.availableQRTypes.push(QRType.V2)
 
     if (this.serializerService.useV3) {
@@ -108,6 +118,22 @@ export class IACQrComponent implements OnDestroy {
   }
 
   private async convertToDataArray(): Promise<void> {
+    // Add BC_UR type, if supported
+    if (!this.availableQRTypes.includes(QRType.BC_UR) && (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects))) {
+      this.availableQRTypes.push(QRType.BC_UR)
+    }
+    // Add Ouput Descriptor, if supported
+    if (
+      !this.availableQRTypes.includes(QRType.OUTPUT_DESCRIPTOR) &&
+      (await OutputDescriptorGenerator.canHandle(this._messageDefinitionObjects))
+    ) {
+      this.availableQRTypes.push(QRType.OUTPUT_DESCRIPTOR)
+    }
+    // Add xPub, if supported
+    if (!this.availableQRTypes.includes(QRType.XPUB) && (await XPubGenerator.canHandle(this._messageDefinitionObjects))) {
+      this.availableQRTypes.push(QRType.XPUB)
+    }
+
     this.qrError = ''
     if (this.activeGenerator) {
       try {

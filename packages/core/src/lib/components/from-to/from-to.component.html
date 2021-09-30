@@ -75,6 +75,7 @@
         <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" slot="end"></ion-toggle>
       </ion-item>
       <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
+      <ion-button *ngIf="displayRawData" (click)="copyToClipboard()">Copy data to clipboard</ion-button>
     </ion-col>
   </ion-row>
 </ng-container>
