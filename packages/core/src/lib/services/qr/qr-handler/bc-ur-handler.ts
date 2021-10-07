@@ -1,12 +1,11 @@
 import { generateId, IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
-import * as bs58check from 'bs58check'
 import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
+
 import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 
-export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
-  public readonly name: string = 'SerializerV3Handler'
-  private readonly serializer: SerializerV3
+export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
+  public readonly name: string = 'BCURTypesHandler'
   private decoder: URDecoder = new URDecoder()
 
   private readonly callback: any = (): void => undefined
@@ -16,7 +15,6 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   private combinedData: Buffer | undefined
 
   constructor(callback: any = (): void => undefined) {
-    this.serializer = new SerializerV3()
     this.callback = callback
     // completion callback
   }
@@ -86,22 +84,32 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   public async getProgress(): Promise<number> {
-    return Number(this.decoder.estimatedPercentComplete().toFixed(2))
+    return Number(this.decoder.getProgress().toFixed(2))
   }
 
   public async getResult(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
     if (this.decoder.isComplete() && this.decoder.isSuccess()) {
       const decoded = this.decoder.resultUR()
-      this.combinedData = decoded.decodeCBOR()
-      console.log('TYPE ', decoded.type)
+      this.combinedData = decoded.cbor
+
       if (decoded.type === 'crypto-psbt') {
         const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor)
         const psbt = cryptoPsbt.getPSBT().toString('hex')
         return [this.convertPSBT(psbt)]
       }
 
-      const resultUr = bs58check.encode(this.combinedData)
-      return await this.serializer.deserialize(resultUr)
+      // TODO: This will be needed in the future to import other accounts, eg. for a multisig setup
+
+      // if (decoded.type === 'bytes') {
+      //   const b = Bytes.fromCBOR(decoded.cbor);
+      //   return b.getData();
+      // }
+
+      // const cryptoAccount = CryptoAccount.fromCBOR(decoded.cbor)
+
+      // console.log('cryptoAccount', cryptoAccount)
+
+      // return [this.convertCryptoAccount(cryptoAccount)]
     }
 
     return undefined
@@ -124,6 +132,59 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     this.parts = new Set()
     return
   }
+
+  // TODO: This will be necessary to import other accounts, eg. for a multisig setup
+
+  // private convertCryptoAccount(cryptoAccount: CryptoAccount): IACMessageDefinitionObjectV3 {
+  //   const descriptor = cryptoAccount.getOutputDescriptors()[0]
+
+  //   // now, crafting zpub out of data we have
+  //   const hdKey = descriptor.getCryptoKey()
+  //   if (!(hdKey instanceof CryptoHDKey)) {
+  //     return undefined
+  //   }
+  //   const derivationPath = 'm/' + hdKey.getOrigin().getPath()
+  //   // const script = descriptor.getScriptExpressions()[0].getExpression()
+  //   const isMultisig = false
+  //   const version = Buffer.from(isMultisig ? '02aa7ed3' : '04b24746', 'hex')
+  //   const parentFingerprint = hdKey.getParentFingerprint()
+  //   const depth = hdKey.getOrigin().getDepth()
+  //   const depthBuf = Buffer.alloc(1)
+  //   depthBuf.writeUInt8(depth)
+  //   const components = hdKey.getOrigin().getComponents()
+  //   const lastComponents = components[components.length - 1]
+  //   const index = lastComponents.isHardened() ? lastComponents.getIndex() + 0x80000000 : lastComponents.getIndex()
+  //   const indexBuf = Buffer.alloc(4)
+  //   indexBuf.writeUInt32BE(index)
+  //   const chainCode = hdKey.getChainCode()
+  //   const key = hdKey.getKey()
+  //   const data = Buffer.concat([version, depthBuf, parentFingerprint, indexBuf, chainCode, key])
+
+  //   const zpub = b58.encode(data)
+
+  //   const result = {}
+  //   result.ExtPubKey = zpub
+  //   result.MasterFingerprint = cryptoAccount.getMasterFingerprint().toString('hex').toUpperCase()
+  //   result.AccountKeyPath = derivationPath
+
+  //   const str = JSON.stringify(result)
+  //   return Buffer.from(str, 'ascii').toString('hex') // we are expected to return hex-encoded string
+
+  //   return {
+  //     id: generateId(8),
+  //     protocol: MainProtocolSymbols.BTC_SEGWIT,
+  //     type: IACMessageType.AccountShareResponse,
+  //     payload: {
+  //       publicKey: 'zpub6s1D4v39zP2hNjAtAFRZ7J59W8tK9txcqgSM1STVQHq2AyUoM3eyXqCfXbweMCT5c69EQCz4rMgZQeMyKWfCvfeQVLCGQeCsGVdWkmQ3D4F',
+  //       isExtendedPublicKey: true,
+  //       derivationPath: "m/84'/0'/0'/0/1",
+  //       masterFingerprint: cryptoAccount.getMasterFingerprint().toString('hex'),
+  //       isActive: true,
+  //       groupId: cryptoAccount.getMasterFingerprint().toString('hex'),
+  //       groupLabel: descriptor.getCryptoKey()
+  //     }
+  //   }
+  // }
 
   private convertPSBT(psbt: string): IACMessageDefinitionObjectV3 {
     return {

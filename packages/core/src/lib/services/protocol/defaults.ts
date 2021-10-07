@@ -1,6 +1,7 @@
 import {
   ICoinProtocol,
   AeternityProtocol,
+  BitcoinSegwitProtocol,
   BitcoinProtocol,
   EthereumProtocol,
   GroestlcoinProtocol,
@@ -20,6 +21,9 @@ import {
   TezosUSD,
   SubProtocolSymbols,
   MoonriverProtocol,
+  MoonriverProtocolOptions,
+  MoonriverProtocolNetwork,
+  MoonriverSubscanBlockExplorer,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -30,15 +34,25 @@ export function getDefaultPassiveProtocols(): ICoinProtocol[] {
 
 export function getDefaultActiveProtocols(): ICoinProtocol[] {
   return [
-    new AeternityProtocol(),
-    new BitcoinProtocol(),
+    new BitcoinSegwitProtocol(),
     new EthereumProtocol(),
-    new GroestlcoinProtocol(),
     new TezosProtocol(),
-    new CosmosProtocol(),
     new PolkadotProtocol(),
     new KusamaProtocol(),
-    new MoonriverProtocol()
+    new CosmosProtocol(),
+    new AeternityProtocol(),
+    new GroestlcoinProtocol(),
+    new MoonriverProtocol(
+      new MoonriverProtocolOptions(
+        new MoonriverProtocolNetwork(
+          undefined, 
+          undefined, 
+          undefined, 
+          new MoonriverSubscanBlockExplorer('https://moonriver.subscan.io')
+        )
+      )
+    ),
+    new BitcoinProtocol()
   ]
 }
 

@@ -50,12 +50,12 @@ export const convertV3ToV2 = async (chunks: IACMessageDefinitionObjectV3[]): Pro
         const { masterFingerprint, isActive, groupId, groupLabel, ...rest } = message.payload as AccountShareResponseV3
         newPayload = {
           ...message.payload
-        }
+        } as any
         newPayload = rest
         break
 
       default:
-        newPayload = message.payload as Exclude<IACMessagesV3, AccountShareResponseV3>
+        newPayload = (message.payload as Exclude<IACMessagesV3, AccountShareResponseV3>) as any
         break
     }
 

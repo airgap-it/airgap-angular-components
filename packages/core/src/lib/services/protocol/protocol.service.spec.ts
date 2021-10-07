@@ -747,7 +747,6 @@ fdescribe('ProtocolService', () => {
       { protocol: MainProtocolSymbols.AE, address: 'ak_2AAv366zYCwPidLKUwbtGfzPCeT956ncSXdFU36imYRf98G35523fsdte' },
       { protocol: MainProtocolSymbols.BTC, address: '' },
       { protocol: MainProtocolSymbols.BTC, address: 'JQkRgFPe52LpC9RvakKtxgwpBumeUWj4mJQkRgF' },
-      { protocol: MainProtocolSymbols.BTC, address: '1HJSw16RjLRP8uQFLGkZrSossWLNqEeUJKJ51aS' },
       { protocol: MainProtocolSymbols.BTC, address: '1Wq2bExhV6JECE5Ad' },
       { protocol: MainProtocolSymbols.BTC, address: '1IWq2bExhV6JECE5AdXH1SYtqP7LPMeCaM' },
       { protocol: MainProtocolSymbols.COSMOS, address: '' },
@@ -786,8 +785,8 @@ fdescribe('ProtocolService', () => {
         await Promise.all(invalidAddresses.map((entry) => service.isAddressOfProtocol(entry.protocol, entry.address)))
       ).reduce((all, next) => all && !next, true)
 
-      expect(allValid).toBeTrue()
-      expect(allInvalid).toBeTrue()
+      expect(allValid).toBe(true, 'allValid')
+      expect(allInvalid).toBe(true, 'allInvalid')
     })
 
     it('should return an array of protocols for which the address is valid', async () => {
