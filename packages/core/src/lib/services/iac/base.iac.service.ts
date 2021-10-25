@@ -19,7 +19,11 @@ export abstract class BaseIACService {
   private scanAgainCallback: ScanAgainCallback | undefined = undefined
 
   protected readonly serializerMessageHandlers: {
-    [key in IACMessageType]: (deserializedSync: IACMessageDefinitionObjectV3[], scanAgainCallback: ScanAgainCallback) => Promise<boolean>
+    [key in IACMessageType]: (
+      deserializedSync: IACMessageDefinitionObjectV3[],
+      transport: IACMessageTransport,
+      scanAgainCallback: ScanAgainCallback
+    ) => Promise<boolean>
   }
 
   constructor(
@@ -120,11 +124,13 @@ export abstract class BaseIACService {
           // TODO: Improve types
           const typedType: IACMessageType = parseInt(type, 10)
           // eslint-disable-next-line no-console
-          this.serializerMessageHandlers[typedType](groupedByType[typedType] ?? [], this.scanAgainCallback!).catch(console.error)
+          this.serializerMessageHandlers[typedType](groupedByType[typedType] ?? [], this.transport!, this.scanAgainCallback!).catch(
+            console.error
+          )
         } else {
           // TODO: Improve types
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
-          this.syncTypeNotSupportedAlert(deserializedSync, this.scanAgainCallback!).catch(console.error)
+          this.syncTypeNotSupportedAlert(deserializedSync, this.transport!, this.scanAgainCallback!).catch(console.error)
 
           return IACHandlerStatus.UNSUPPORTED
         }
@@ -159,6 +165,7 @@ export abstract class BaseIACService {
 
   protected async syncTypeNotSupportedAlert(
     messageDefinitionObjects: IACMessageDefinitionObjectV3[],
+    _transport: IACMessageTransport,
     scanAgainCallback: ScanAgainCallback
   ): Promise<boolean> {
     const relayHandler = () => {
