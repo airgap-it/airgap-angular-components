@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core'
-import { ClipboardPlugin } from '@capacitor/core'
+import { ClipboardPlugin } from '@capacitor/clipboard'
 
 // TODO: import { ErrorCategory, handleErrorLocal } from './../error-handler/error-handler.service'
 import { CLIPBOARD_PLUGIN } from '../../capacitor-plugins/injection-tokens'
