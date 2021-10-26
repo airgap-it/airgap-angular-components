@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@angular/core'
-import { AppPlugin } from '@capacitor/core'
+import { AppLauncherPlugin } from '@capacitor/app-launcher'
 
 import { AppConfig, APP_CONFIG } from '../../config/app-config'
-import { APP_PLUGIN } from '../../capacitor-plugins/injection-tokens'
+import { APP_LAUNCHER_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../iac/qr-generator'
@@ -17,14 +17,14 @@ export class DeeplinkService {
   constructor(
     private readonly uiEventElementsService: UiEventElementsService,
     private readonly serializerService: SerializerService,
-    @Inject(APP_PLUGIN) private readonly app: AppPlugin,
+    @Inject(APP_LAUNCHER_PLUGIN) private readonly appLauncher: AppLauncherPlugin,
     @Inject(APP_CONFIG) private readonly appConfig: AppConfig
   ) {}
 
   public async sameDeviceDeeplink(data: string | IACMessageDefinitionObjectV3[]): Promise<void> {
     const deeplinkUrl = await this.generateDeepLinkUrl(data)
     return new Promise((resolve, reject) => {
-      this.app
+      this.appLauncher
         .openUrl({ url: deeplinkUrl })
         .then(() => {
           // eslint-disable-next-line no-console
