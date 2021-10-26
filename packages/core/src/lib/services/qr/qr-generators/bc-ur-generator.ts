@@ -148,7 +148,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
   private async generatePSBTMessage(data: IACMessageDefinitionObjectV3): Promise<CryptoPSBT> {
     const transaction = data.payload as UnsignedBitcoinSegwitTransaction
 
-    const psbt = bufferFrom(transaction.transaction, 'hex')
+    const psbt = bufferFrom(transaction.transaction.psbt, 'hex')
 
     const cryptoPSBT = new CryptoPSBT(psbt)
 
