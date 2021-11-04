@@ -49,7 +49,11 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
   }
 
   public isIdentifierValid(identifier: string): boolean {
-    return Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) || this.ethTokenIdentifiers.has(identifier)
+    return (
+      Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) 
+        || this.ethTokenIdentifiers.has(identifier)
+        || Object.values(MainProtocolSymbols).includes(getMainIdentifier(identifier as SubProtocolSymbols) as MainProtocolSymbols)
+    )
   }
 
   public getProtocolByIdentifier(
