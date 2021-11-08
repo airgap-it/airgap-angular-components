@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnChanges } from '@angular/core'
+import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { UIResource, UIResourceStatus } from '../../../public-api'
 
 const DEFAULT_SYMBOL_URL = './assets/symbols/generic-coin.svg'
@@ -11,17 +11,23 @@ const DEFAULT_SYMBOL_URL = './assets/symbols/generic-coin.svg'
 export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
   public symbol: string | undefined
-
+  
   public symbolAsset: UIResource<string> = {
     status: UIResourceStatus.IDLE,
     value: DEFAULT_SYMBOL_URL
   }
-
+  
   public ngAfterViewInit(): void {
     this.loadImage()
   }
-
-  public ngOnChanges(): void {
+  
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.symbol.previousValue !== changes.symbol.currentValue) {
+      this.symbolAsset = {
+        status: UIResourceStatus.IDLE,
+        value: this.symbolAsset.value
+      }
+    }
     this.loadImage()
   }
 
