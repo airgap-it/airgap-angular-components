@@ -35,7 +35,7 @@ import {
   getDefaultPassiveSubProtocols
 } from './defaults'
 
-fdescribe('ProtocolService', () => {
+describe('ProtocolService', () => {
   let service: ProtocolService
 
   let tezosTestnet: TezosProtocolNetwork

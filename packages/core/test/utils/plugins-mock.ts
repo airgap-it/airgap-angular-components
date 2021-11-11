@@ -23,12 +23,18 @@ export class ClipboardMock {
   public write: jasmine.Spy = newSpy('write', Promise.resolve())
 }
 
-export class AppPluginMock {
-  public openUrl: jasmine.Spy = newSpy('openUrl', Promise.resolve({ value: 'text-from-clipboard' }))
+export class AppLauncherPluginMock {
+  public openUrl: jasmine.Spy = newSpy('openUrl', Promise.resolve())
 }
 
 export class PermissionsPluginMock {
   public query: jasmine.Spy = newSpy('query', Promise.resolve({ value: true }))
+}
+
+export class FilesystemPluginMock {
+  public readFile: jasmine.Spy = newSpy('readFile', Promise.resolve({ data: 'text-from-filesystem' }))
+  public writeFile: jasmine.Spy = newSpy('writeFile', Promise.resolve())
+  public readdir: jasmine.Spy = newSpy('readdir', Promise.resolve({ files: [] }))
 }
 
 export class InternalStorageServiceMock {

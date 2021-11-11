@@ -18,7 +18,7 @@ import {
   getDefaultPassiveSubProtocols,
   getDefaultActiveSubProtocols
 } from './defaults'
-import { getMainIdentifier } from '../../../public-api'
+import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 
 export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
