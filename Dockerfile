@@ -29,7 +29,7 @@ RUN chmod +x ./npm-ci-publish-beta-only.sh
 RUN chmod +x ./npm-ci-publish.sh
 
 # install dependencies
-RUN npm install 
+RUN npm install --legacy-peer-deps
 
 # set to production
 RUN export NODE_ENV=production

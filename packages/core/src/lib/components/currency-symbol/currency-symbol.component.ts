@@ -1,75 +1,36 @@
-import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core'
-import { UIResource, UIResourceStatus } from '../../../public-api'
-
-const DEFAULT_SYMBOL_URL = './assets/symbols/generic-coin.svg'
+import { AfterViewInit, Component, Inject, Input, OnChanges, SimpleChanges } from '@angular/core'
+import { first } from 'rxjs/operators'
+import { CurrencySymbolCoreFacade, CurrencySymbolFacade, CURRENCY_SYMBOL_FACADE } from './currency-symbol.facade'
 
 @Component({
   selector: 'airgap-currency-symbol',
   templateUrl: './currency-symbol.component.html',
-  styleUrls: ['./currency-symbol.component.scss']
+  styleUrls: ['./currency-symbol.component.scss'],
+  providers: [
+    { provide: CURRENCY_SYMBOL_FACADE, useClass: CurrencySymbolCoreFacade },
+  ]
 })
 export class CurrencySymbolComponent implements AfterViewInit, OnChanges {
   @Input()
   public symbol: string | undefined
-  
-  public symbolAsset: UIResource<string> = {
-    status: UIResourceStatus.IDLE,
-    value: DEFAULT_SYMBOL_URL
-  }
+
+  public constructor(@Inject(CURRENCY_SYMBOL_FACADE) public readonly facade: CurrencySymbolFacade) {}
   
   public ngAfterViewInit(): void {
-    this.loadImage()
+    this.facade.onInit(this.symbol)
   }
   
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.symbol.previousValue !== changes.symbol.currentValue) {
-      this.symbolAsset = {
-        status: UIResourceStatus.IDLE,
-        value: this.symbolAsset.value
-      }
-    }
-    this.loadImage()
-  }
-
-  public onError(): void {
-    this.symbolAsset = {
-      status: UIResourceStatus.ERROR,
-      value: this.symbolAsset.value
-    }
-    this.loadImage()
-  }
-
-  private loadImage(): void {
-    if (this.symbol !== undefined) {
-      this.symbolAsset = this.getSymbolAsset()
+      this.facade.onSymbolChanged(changes.symbol.currentValue)
     }
   }
 
-  private getSymbolAsset(): UIResource<string> {
-    if (this.symbolAsset.status === UIResourceStatus.IDLE) {
-      // try with .svg by default
-      return {
-        status: UIResourceStatus.SUCCESS,
-        value: this.getSymbolURL('svg')
-      }
-    } else if (this.symbolAsset.status === UIResourceStatus.SUCCESS) {
-      return this.symbolAsset
-    } else if (this.symbolAsset.status === UIResourceStatus.ERROR && this.symbolAsset.value === this.getSymbolURL('svg')) {
-      // .svg not found, use .png as a fallback
-      return {
-        status: UIResourceStatus.SUCCESS,
-        value: this.getSymbolURL('png')
-      }
-    } else if (this.symbolAsset.status === UIResourceStatus.ERROR && this.symbolAsset.value === this.getSymbolURL('png')) {
-      // no image was found for the symbol, use the generic image
-      return {
-        status: UIResourceStatus.SUCCESS,
-        value: DEFAULT_SYMBOL_URL
-      }
-    }
-  }
+  public async onError(): Promise<void> {
+    const symbolSrc = await this.facade.symbolSrc$
+      .pipe(first())
+      .toPromise()
 
-  private getSymbolURL(extension: 'svg' | 'png'): string {
-    return `./assets/symbols/${this.symbol.toLowerCase()}.${extension}`
+    this.facade.onError(this.symbol, symbolSrc)
   }
 }

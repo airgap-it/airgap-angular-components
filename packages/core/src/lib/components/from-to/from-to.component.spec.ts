@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { ClipboardMock } from '../../../../test/utils/plugins-mock'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
+import { CLIPBOARD_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { FromToComponent } from './from-to.component'
 
 describe('FromToComponent', () => {
@@ -12,7 +14,9 @@ describe('FromToComponent', () => {
   beforeEach(
     waitForAsync(async () => {
       testBedUtils = new TestBedUtils()
-      await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+      await TestBed.configureTestingModule(testBedUtils.moduleDef({
+        providers: [{ provide: CLIPBOARD_PLUGIN, useValue: new ClipboardMock() }]
+      })).compileComponents()
     })
   )
 

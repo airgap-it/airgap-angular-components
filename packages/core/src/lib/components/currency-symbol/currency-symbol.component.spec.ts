@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { FilesystemPluginMock } from '../../../../test/utils/plugins-mock'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
+import { FILESYSTEM_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { CurrencySymbolComponent } from './currency-symbol.component'
 
 describe('CurrencySymbolComponent', () => {
@@ -9,10 +11,15 @@ describe('CurrencySymbolComponent', () => {
 
   let testBedUtils: TestBedUtils
 
+  let filesystemPluginMock: FilesystemPluginMock
+
   beforeEach(
     waitForAsync(async () => {
       testBedUtils = new TestBedUtils()
-      await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+      filesystemPluginMock = new FilesystemPluginMock()
+      await TestBed.configureTestingModule(testBedUtils.moduleDef({
+        providers: [{ provide: FILESYSTEM_PLUGIN, useValue: filesystemPluginMock }]
+      })).compileComponents()
     })
   )
 
