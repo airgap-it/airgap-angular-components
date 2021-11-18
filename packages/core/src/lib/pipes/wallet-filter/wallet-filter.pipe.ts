@@ -1,9 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core'
-import { AirGapWallet, AirGapWalletStatus } from '@airgap/coinlib-core'
+import { AirGapWallet, AirGapWalletStatus, ProtocolNetwork } from '@airgap/coinlib-core'
 
 interface WalletFilterPipeArgs {
   symbol?: string
   status?: AirGapWalletStatus | AirGapWalletStatus[]
+  network?: string | ProtocolNetwork
 }
 
 @Pipe({
@@ -17,19 +18,22 @@ export class WalletFilterPipe implements PipeTransform {
 
     const symbol: string | undefined = args?.symbol
     const status: AirGapWalletStatus | AirGapWalletStatus[] | undefined = args?.status
+    const network: string | ProtocolNetwork | undefined = args?.network
 
-    if (symbol === undefined && status === undefined) {
+    if (!symbol && !status && !network) {
       return items
     } else {
       return items.filter((wallet: AirGapWallet) => {
         const symbolCompliant: boolean =
-          symbol === undefined ||
+          !symbol ||
           wallet.protocol.symbol.toLowerCase().includes(symbol) ||
           wallet.protocol.name.toLowerCase().includes(symbol)
         const statusCompliant: boolean =
-          status === undefined || (Array.isArray(status) ? status.includes(wallet.status) : wallet.status === status)
+          !status || (Array.isArray(status) ? status.includes(wallet.status) : wallet.status === status)
+        const networkCompliant: boolean =
+          !network || wallet.protocol.options.network.identifier === (typeof network === 'string' ? network : network.identifier)
 
-        return symbolCompliant && statusCompliant
+        return symbolCompliant && statusCompliant && networkCompliant
       })
     }
   }
