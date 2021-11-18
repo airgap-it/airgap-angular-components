@@ -1,4 +1,11 @@
-import { generateId, IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, SerializerV3 } from '@airgap/coinlib-core'
+import {
+  generateId,
+  IACMessageDefinitionObjectV3,
+  IACMessageType,
+  MainProtocolSymbols,
+  SerializerV3,
+  UnsignedBitcoinSegwitTransaction
+} from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
@@ -126,14 +133,16 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   private convertPSBT(psbt: string): IACMessageDefinitionObjectV3 {
+    const payload: UnsignedBitcoinSegwitTransaction = {
+      transaction: { psbt },
+      publicKey: ''
+    }
+
     return {
       id: generateId(8),
       protocol: MainProtocolSymbols.BTC_SEGWIT,
       type: IACMessageType.TransactionSignRequest,
-      payload: {
-        transaction: psbt,
-        accountIdentifier: ''
-      }
+      payload
     }
   }
 }

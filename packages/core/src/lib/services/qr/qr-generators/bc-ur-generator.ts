@@ -2,8 +2,8 @@ import {
   bufferFrom,
   AccountShareResponse,
   IACMessageDefinitionObjectV3,
-  UnsignedBitcoinTransaction,
-  MainProtocolSymbols
+  MainProtocolSymbols,
+  SignedBitcoinSegwitTransaction
 } from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../../iac/qr-generator'
 import { UR, UREncoder } from '@ngraveio/bc-ur'
@@ -20,7 +20,6 @@ import {
   CryptoPSBT
 } from '@keystonehq/bc-ur-registry'
 import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
-import { UnsignedBitcoinSegwitTransaction } from '@airgap/coinlib-core/serializer-v3/schemas/definitions/unsigned-transaction-bitcoin-segwit' // TODO: Use import from index
 
 class ExtendedPublicKey {
   private readonly rawKey: Buffer
@@ -146,9 +145,9 @@ export class BCURTypesGenerator extends IACQrGenerator {
   }
 
   private async generatePSBTMessage(data: IACMessageDefinitionObjectV3): Promise<CryptoPSBT> {
-    const transaction = data.payload as UnsignedBitcoinSegwitTransaction
+    const transaction = data.payload as SignedBitcoinSegwitTransaction
 
-    const psbt = bufferFrom(transaction.transaction.psbt, 'hex')
+    const psbt = bufferFrom(transaction.transaction, 'hex')
 
     const cryptoPSBT = new CryptoPSBT(psbt)
 
