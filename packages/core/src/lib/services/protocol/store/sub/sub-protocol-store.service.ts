@@ -29,10 +29,10 @@ export interface SubProtocolStoreConfig {
   providedIn: 'root'
 })
 export class SubProtocolStoreService extends BaseProtocolStoreService<
-  ICoinSubProtocol,
-  SubProtocolSymbols,
-  SubProtocolsMap,
-  SubProtocolStoreConfig
+ICoinSubProtocol,
+SubProtocolSymbols,
+SubProtocolsMap,
+SubProtocolStoreConfig
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
@@ -50,9 +50,9 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
 
   public isIdentifierValid(identifier: string): boolean {
     return (
-      Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) 
-        || this.ethTokenIdentifiers.has(identifier)
-        || Object.values(MainProtocolSymbols).includes(getMainIdentifier(identifier as SubProtocolSymbols) as MainProtocolSymbols)
+      Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols)
+      || this.ethTokenIdentifiers.has(identifier)
+      || Object.values(MainProtocolSymbols).includes(getMainIdentifier(identifier as SubProtocolSymbols) as MainProtocolSymbols)
     )
   }
 
@@ -71,7 +71,12 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
       const found = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
 
       if (!found && retry) {
-        return this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+        const mainnetProtocol = this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+        if (mainnetProtocol === undefined) {
+          const protocols = Object.values(subProtocolsMap).map(values => values[identifier])
+          return protocols.find(protocol => protocol?.identifier === identifier)
+        }
+        return mainnetProtocol
       }
       return found
     } catch (error) {

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core'
 import BigNumber from 'bignumber.js'
-import { ICoinProtocol, ProtocolSymbols } from '@airgap/coinlib-core'
+import { ICoinProtocol, ProtocolNetwork, ProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 type AmountConverterValue = BigNumber | string | number | null | undefined
@@ -8,6 +8,7 @@ type AmountConverterValue = BigNumber | string | number | null | undefined
 interface AmountConverterArgs {
   protocol: ICoinProtocol | ProtocolSymbols | undefined | null
   maxDigits?: number
+  network?: ProtocolNetwork | string
 }
 
 interface AmountConverterNumberFormat {
@@ -33,7 +34,7 @@ export class AmountConverterPipe implements PipeTransform {
     groupSize: 3
   }
 
-  constructor(private readonly protocolsService: ProtocolService) {}
+  constructor(private readonly protocolsService: ProtocolService) { }
 
   public async transform(value: AmountConverterValue, args: AmountConverterArgs): Promise<string> {
     if (!args.protocol) {
@@ -48,7 +49,7 @@ export class AmountConverterPipe implements PipeTransform {
       throw new Error('Invalid maxDigits')
     }
 
-    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol)
+    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol, args.network)
     const amount = this.transformValueOnly(value, protocol, args.maxDigits)
 
     return `${amount} ${protocol.symbol}`

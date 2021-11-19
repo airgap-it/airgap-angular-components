@@ -34,7 +34,7 @@ export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig &
 export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
 
-  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) { }
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
@@ -124,10 +124,18 @@ export class ProtocolService {
   ): Promise<ICoinProtocol> {
     await this.waitReady()
 
-    if (typeof protocolOrIdentifier == 'string') {
-      const protocol: ICoinProtocol | undefined = this.mainProtocolStore.isIdentifierValid(protocolOrIdentifier)
-        ? this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
-        : this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
+    if (typeof protocolOrIdentifier === 'string') {
+      let protocol: ICoinProtocol | undefined
+
+      if (this.mainProtocolStore.isIdentifierValid(protocolOrIdentifier)) {
+        protocol = this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
+      } else if (this.subProtocolStore.isIdentifierValid(protocolOrIdentifier)) {
+        protocol = this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
+        if (protocol === undefined) {
+          const mainProtocolIdentifier = getMainIdentifier(protocolOrIdentifier)
+          return this.getProtocol(mainProtocolIdentifier, network, activeOnly)
+        }
+      }
 
       if (protocol === undefined) {
         throw new Error(`Protocol ${protocolOrIdentifier} not supported`)
@@ -150,7 +158,7 @@ export class ProtocolService {
 
   public async addActiveSubProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
     await this.waitReady()
-    
+
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
     const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) => this.subProtocolStore.isIdentifierValid(protocol.identifier))
 
@@ -164,7 +172,7 @@ export class ProtocolService {
         })
         .reduce(
           (obj: SubProtocolsMap, [protocolAndNetworkIdentifier, protocol]: [string, ICoinProtocol]) =>
-            Object.assign(obj, { 
+            Object.assign(obj, {
               [protocolAndNetworkIdentifier]: Object.assign(obj[protocolAndNetworkIdentifier] ?? {}, { [protocol.identifier]: protocol })
             }),
           {}
@@ -211,7 +219,7 @@ export class ProtocolService {
 
     const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : mainProtocol.identifier
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
-    
+
     return Object.keys(subProtocolsMap)
       .filter((key) => key.startsWith(mainIdentifier))
       .map((key) => Object.values(subProtocolsMap[key] ?? {}))
@@ -262,11 +270,9 @@ export class ProtocolService {
     checkActiveOnly: boolean = true
   ): Promise<boolean> {
     const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
-    const targetNetwork: ProtocolNetwork | undefined =
-      typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network
-
+    const targetNetwork: ProtocolNetwork = typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network ?? getProtocolOptionsByIdentifier(identifier).network
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
-      .then(() => true)
+      .then((protocol) => protocol.identifier === identifier && protocol.options.network.identifier === targetNetwork.identifier)
       .catch(() => false)
   }
 }
