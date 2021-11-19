@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core'
 import BigNumber from 'bignumber.js'
-import { ICoinProtocol, ProtocolSymbols } from '@airgap/coinlib-core'
+import { ICoinProtocol, ProtocolNetwork, ProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
 type FeeConverterValue = BigNumber | string | number | null | undefined
@@ -9,13 +9,14 @@ interface FeeConverterArgs {
   protocol: ICoinProtocol | ProtocolSymbols | undefined | null
   dropSymbol?: boolean
   reverse?: boolean
+  network?: ProtocolNetwork | string
 }
 
 @Pipe({
   name: 'feeConverter'
 })
 export class FeeConverterPipe implements PipeTransform {
-  constructor(private readonly protocolsService: ProtocolService) {}
+  constructor(private readonly protocolsService: ProtocolService) { }
 
   public async transform(value: FeeConverterValue, args: FeeConverterArgs): Promise<string> {
     if (args.protocol === undefined || !args.protocol) {
@@ -26,7 +27,7 @@ export class FeeConverterPipe implements PipeTransform {
       throw new Error('Invalid fee amount')
     }
 
-    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol)
+    const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol, args.network)
     const reverse = args.reverse !== undefined && args.reverse
 
     const shiftDirection: number = !reverse ? -1 : 1

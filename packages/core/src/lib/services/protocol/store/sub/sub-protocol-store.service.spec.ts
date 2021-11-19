@@ -24,9 +24,17 @@ import { SubProtocolStoreService, SubProtocolStoreConfig } from './sub-protocol-
 describe('SubProtocolStoreService', () => {
   let service: SubProtocolStoreService
 
+  let tezosMainnet: TezosProtocolNetwork
   let tezosTestnet: TezosProtocolNetwork
 
   beforeAll(() => {
+    tezosMainnet = new TezosProtocolNetwork(
+      'Mainnet',
+      NetworkType.MAINNET,
+      undefined,
+      new TezblockBlockExplorer(),
+      new TezosProtocolNetworkExtras()
+    )
     tezosTestnet = new TezosProtocolNetwork(
       'Testnet',
       NetworkType.TESTNET,
@@ -253,7 +261,7 @@ describe('SubProtocolStoreService', () => {
       const foundSubProtocol = service.getProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
 
       expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
-      expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
+      expect(foundSubProtocol?.options.network).toEqual(tezosTestnet)
     })
 
     it('should find a sub protocol by sub protocol and network identifiers', () => {
@@ -271,20 +279,19 @@ describe('SubProtocolStoreService', () => {
       const foundSubProtocol = service.getProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet.identifier)
 
       expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
-      expect(foundSubProtocol?.options.network).toBe(tezosTestnet)
+      expect(foundSubProtocol?.options.network).toEqual(tezosTestnet)
     })
 
-    it('should not find a sub protocol by a sub identifier if network does not match', () => {
+    it('should not find a sub protocol by a sub identifier if network does not match and fall back to any matching the identifier', () => {
       service.init({
         activeSubProtocols: [[new TezosProtocol(), new TezosBTC()]],
         passiveSubProtocols: []
       })
 
-      try {
-        service.getProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
-      } catch (error) {
-        expect(error.toString()).toBe('Error: serializer(PROTOCOL_NOT_SUPPORTED): ')
-      }
+      const foundSubProtocol = service.getProtocolByIdentifier(SubProtocolSymbols.XTZ_BTC, tezosTestnet)
+
+      expect(foundSubProtocol?.identifier).toBe(SubProtocolSymbols.XTZ_BTC)
+      expect(foundSubProtocol?.options.network).toEqual(tezosMainnet)
     })
   })
 
