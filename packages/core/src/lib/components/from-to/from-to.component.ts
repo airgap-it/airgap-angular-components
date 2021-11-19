@@ -14,7 +14,7 @@ export class FromToComponent {
   @Input()
   public displayRawData: boolean = false
 
-  constructor(private readonly clipboardService: ClipboardService) {}
+  constructor(private readonly clipboardService: ClipboardService) { }
 
   public toggleDisplayRawData(): void {
     this.displayRawData = !this.displayRawData

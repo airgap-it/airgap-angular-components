@@ -1,6 +1,13 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.20",
+  "version": "0.0.21",
+  "main": "dist/bundles/airgap-angular-ngrx.umd.js",
+  "module": "dist/fesm2015/airgap-angular-ngrx.js",
+  "es2015": "dist/fesm2015/airgap-angular-ngrx.js",
+  "esm2015": "dist/esm2015/airgap-angular-ngrx.js",
+  "fesm2015": "dist/fesm2015/airgap-angular-ngrx.js",
+  "typings": "dist/airgap-angular-ngrx.d.ts",
+  "metadata": "dist/airgap-angular-ngrx.metadata.json",
   "publishConfig": {
     "access": "public"
   },
@@ -20,10 +27,13 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
+    "@airgap/angular-core": "^0.0.21-beta.12",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
     "@angular/platform-browser": "^11.2.9",
     "@angular/platform-browser-dynamic": "^11.2.9",
+    "@ngrx/component": "^11.1.1",
+    "@ngrx/component-store": "^11.1.1",
     "@ngrx/store": "^11.1.0",
     "rxjs": "^6.6.7",
     "zone.js": "^0.11.4"

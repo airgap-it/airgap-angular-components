@@ -24,6 +24,11 @@ import {
   MoonriverProtocolOptions,
   MoonriverProtocolNetwork,
   MoonriverSubscanBlockExplorer,
+  TezosUDEFI,
+  TezosCTez,
+  TezosPlenty,
+  TezosWRAP,
+  TezosQUIPU,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -45,9 +50,9 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new MoonriverProtocol(
       new MoonriverProtocolOptions(
         new MoonriverProtocolNetwork(
-          undefined, 
-          undefined, 
-          undefined, 
+          undefined,
+          undefined,
+          undefined,
           new MoonriverSubscanBlockExplorer('https://moonriver.subscan.io')
         )
       )
@@ -69,6 +74,11 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
     [tezosProtocol, new TezosYOU()],
     [tezosProtocol, new TezosBTC()],
     [tezosProtocol, new TezosUSD()],
+    [tezosProtocol, new TezosUDEFI()],
+    [tezosProtocol, new TezosCTez()],
+    [tezosProtocol, new TezosPlenty()],
+    [tezosProtocol, new TezosWRAP()],
+    [tezosProtocol, new TezosQUIPU()],
     [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens.map(
       (token: Token) =>

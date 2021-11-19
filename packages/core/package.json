@@ -1,6 +1,13 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.20",
+  "version": "0.0.21",
+  "main": "dist/bundles/airgap-angular-core.umd.js",
+  "module": "dist/fesm2015/airgap-angular-core.js",
+  "es2015": "dist/fesm2015/airgap-angular-core.js",
+  "esm2015": "dist/esm2015/airgap-angular-core.js",
+  "fesm2015": "dist/fesm2015/airgap-angular-core.js",
+  "typings": "dist/airgap-angular-core.d.ts",
+  "metadata": "dist/airgap-angular-core.metadata.json",
   "publishConfig": {
     "access": "public"
   },
@@ -20,7 +27,7 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "^0.12.0",
+    "@airgap/coinlib-core": "^0.12.3",
     "@angular/animations": "^11.2.9",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
@@ -32,6 +39,7 @@
     "@capacitor/app-launcher": "^1.0.6",
     "@capacitor/clipboard": "^1.0.5",
     "@capacitor/core": "^3.2.5",
+    "@capacitor/filesystem": "^1.0.6",
     "@capacitor/splash-screen": "^1.1.5",
     "@capacitor/status-bar": "^1.0.5",
     "@download/blockies": "^1.0.3",

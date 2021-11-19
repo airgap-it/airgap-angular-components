@@ -1,4 +1,4 @@
-FROM node:15
+FROM node:15.14.0
 
 # See https://crbug.com/795759
 RUN apt-get update && apt-get install -yq libgconf-2-4 bzip2 build-essential python libxtst6
@@ -29,7 +29,7 @@ RUN chmod +x ./npm-ci-publish-beta-only.sh
 RUN chmod +x ./npm-ci-publish.sh
 
 # install dependencies
-RUN npm install 
+RUN npm install --legacy-peer-deps
 
 # set to production
 RUN export NODE_ENV=production

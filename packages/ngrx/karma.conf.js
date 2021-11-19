@@ -16,6 +16,9 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
+      jasmine: {
+        random: false
+      },
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     coverageReporter: {
@@ -30,7 +33,7 @@ module.exports = function (config) {
       suppressSkipped: false // do not print information about skipped tests
     },
     failOnEmptyTestSuite: false,
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'kjhtml', 'spec'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,

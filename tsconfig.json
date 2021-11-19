@@ -26,6 +26,6 @@
   },
   "paths": {
     "core": ["packages/core/dist/core", "packages/core/dist"],
-    "ng-rx": ["packages/ng-rx/dist/ng-rx", "packages/ng-rx/dist"]
+    "ngrx": ["packages/ngrx/dist/ngrx", "packages/ngrx/dist"]
   }
 }
