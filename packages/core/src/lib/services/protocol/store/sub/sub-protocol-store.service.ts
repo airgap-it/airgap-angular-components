@@ -49,10 +49,12 @@ SubProtocolStoreConfig
   }
 
   public isIdentifierValid(identifier: string): boolean {
+    const mainIdentifier = getMainIdentifier(identifier as SubProtocolSymbols)
+
     return (
       Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols)
       || this.ethTokenIdentifiers.has(identifier)
-      || Object.values(MainProtocolSymbols).includes(getMainIdentifier(identifier as SubProtocolSymbols) as MainProtocolSymbols)
+      || (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier)
     )
   }
 

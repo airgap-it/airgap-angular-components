@@ -1,3 +1,4 @@
+import { ProtocolSymbols } from '@airgap/coinlib-core'
 import { Component, Input } from '@angular/core'
 
 @Component({
@@ -14,6 +15,9 @@ export class TitledAddressComponent {
 
   @Input()
   public symbol: string | undefined
+
+  @Input()
+  public protocolIdentifier: ProtocolSymbols | undefined
 
   @Input()
   public hasSymbol: boolean = false
