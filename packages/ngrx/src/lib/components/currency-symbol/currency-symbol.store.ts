@@ -1,31 +1,42 @@
-import { DEFAULT_CURRENCY_SYMBOL_URL, FilesystemService } from '@airgap/angular-core'
+import { DEFAULT_CURRENCY_SYMBOL_URL, FilesystemService, SymbolInput, SymbolValue } from '@airgap/angular-core'
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { Observable, Subscriber } from 'rxjs'
-import { repeat, switchMap, withLatestFrom } from 'rxjs/operators'
+import { map, repeat, switchMap, withLatestFrom } from 'rxjs/operators'
 
 import { CurrencySymbolState } from './currency-symbol.types'
 
 const initialStore: CurrencySymbolState = {
-  symbol: undefined,
-  imageSrc: DEFAULT_CURRENCY_SYMBOL_URL
+  src: DEFAULT_CURRENCY_SYMBOL_URL,
+
+  input: undefined,
+  fallbackInput: undefined,
+  inputs: []
 }
 
 @Injectable()
 export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
-
   constructor(private readonly filesystemService: FilesystemService) {
     super(initialStore)
   }
 
-  public readonly onError = this.effect((src$: Observable<string | undefined>) => {
-    return src$.pipe(
+  public readonly onError$ = this.effect((props$: Observable<void>) => {
+    return props$.pipe(
       withLatestFrom(this.state$),
-      switchMap(([src, state]: [string, CurrencySymbolState]) => {
-        return this.loadFallbackImage(state, src).pipe(
+      switchMap(([, state]: [void, CurrencySymbolState]) => {
+        return this.loadFallbackImage(state).pipe(
+          map((value: SymbolValue) => {
+            if (value.kind === 'lazy' && value.url === undefined) {
+              return !state.fallbackInput || value.symbolInput === state.fallbackInput
+                ? { kind: 'default' }
+                : { kind: 'asset', symbolInput: state.fallbackInput, extension: 'svg' } // try again with fallback symbol
+            } else {
+              return value
+            }
+          }),
           tapResponse(
-            (src) => this.setImageSrc(src),
-            () => this.setImageSrc(DEFAULT_CURRENCY_SYMBOL_URL)
+            (value: SymbolValue) => this.setSrc(value),
+            () => this.setSrc({ kind: 'default' })
           )
         )
       }),
@@ -33,31 +44,88 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
     )
   })
 
-  public readonly setSymbol = this.updater((state: CurrencySymbolState, symbol: string | undefined) => ({
-    ...state,
-    symbol,
-    imageSrc: symbol ? this.getSymbolAssetURL(symbol, 'svg') /* use .svg by default */ : state.imageSrc
-  }))
+  public readonly setInitialSrc = this.updater((state: CurrencySymbolState, inputs: SymbolInput[]) => {
+    const input: SymbolInput | undefined = inputs[0]
+    const fallbackInput: SymbolInput | undefined = inputs[1]
 
-  private readonly setImageSrc = this.updater((state: CurrencySymbolState, imageSrc: string) => ({
-    ...state,
-    imageSrc
-  }))
+    return {
+      ...state,
+      src: input ? this.getSymbolAssetURL(input, 'svg') /* use .svg by default */ : state.src,
+      fallbackType: input ? { kind: 'asset', symbolInput: input, extension: 'png' } /* use .png as a fallback */ : state.fallbackType,
 
-  private loadFallbackImage(state: CurrencySymbolState, src: string): Observable<string> {
-    return new Observable((subscriber: Subscriber<string>) => {
+      input,
+      fallbackInput,
+      inputs
+    }
+  })
+
+  private readonly setSrc = this.updater((state: CurrencySymbolState, value: SymbolValue) => {
+    switch (value.kind) {
+      case 'default':
+        return {
+          ...state,
+          src: DEFAULT_CURRENCY_SYMBOL_URL,
+
+          input: undefined,
+          fallbackInput: undefined
+        }
+      case 'asset':
+        const { current: assetCurrent, fallback: assetFallback } = this.getNextInputs(state, value.symbolInput)
+
+        return {
+          ...state,
+          src: this.getSymbolAssetURL(value.symbolInput, value.extension),
+          fallbackType:
+            value.extension === 'svg'
+              ? { kind: 'asset', symbolInput: value.symbolInput, extension: 'png' } /* use .png as a fallback */
+              : { kind: 'lazy', symbolInput: value.symbolInput } /* try loading external image as a fallback */,
+
+          input: assetCurrent,
+          fallbackInput: assetFallback
+        }
+      case 'lazy':
+        const { current: lazyCurrent, fallback: lazyFallback } = this.getNextInputs(state, value.symbolInput)
+
+        return {
+          ...state,
+          src: value.url ?? '',
+          fallbackType:
+            !state.fallbackInput || value.symbolInput === state.fallbackInput
+              ? { kind: 'default' }
+              : { kind: 'asset', symbolInput: state.fallbackInput, extension: 'svg' } /* try again with fallback symbol */,
+
+          input: lazyCurrent,
+          fallbackInput: lazyFallback
+        }
+      default:
+        return state
+    }
+  })
+
+  private getNextInputs(state: CurrencySymbolState, input?: SymbolInput): { current?: SymbolInput; fallback?: SymbolInput } {
+    if (!input) {
+      return {}
+    }
+
+    const index = state.inputs.indexOf(input)
+
+    return index > -1 ? { current: state.inputs[index], fallback: state.inputs[index + 1] } : {}
+  }
+
+  private loadFallbackImage(state: CurrencySymbolState): Observable<SymbolValue> {
+    return new Observable((subscriber: Subscriber<SymbolValue>) => {
       new Promise<void>(async (resolve, reject) => {
         try {
-          subscriber.next(DEFAULT_CURRENCY_SYMBOL_URL)
-          if (src === this.getSymbolAssetURL(state.symbol, 'svg')) {
-            // .svg not found, use .png as a fallback
-            subscriber.next(this.getSymbolAssetURL(state.symbol, 'png'))
-          } else if (src === this.getSymbolAssetURL(state.symbol, 'png')) {
+          subscriber.next({ kind: 'default' })
+          if (state.fallbackType?.kind === 'asset') {
+            subscriber.next({ kind: 'asset', symbolInput: state.fallbackType.symbolInput, extension: state.fallbackType.extension })
+          } else if (state.fallbackType?.kind === 'lazy') {
             // try loading external image
-            await this.loadLazyImage(state.symbol, subscriber)
+            const imageURI: string | undefined = await this.loadLazyImage(state.fallbackType.symbolInput)
+            subscriber.next({ kind: 'lazy', symbolInput: state.fallbackType.symbolInput, url: imageURI })
           } else {
             // no image was found for the symbol, use the generic image
-            subscriber.next(DEFAULT_CURRENCY_SYMBOL_URL)
+            subscriber.next({ kind: 'default' })
           }
 
           resolve()
@@ -70,20 +138,17 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
     })
   }
 
-  private async loadLazyImage(symbol: string, subscriber: Subscriber<string>): Promise<void> {
-    subscriber.next(DEFAULT_CURRENCY_SYMBOL_URL)
+  private async loadLazyImage(symbolInput: SymbolInput): Promise<string | undefined> {
+    const imagePath: string = this.getSymbolImagePath(symbolInput)
 
-    const imagePath: string = this.getSymbolImagePath(symbol)
-    const imageURI: string | undefined = await this.filesystemService.readLazyImage(imagePath)
-
-    subscriber.next(imageURI ?? DEFAULT_CURRENCY_SYMBOL_URL)
+    return this.filesystemService.readLazyImage(imagePath)
   }
 
-  private getSymbolAssetURL(symbol: string, extension: 'svg' | 'png'): string {
-    return `./assets/symbols/${symbol.toLowerCase()}.${extension}`
+  private getSymbolAssetURL(symbolInput: SymbolInput, extension: 'svg' | 'png'): string {
+    return `./assets/symbols/${symbolInput.caseSensitive ? symbolInput.value : symbolInput.value.toLowerCase()}.${extension}`
   }
 
-  private getSymbolImagePath(symbol: string): string {
-    return `/images/symbols/${symbol.toLowerCase()}`
+  private getSymbolImagePath(symbolInput: SymbolInput): string {
+    return `/images/symbols/${symbolInput.caseSensitive ? symbolInput.value : symbolInput.value.toLowerCase()}`
   }
 }

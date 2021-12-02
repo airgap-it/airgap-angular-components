@@ -22,10 +22,12 @@
     "fullTemplateTypeCheck": true,
     "strictTemplates": true,
     "strictInputAccessModifiers": true,
-    "strictMetadataEmit": false
+    "strictMetadataEmit": false,
   },
   "paths": {
-    "core": ["packages/core/dist/core", "packages/core/dist"],
-    "ngrx": ["packages/ngrx/dist/ngrx", "packages/ngrx/dist"]
+    "core": ["packages/core/dist"],
+    "ngrx": ["packages/ngrx/dist"],
+    "@airgap/angular-core": ["packages/core/dist"],
+    "@airgap/angular-ngrx": ["packages/ngrx/dist"]
   }
 }
