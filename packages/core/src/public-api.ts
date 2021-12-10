@@ -5,10 +5,15 @@
 // Core module
 export * from './lib/airgap-angular-core.module'
 
+// Base
+export * from './lib/base/base.component'
+export * from './lib/base/base.facade'
+
 // Components
 export * from './lib/components/components.module'
 export * from './lib/components/currency-symbol/currency-symbol.component'
 export * from './lib/components/currency-symbol/currency-symbol.facade'
+export * from './lib/components/currency-symbol/currency-symbol.types'
 export * from './lib/components/from-to/from-to.component'
 export * from './lib/components/iac-qr/iac-qr.component'
 export * from './lib/components/identicon/identicon.component'

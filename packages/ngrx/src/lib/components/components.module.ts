@@ -6,11 +6,10 @@ import { MomentModule } from 'ngx-moment'
 
 import { QRCodeModule } from 'angularx-qrcode'
 import { FormsModule } from '@angular/forms'
-import { CurrencySymbolNgRxComponent } from './currency-symbol/currency-symbol.component'
 
 @NgModule({
-  declarations: [CurrencySymbolNgRxComponent],
+  declarations: [],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, QRCodeModule, FormsModule],
-  exports: [CurrencySymbolNgRxComponent]
+  exports: []
 })
 export class ComponentsModule {}

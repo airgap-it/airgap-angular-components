@@ -2,7 +2,7 @@
   <ion-item lines="none" class="ion-no-padding">
     <ion-avatar slot="start">
       <airgap-identicon [address]="wallet.receivingPublicAddress"></airgap-identicon>
-      <airgap-currency-symbol [symbol]="wallet.protocol.symbol"></airgap-currency-symbol>
+      <airgap-currency-symbol [symbol]="wallet.protocol.symbol" [protocolIdentifier]="wallet.protocol.identifier"></airgap-currency-symbol>
     </ion-avatar>
     <ion-label>
       <h2>
