@@ -4,7 +4,7 @@
       <ion-avatar>
         <airgap-identicon [address]="address"></airgap-identicon>
       </ion-avatar>
-      <airgap-currency-symbol [symbol]="symbol" *ngIf="hasSymbol" class="symbol--icon"></airgap-currency-symbol>
+      <airgap-currency-symbol [symbol]="symbol" [protocolIdentifier]="protocolIdentifier" *ngIf="hasSymbol" class="symbol--icon"></airgap-currency-symbol>
     </ion-row>
   </ion-col>
   <ion-col size="9">

@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "main": "dist/bundles/airgap-angular-core.umd.js",
   "module": "dist/fesm2015/airgap-angular-core.js",
   "es2015": "dist/fesm2015/airgap-angular-core.js",
@@ -27,7 +27,7 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "^0.12.3",
+    "@airgap/coinlib-core": "^0.12.4",
     "@angular/animations": "^11.2.9",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
@@ -51,6 +51,7 @@
     "@keystonehq/bc-ur-registry": "0.4.4",
     "@ngx-translate/core": "^13.0.0",
     "angularx-qrcode": "^11.0.0",
+    "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
     "moment": "^2.29.1",
     "myetherwallet-blockies": "^0.1.1",

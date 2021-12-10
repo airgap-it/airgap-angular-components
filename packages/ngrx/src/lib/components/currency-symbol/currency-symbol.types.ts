@@ -1,6 +1,10 @@
-import { UIResource } from '@airgap/angular-core'
+import { SymbolInput, SymbolType } from '@airgap/angular-core'
 
 export interface CurrencySymbolState {
-  symbol: string | undefined
-  imageSrc: string
+  src: string
+  fallbackType?: SymbolType
+
+  input: SymbolInput | undefined
+  fallbackInput: SymbolInput | undefined
+  inputs: SymbolInput[]
 }

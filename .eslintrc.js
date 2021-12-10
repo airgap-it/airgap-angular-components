@@ -6,7 +6,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', '@typescript-eslint/tslint', 'prefer-arrow', 'import'],
-  extends: ['plugin:@typescript-eslint/recommended', 'prettier', 'prettier/@typescript-eslint'],
+  extends: ['plugin:@typescript-eslint/recommended', 'prettier', 'plugin:prettier/recommended'],
   rules: {
     '@typescript-eslint/adjacent-overload-signatures': 'error',
     '@typescript-eslint/array-type': 'error',
@@ -37,10 +37,10 @@ module.exports = {
         }
       }
     ],
-    '@typescript-eslint/member-ordering': 'error',
+    '@typescript-eslint/member-ordering': 'off',
     '@typescript-eslint/no-empty-function': 'error',
     '@typescript-eslint/no-empty-interface': 'error',
-    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-extraneous-class': 'off',
     '@typescript-eslint/no-floating-promises': 'error',
     '@typescript-eslint/no-for-in-array': 'error',
@@ -71,7 +71,7 @@ module.exports = {
     '@typescript-eslint/type-annotation-spacing': 'off',
     '@typescript-eslint/unbound-method': 'error',
     '@typescript-eslint/unified-signatures': 'error',
-    'arrow-body-style': ['error', 'as-needed'],
+    'arrow-body-style': ['off', 'as-needed'],
     'arrow-parens': ['off', 'as-needed'],
     '@typescript-eslint/naming-convention': [
       'warn',
@@ -154,7 +154,7 @@ module.exports = {
     'no-eval': 'error',
     'no-extra-semi': 'off',
     'no-fallthrough': 'error',
-    'no-invalid-this': 'error',
+    'no-invalid-this': 'off',
     'no-irregular-whitespace': 'off',
     'no-magic-numbers': 'off',
     'no-multiple-empty-lines': 'off',
@@ -203,7 +203,7 @@ module.exports = {
     'valid-typeof': 'off',
     yoda: 'error',
     '@typescript-eslint/tslint/config': [
-      'error',
+      'warn',
       {
         rules: {
           ban: [true, 'fit', 'fdescribe', 'xit', 'xdescribe'],
@@ -219,7 +219,7 @@ module.exports = {
           'no-unnecessary-callback-wrapper': true,
           'prefer-conditional-expression': true,
           'prefer-method-signature': true,
-          'prefer-switch': true,
+          'prefer-switch': false,
           'prefer-while': true,
           'return-undefined': true,
           'switch-final-break': true,

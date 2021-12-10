@@ -10,6 +10,8 @@ import {
 } from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
+import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
+import { Token } from '../../types/Token'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -18,7 +20,7 @@ import {
   getDefaultPassiveSubProtocols,
   getDefaultActiveSubProtocols
 } from './defaults'
-import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
+import { ethTokens } from './tokens'
 
 export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
@@ -33,8 +35,9 @@ export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig &
 })
 export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
+  private knownProtocolSymbols: Set<string> | undefined
 
-  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) { }
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
@@ -133,6 +136,7 @@ export class ProtocolService {
         protocol = this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
         if (protocol === undefined) {
           const mainProtocolIdentifier = getMainIdentifier(protocolOrIdentifier)
+
           return this.getProtocol(mainProtocolIdentifier, network, activeOnly)
         }
       }
@@ -148,10 +152,25 @@ export class ProtocolService {
   }
 
   public async addActiveProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
+    const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
+
+    const mainProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
+      this.mainProtocolStore.isIdentifierValid(protocol.identifier)
+    )
+    const subProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
+      this.subProtocolStore.isIdentifierValid(protocol.identifier)
+    )
+
+    await Promise.all([this.addActiveMainProtocols(mainProtocols), this.addActiveSubProtocols(subProtocols)])
+  }
+
+  public async addActiveMainProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
     await this.waitReady()
 
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
-    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) => this.mainProtocolStore.isIdentifierValid(protocol.identifier))
+    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
+      this.mainProtocolStore.isIdentifierValid(protocol.identifier)
+    )
 
     this.mainProtocolStore.addActiveProtocols(validProtocols)
   }
@@ -160,7 +179,9 @@ export class ProtocolService {
     await this.waitReady()
 
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
-    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) => this.subProtocolStore.isIdentifierValid(protocol.identifier))
+    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
+      this.subProtocolStore.isIdentifierValid(protocol.identifier)
+    )
 
     this.subProtocolStore.addActiveProtocols(
       validProtocols
@@ -187,10 +208,7 @@ export class ProtocolService {
       ? this.mainProtocolStore.getProtocolByIdentifier(protocolIdentifier as MainProtocolSymbols, networkIdentifier, true, false)
       : this.subProtocolStore.getProtocolByIdentifier(protocolIdentifier as SubProtocolSymbols, networkIdentifier, true, false)
 
-    if (protocol === undefined) {
-      return false
-    }
-    return true
+    return protocol !== undefined
   }
 
   public async getSubProtocols(
@@ -208,7 +226,7 @@ export class ProtocolService {
 
     return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
       (subProtocol: ICoinSubProtocol | undefined) => subProtocol !== undefined
-    ) as ICoinSubProtocol[]
+    )
   }
 
   public async getAllSubProtocols(
@@ -239,6 +257,16 @@ export class ProtocolService {
       : this.subProtocolStore.getNetworksForProtocol(identifier as SubProtocolSymbols, activeOnly)
   }
 
+  public async getNetworkForProtocol(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    networkIdentifier: string,
+    activeOnly: boolean = true
+  ): Promise<ProtocolNetwork | undefined> {
+    const networks = await this.getNetworksForProtocol(protocolOrIdentifier, activeOnly)
+
+    return networks.find((network: ProtocolNetwork) => network.identifier === networkIdentifier)
+  }
+
   public async isAddressOfProtocol(protocolOrIdentifier: ICoinProtocol | ProtocolSymbols, address: string): Promise<boolean> {
     await this.waitReady()
 
@@ -261,7 +289,19 @@ export class ProtocolService {
           return isProtocolAddress ? protocol : undefined
         })
       )
-    ).filter((protocol: ICoinProtocol | undefined) => protocol !== undefined) as ICoinProtocol[]
+    ).filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+  }
+
+  public isKnownProtocolSymbol(symbol: ProtocolSymbols): boolean {
+    if (this.knownProtocolSymbols === undefined) {
+      this.knownProtocolSymbols = new Set([
+        ...Object.values(MainProtocolSymbols),
+        ...Object.values(SubProtocolSymbols),
+        ...ethTokens.map((token: Token) => token.identifier)
+      ])
+    }
+
+    return this.knownProtocolSymbols?.has(symbol) ?? false
   }
 
   private async isProtocolRegistered(
@@ -270,7 +310,11 @@ export class ProtocolService {
     checkActiveOnly: boolean = true
   ): Promise<boolean> {
     const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
-    const targetNetwork: ProtocolNetwork = typeof protocolOrIdentifier !== 'string' ? protocolOrIdentifier.options.network : network ?? getProtocolOptionsByIdentifier(identifier).network
+    const targetNetwork: ProtocolNetwork =
+      typeof protocolOrIdentifier !== 'string'
+        ? protocolOrIdentifier.options.network
+        : network ?? getProtocolOptionsByIdentifier(identifier).network
+
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
       .then((protocol) => protocol.identifier === identifier && protocol.options.network.identifier === targetNetwork.identifier)
       .catch(() => false)
