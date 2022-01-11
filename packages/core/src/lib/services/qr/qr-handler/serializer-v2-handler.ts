@@ -1,18 +1,18 @@
 import { IACMessageDefinitionObject, IACMessageDefinitionObjectV3, Serializer } from '@airgap/coinlib-core'
-import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
+import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { convertV2ToV3 } from '../../serializer/serializer.service'
 
 export class SerializerV2Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV2Handler'
   private readonly serializer: Serializer
 
-  private readonly callback: any = (): void => undefined
+  private readonly callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined
 
   private progress: number = 0
   private parts: Set<string> = new Set<string>()
   private completeDeserialized: IACMessageDefinitionObject[] | undefined
 
-  constructor(callback: any = (): void => undefined) {
+  constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
     this.serializer = new Serializer()
     this.callback = callback
   }
@@ -98,7 +98,7 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
     return Number(this.progress.toFixed(2))
   }
 
-  public async handleComplete(): Promise<IACMessageDefinitionObjectV3[]> {
+  public async handleComplete(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const result = await this.getResult()
     if (!result) {
       throw new Error('Data not complete!')
@@ -108,12 +108,14 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
     return result
   }
 
-  public async getDataSingle(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
-    return this.getResult()
+  public async getDataSingle(): Promise<string | undefined> {
+    return Array.from(this.parts.values()).join(',') // Serializer V2 used commas to separate parts
   }
 
-  public async getResult(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
-    return this.completeDeserialized ? convertV2ToV3(this.completeDeserialized) : undefined
+  public async getResult(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined> {
+    return this.completeDeserialized
+      ? { result: await convertV2ToV3(this.completeDeserialized), data: await this.getDataSingle() }
+      : undefined
   }
 
   public async reset(): Promise<void> {

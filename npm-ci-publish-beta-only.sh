@@ -7,6 +7,14 @@ git update-index --assume-unchanged npm-ci-publish-beta-only.sh
 git update-index --assume-unchanged package.json
 git update-index --assume-unchanged package-lock.json
 
+git update-index --assume-unchanged packages/core/package.json
+git update-index --assume-unchanged packages/core/package-lock.json
+
+git update-index --assume-unchanged packages/ngrx/package.json
+git update-index --assume-unchanged packages/ngrx/package-lock.json
+
+git --no-pager diff
+
 VERSION=$(node -pe 'JSON.parse(process.argv[1]).version.indexOf("beta")' "$(cat lerna.json)")
 
 if [ "$VERSION" = "-1" ]

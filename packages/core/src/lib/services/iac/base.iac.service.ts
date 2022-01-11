@@ -1,7 +1,7 @@
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/coinlib-core'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
-import { IACMessageHandler, IACMessageTransport, IACHandlerStatus } from './message-handler'
+import { IACMessageHandler, IACMessageTransport, IACHandlerStatus, IACMessageWrapper } from './message-handler'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
 import { SerializerV3Handler } from '../qr/qr-handler/serializer-v3-handler'
 import { SerializerV2Handler } from '../qr/qr-handler/serializer-v2-handler'
@@ -11,7 +11,7 @@ import { Inject } from '@angular/core'
 
 export type ScanAgainCallback = (progress?: number) => void
 
-export type RelayMessage = { messages: IACMessageDefinitionObjectV3[]; rawString: undefined } | { messages: undefined; rawString: string }
+export type RelayMessage = string
 
 export abstract class BaseIACService {
   protected readonly handlers: IACMessageHandler<unknown>[]
@@ -20,7 +20,7 @@ export abstract class BaseIACService {
 
   protected readonly serializerMessageHandlers: {
     [key in IACMessageType]: (
-      deserializedSync: IACMessageDefinitionObjectV3[],
+      deserializedSync: IACMessageWrapper<IACMessageDefinitionObjectV3[]>,
       transport: IACMessageTransport,
       scanAgainCallback: ScanAgainCallback
     ) => Promise<boolean>
@@ -44,15 +44,19 @@ export abstract class BaseIACService {
     }
 
     this.handlers = [
-      new SerializerV3Handler((deserializedSync: IACMessageDefinitionObjectV3[]) => this.deserialize(deserializedSync)),
-      new SerializerV2Handler((deserializedSync: IACMessageDefinitionObjectV3[]) => this.deserialize(deserializedSync))
+      new SerializerV3Handler((deserializedSync: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => this.deserialize(deserializedSync)),
+      new SerializerV2Handler((deserializedSync: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => this.deserialize(deserializedSync))
     ]
 
     this.handlers.push(...customHandlers)
   }
 
-  public async storeResult(_message: unknown, status: IACHandlerStatus, _transport: IACMessageTransport): Promise<IACHandlerStatus> {
-    console.debug('STORE_RESULT', _message, status, _transport)
+  public async storeResult(
+    message: IACMessageWrapper<unknown>,
+    status: IACHandlerStatus,
+    transport: IACMessageTransport
+  ): Promise<IACHandlerStatus> {
+    console.debug('STORE_RESULT', message, status, transport)
     return status
   }
 
@@ -73,25 +77,23 @@ export abstract class BaseIACService {
         if (canHandle) {
           const handlerStatus: IACHandlerStatus = await handler.receive(data)
           if (handlerStatus === IACHandlerStatus.SUCCESS) {
-            let result: unknown = data
-            let status: IACHandlerStatus = IACHandlerStatus.SUCCESS
             try {
-              result = await handler.getResult()
+              const result: IACMessageWrapper<unknown> = await handler.getResult()
+              const status: IACHandlerStatus = IACHandlerStatus.SUCCESS
               await handler.handleComplete()
+              await this.resetHandlers()
+              return this.storeResult(result, status, transport)
             } catch (e) {
               console.error('Error while handling result', e)
-              result = await handler.getDataSingle()
-              if (!result) {
-                result = data
-              }
-              await this.messageUnknownAlert(result as string, this.scanAgainCallback!)
-              status = IACHandlerStatus.UNSUPPORTED
+              let dataSingle: string = (await handler.getDataSingle()) ?? data
+
+              await this.messageUnknownAlert(dataSingle, this.scanAgainCallback!)
+              await this.resetHandlers()
+              return this.storeResult({ result: undefined, data: dataSingle }, IACHandlerStatus.UNSUPPORTED, transport)
             }
-            await this.resetHandlers()
-            return this.storeResult(result, status, transport)
           } else if (handlerStatus === IACHandlerStatus.PARTIAL) {
             scanAgainCallback(await handler.getProgress())
-            return this.storeResult(data, IACHandlerStatus.PARTIAL, transport)
+            return this.storeResult({ result: data, data: await handler.getDataSingle() }, IACHandlerStatus.PARTIAL, transport)
           }
         }
       } catch (handlerError) {
@@ -101,7 +103,7 @@ export abstract class BaseIACService {
     await this.resetHandlers()
 
     await this.messageUnknownAlert(data, this.scanAgainCallback!)
-    return this.storeResult(data, IACHandlerStatus.UNSUPPORTED, this.transport)
+    return this.storeResult({ result: undefined, data: data }, IACHandlerStatus.UNSUPPORTED, this.transport)
   }
 
   public async resetHandlers(): Promise<void> {
@@ -112,9 +114,10 @@ export abstract class BaseIACService {
     )
   }
 
-  private async deserialize(deserializedSync: IACMessageDefinitionObjectV3[]): Promise<IACHandlerStatus> {
-    if (deserializedSync && deserializedSync.length > 0) {
-      const groupedByType: { [key in IACMessageType]?: IACMessageDefinitionObjectV3[] } = deserializedSync.reduce(
+  private async deserialize(deserializedSync: IACMessageWrapper<IACMessageDefinitionObjectV3[]>): Promise<IACHandlerStatus> {
+    const data = deserializedSync.result
+    if (data && data.length > 0) {
+      const groupedByType: { [key in IACMessageType]?: IACMessageDefinitionObjectV3[] } = data.reduce(
         (grouped, message) => Object.assign(grouped, { [message.type]: (grouped[message.type] || []).concat(message) }),
         {} as { [key in IACMessageType]?: IACMessageDefinitionObjectV3[] }
       )
@@ -124,9 +127,11 @@ export abstract class BaseIACService {
           // TODO: Improve types
           const typedType: IACMessageType = parseInt(type, 10)
           // eslint-disable-next-line no-console
-          this.serializerMessageHandlers[typedType](groupedByType[typedType] ?? [], this.transport!, this.scanAgainCallback!).catch(
-            console.error
-          )
+          this.serializerMessageHandlers[typedType](
+            { result: groupedByType[typedType] ?? [], data: deserializedSync.data, context: deserializedSync.context },
+            this.transport!,
+            this.scanAgainCallback!
+          ).catch(console.error)
         } else {
           // TODO: Improve types
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
@@ -144,10 +149,7 @@ export abstract class BaseIACService {
   protected async messageUnknownAlert(data: string, scanAgainCallback: ScanAgainCallback): Promise<void> {
     const relayHandler = () => {
       // eslint-disable-next-line no-console
-      this.relay({
-        rawString: data,
-        messages: undefined
-      }).catch(console.error)
+      this.relay(data).catch(console.error)
     }
 
     const copyHandler = () => {
@@ -164,22 +166,18 @@ export abstract class BaseIACService {
   }
 
   protected async syncTypeNotSupportedAlert(
-    messageDefinitionObjects: IACMessageDefinitionObjectV3[],
+    messageWrapper: IACMessageWrapper<IACMessageDefinitionObjectV3[]>,
     _transport: IACMessageTransport,
     scanAgainCallback: ScanAgainCallback
   ): Promise<boolean> {
     const relayHandler = () => {
       // eslint-disable-next-line no-console
-      this.relay({
-        messages: messageDefinitionObjects,
-        rawString: undefined
-      }).catch(console.error)
+      this.relay(messageWrapper.data).catch(console.error)
     }
 
-    const copyHandler = async () => {
-      const data = await this.serialize(messageDefinitionObjects, this.appConfig.otherApp.urlScheme)
+    const copyHandler = () => {
       // eslint-disable-next-line no-console
-      this.clipboard.copyAndShowToast(data).catch(console.error)
+      this.clipboard.copyAndShowToast(messageWrapper.data).catch(console.error)
     }
 
     const cancelHandler = () => {

@@ -1,10 +1,11 @@
-import { IACHandlerStatus, IACMessageHandler } from './message-handler'
+import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from './message-handler'
 
 /**
  * Handles requests that can only be in a single QR
  */
 export abstract class IACSinglePartHandler<T> extends IACMessageHandler<T> {
   protected payload: T | undefined
+  protected rawData: string | undefined
 
   constructor() {
     super()
@@ -26,6 +27,7 @@ export abstract class IACSinglePartHandler<T> extends IACMessageHandler<T> {
       return IACHandlerStatus.UNSUPPORTED
     }
 
+    this.rawData = data
     this.payload = processed
 
     return IACHandlerStatus.SUCCESS
@@ -35,12 +37,12 @@ export abstract class IACSinglePartHandler<T> extends IACMessageHandler<T> {
     return 1
   }
 
-  public async getResult(): Promise<T | undefined> {
-    return this.payload
+  public async getResult(): Promise<IACMessageWrapper<T> | undefined> {
+    return { result: this.payload, data: await this.getDataSingle() }
   }
 
-  public async getDataSingle(): Promise<T | undefined> {
-    return this.getResult()
+  public async getDataSingle(): Promise<string> {
+    return this.rawData
   }
 
   public async reset(): Promise<void> {
