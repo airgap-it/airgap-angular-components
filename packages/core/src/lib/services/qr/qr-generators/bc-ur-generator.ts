@@ -6,7 +6,7 @@ import {
   SignedBitcoinSegwitTransaction
 } from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../../iac/qr-generator'
-import { UR, UREncoder } from '@ngraveio/bc-ur'
+import { UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import * as bip32 from 'bip32'
 

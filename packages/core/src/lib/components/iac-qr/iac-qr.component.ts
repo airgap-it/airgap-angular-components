@@ -1,14 +1,15 @@
 import { Component, Input, OnDestroy, Inject } from '@angular/core'
 
 import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
+import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 import { SerializerService } from '../../services/serializer/serializer.service'
 import { APP_CONFIG, AppConfig } from '../../config/app-config'
 import { IACQrGenerator } from '../../services/iac/qr-generator'
 import { SerializerV3Generator } from '../../services/qr/qr-generators/serializer-v3-generator'
 import { SerializerV2Generator } from '../../services/qr/qr-generators/serializer-v2-generator'
-import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { BCURTypesGenerator } from '../../services/qr/qr-generators/bc-ur-generator'
+import { MetamaskGenerator } from '../../services/qr/qr-generators/metamask-generator'
 import { defaultValues } from '../../services/storage/storage.service'
 import { XPubGenerator } from '../../services/qr/qr-generators/xpub-generator'
 import { OutputDescriptorGenerator } from '../../services/qr/qr-generators/output-descriptor-generator'
@@ -18,7 +19,8 @@ export enum QRType {
   V3 = 'QR Code V3',
   BC_UR = 'BC UR (Beta)',
   XPUB = 'xPub (Beta)',
-  OUTPUT_DESCRIPTOR = 'Output Descriptor (Beta)'
+  OUTPUT_DESCRIPTOR = 'Output Descriptor (Beta)',
+  METAMASK = 'MetaMask'
 }
 
 @Component({
@@ -36,6 +38,7 @@ export class IACQrComponent implements OnDestroy {
   private readonly multiChunkSize: number = defaultValues.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE
 
   private activeGenerator: IACQrGenerator | undefined
+
   @Input()
   public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
 
@@ -76,6 +79,7 @@ export class IACQrComponent implements OnDestroy {
     this.generatorsMap.set(QRType.BC_UR, new BCURTypesGenerator())
     this.generatorsMap.set(QRType.OUTPUT_DESCRIPTOR, new OutputDescriptorGenerator())
     this.generatorsMap.set(QRType.XPUB, new XPubGenerator())
+    this.generatorsMap.set(QRType.METAMASK, new MetamaskGenerator())
 
     this.availableQRTypes.push(QRType.V3)
     this.availableQRTypes.push(QRType.V2)
@@ -98,6 +102,7 @@ export class IACQrComponent implements OnDestroy {
   public updateGenerator(value: QRType) {
     const generator = this.generatorsMap.get(value)
     if (generator) {
+      this.qrType = value
       this.activeGenerator = generator
       this.convertToDataArray()
     } else {
@@ -132,6 +137,20 @@ export class IACQrComponent implements OnDestroy {
     // Add xPub, if supported
     if (!this.availableQRTypes.includes(QRType.XPUB) && (await XPubGenerator.canHandle(this._messageDefinitionObjects))) {
       this.availableQRTypes.push(QRType.XPUB)
+    }
+    // Add MetaMask, if supported
+    if (!this.availableQRTypes.includes(QRType.METAMASK) && (await MetamaskGenerator.canHandle(this._messageDefinitionObjects))) {
+      this.availableQRTypes.push(QRType.METAMASK)
+
+      // If we know the message ID, we activate the MetaMask toggle
+      this._messageDefinitionObjects.forEach((message) => {
+        const IDs = JSON.parse(localStorage.getItem('TEMP-MM-REQUEST-IDS') ?? '{}')
+        const id = IDs[message.id]
+
+        if (id) {
+          this.updateGenerator(QRType.METAMASK)
+        }
+      })
     }
 
     this.qrError = ''

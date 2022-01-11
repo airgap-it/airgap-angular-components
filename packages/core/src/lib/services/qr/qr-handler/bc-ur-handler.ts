@@ -6,7 +6,7 @@ import {
   UnsignedBitcoinSegwitTransaction
 } from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
-import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
+import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 
 import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 
@@ -14,13 +14,13 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
   public readonly name: string = 'BCURTypesHandler'
   private decoder: URDecoder = new URDecoder()
 
-  private readonly callback: any = (): void => undefined
+  private readonly callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined
 
   private parts: Set<string> = new Set()
 
   private combinedData: Buffer | undefined
 
-  constructor(callback: any = (): void => undefined) {
+  constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
     this.callback = callback
     // completion callback
   }
@@ -79,7 +79,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
     return IACHandlerStatus.PARTIAL
   }
 
-  public async handleComplete(): Promise<IACMessageDefinitionObjectV3[]> {
+  public async handleComplete(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const result = await this.getResult()
     if (!result) {
       throw new Error('Data not complete!')
@@ -93,7 +93,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
     return Number(this.decoder.getProgress().toFixed(2))
   }
 
-  public async getResult(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
+  public async getResult(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined> {
     if (this.decoder.isComplete() && this.decoder.isSuccess()) {
       const decoded = this.decoder.resultUR()
       this.combinedData = decoded.cbor
@@ -101,7 +101,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
       if (decoded.type === 'crypto-psbt') {
         const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor)
         const psbt = cryptoPsbt.getPSBT().toString('hex')
-        return [this.convertPSBT(psbt)]
+        return this.convertPSBT(psbt)
       }
 
       // TODO: This will be needed in the future to import other accounts, eg. for a multisig setup
@@ -192,17 +192,22 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
   //   }
   // }
 
-  private convertPSBT(psbt: string): IACMessageDefinitionObjectV3 {
+  private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const payload: UnsignedBitcoinSegwitTransaction = {
       transaction: { psbt },
       publicKey: ''
     }
 
     return {
-      id: generateId(8),
-      protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: IACMessageType.TransactionSignRequest,
-      payload
+      result: [
+        {
+          id: generateId(8),
+          protocol: MainProtocolSymbols.BTC_SEGWIT,
+          type: IACMessageType.TransactionSignRequest,
+          payload
+        }
+      ],
+      data: await this.getDataSingle()
     }
   }
 }

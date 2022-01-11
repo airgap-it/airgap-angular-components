@@ -155,7 +155,7 @@ describe('SerializerV3Handler', () => {
     expect(handlerStatus).toBe(IACHandlerStatus.SUCCESS)
 
     const result = await handler.getResult()
-    expect(result?.length).toBe(1)
+    expect(result?.result.length).toBe(1)
   })
 
   // TODO: To import other accounts. This will be needed for multisig
@@ -190,4 +190,57 @@ describe('SerializerV3Handler', () => {
     }
     console.log('result', JSON.stringify(await handler.getResult()))
   })
+
+  it('should handle a metamask sign request ur', async () => {
+    const str: string =
+      'ur:eth-sign-request/onadtpdagdndcawmgtfrkigrpmndutdnbtkgfssbjnaohdgryagalalnascsgljpnbaelfdibemwaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaelaoxlbjyihjkjyeyaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaeaehnaehglalalaaxadaaadahtaaddyoeadlecsdwykadykadykaewkadwkaocybgeehfkswdtklffd'
+
+    const handlerStatus: IACHandlerStatus = await handler.receive(str)
+
+    expect(handlerStatus).toBe(IACHandlerStatus.SUCCESS)
+
+    const result = await handler.getResult()
+    console.log(JSON.stringify(result))
+    expect(result?.result.length).toBe(1)
+  })
+
+  it('should handle a metamask sign request ur', async () => {
+    const str: string =
+      'UR:ETH-SIGN-REQUEST/ONADTPDAGDRPGLCKLENBVYGLPFLEUTFTQZYLLDDLDWAOHDEHAOWSADBZLRGLZMZMRTLPBGRSKKZSDALFGMAYMWGRFLAHIYJYPRSPFXTKGTNDVSLPDEDSWSAOLASNBWLTAXLGKBOXSWLAAELARTAXAAAAADAHTAADDYOEADLECSDWYKCSFNYKAEYKAEWKAEWKAOCYPFIDGTFRLBMELOWT'
+
+    const handlerStatus: IACHandlerStatus = await handler.receive(str)
+
+    expect(handlerStatus).toBe(IACHandlerStatus.SUCCESS)
+
+    const result = await handler.getResult()
+    console.log(JSON.stringify(result))
+    expect(result?.result.length).toBe(1)
+  })
+
+  it('should handle a metamask sign request ur (BSC, legacy tx)', async () => {
+    const str: string =
+      'UR:ETH-SIGN-REQUEST/ONADTPDAGDSBTELKFWLBGSGSOYREOXMNURLUSEAMHGAOHDDWWMAALPADDRAHWZAELFGMAYMWCLSPSAJSLPFPDPVYTIIAFMJZBENNVYIDFYRTPDFRLTCNLNWZJLSEAEAELAETLALAAXADAACSETAHTAADDYOEADLECSDWYKCSFNYKAEYKAEWKAEWKAOCYWMCPCHCAAMYAJLKP'
+
+    const handlerStatus: IACHandlerStatus = await handler.receive(str)
+
+    expect(handlerStatus).toBe(IACHandlerStatus.SUCCESS)
+
+    const result = await handler.getResult()
+    console.log(JSON.stringify(result))
+    expect(result?.result.length).toBe(1)
+  })
+
+  // TODO: Enable when message signing is supported
+  // it('should handle an arbitrary message sign request ur from metamask', async () => {
+  //   const str: string =
+  //     'UR:ETH-SIGN-REQUEST/ONADTPDAGDSFGSVWLOFHZEFLFLLSRSTDSFIESFDMPAAOGWJNKKCXJYIHJKJYCXJNIHJKJKHSIOIHAXAXAHTAADDYOEADLECSDWYKCSFNYKAEYKAEWKAEWKAOCYPFIDGTFRAMGHGRFLAHIYJYPRSPFXTKGTNDVSLPDEDSWSAOLASNBWUODTWMRL'
+
+  //   const handlerStatus: IACHandlerStatus = await handler.receive(str)
+
+  //   expect(handlerStatus).toBe(IACHandlerStatus.SUCCESS)
+
+  //   const result = await handler.getResult()
+  //   console.log(JSON.stringify(result))
+  //   expect(result?.result.length).toBe(1)
+  // })
 })
