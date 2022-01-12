@@ -12,7 +12,7 @@ export type CurrencySymbolFacade<T extends BaseFacade = BaseFacade> = ICurrencyS
 export interface ICurrencySymbolFacade {
   readonly symbolSrc$: Observable<string>
 
-  afterViewInit(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void
+  initWithSymbol(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void
   onSymbolChanged(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void
   onError(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined, src?: string): void
 }

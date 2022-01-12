@@ -15,7 +15,7 @@ class CurrencySymbolTestFacade extends BaseFacade implements ICurrencySymbolFaca
   public symbolSrc$: Observable<string> = new BehaviorSubject('').asObservable()
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public afterViewInit(_symbol: string, _protocolIdentifier: ProtocolSymbols): void {}
+  public initWithSymbol(_symbol: string, _protocolIdentifier: ProtocolSymbols): void {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   public onSymbolChanged(_symbol: string, _protocolIdentifier: ProtocolSymbols): void {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -8,21 +8,25 @@ import {
 } from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
-import { IACHandlerStatus, IACMessageHandler } from '../../iac/message-handler'
-import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
+import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
+import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
+import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
+import { Transaction, TransactionFactory } from '@ethereumjs/tx'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'
   private readonly serializer: SerializerV3
   private decoder: URDecoder = new URDecoder()
 
-  private readonly callback: any = (): void => undefined
+  private readonly callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined
 
   private parts: Set<string> = new Set()
 
   private combinedData: Buffer | undefined
 
-  constructor(callback: any = (): void => undefined) {
+  private resultCache: IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined
+
+  constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
     this.serializer = new SerializerV3()
     this.callback = callback
     // completion callback
@@ -82,7 +86,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     return IACHandlerStatus.PARTIAL
   }
 
-  public async handleComplete(): Promise<IACMessageDefinitionObjectV3[]> {
+  public async handleComplete(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const result = await this.getResult()
     if (!result) {
       throw new Error('Data not complete!')
@@ -96,7 +100,11 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     return Number(this.decoder.estimatedPercentComplete().toFixed(2))
   }
 
-  public async getResult(): Promise<IACMessageDefinitionObjectV3[] | undefined> {
+  public async getResult(): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined> {
+    if (this.resultCache) {
+      return this.resultCache
+    }
+
     if (this.decoder.isComplete() && this.decoder.isSuccess()) {
       const decoded = this.decoder.resultUR()
       this.combinedData = decoded.decodeCBOR()
@@ -104,11 +112,17 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       if (decoded.type === 'crypto-psbt') {
         const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor)
         const psbt = cryptoPsbt.getPSBT().toString('hex')
-        return [this.convertPSBT(psbt)]
+        return this.convertPSBT(psbt)
+      }
+
+      if (decoded.type === 'eth-sign-request') {
+        const signRequest = EthSignRequest.fromCBOR(decoded.cbor)
+
+        return this.convertMetaMaskSignRequest(signRequest)
       }
 
       const resultUr = bs58check.encode(this.combinedData)
-      return await this.serializer.deserialize(resultUr)
+      return { result: await this.serializer.deserialize(resultUr), data: await this.getDataSingle() }
     }
 
     return undefined
@@ -132,17 +146,118 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     return
   }
 
-  private convertPSBT(psbt: string): IACMessageDefinitionObjectV3 {
+  private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const payload: UnsignedBitcoinSegwitTransaction = {
       transaction: { psbt },
       publicKey: ''
     }
 
     return {
-      id: generateId(8),
-      protocol: MainProtocolSymbols.BTC_SEGWIT,
-      type: IACMessageType.TransactionSignRequest,
-      payload
+      result: [
+        {
+          id: generateId(8),
+          protocol: MainProtocolSymbols.BTC_SEGWIT,
+          type: IACMessageType.TransactionSignRequest,
+          payload
+        }
+      ],
+      data: await this.getDataSingle()
+    }
+  }
+
+  private async convertMetaMaskSignRequest(request: EthSignRequest): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
+    const data = request.getSignData()
+
+    const sourceFingerprint = ((request as any).derivationPath as CryptoKeypath).getSourceFingerprint().toString('hex')
+
+    const ownRequestId: number = generateId(8)
+
+    const metamaskRequestId: string = request.getRequestId().toString('hex')
+
+    // TODO: This should be moved to a higher level, probably the "iac.service", and properly store context for any kind of request.
+    const IDs = JSON.parse(localStorage.getItem('TEMP-MM-REQUEST-IDS') ?? '{}')
+    IDs[ownRequestId] = metamaskRequestId
+    localStorage.setItem('TEMP-MM-REQUEST-IDS', JSON.stringify(IDs))
+
+    const context = { requestId: metamaskRequestId, derivationPath: request.getDerivationPath(), sourceFingerprint }
+
+    switch (request.getDataType()) {
+      case DataType.transaction: {
+        const ethTx = TransactionFactory.fromSerializedData(Buffer.from(data))
+
+        const tx: Transaction = ethTx as Transaction
+
+        return {
+          result: [
+            {
+              id: ownRequestId,
+              protocol: MainProtocolSymbols.ETH,
+              type: IACMessageType.TransactionSignRequest,
+              payload: {
+                transaction: {
+                  nonce: `0x${tx.nonce.toString(16)}`,
+                  gasPrice: `0x${tx.gasPrice.toString(16)}`,
+                  gasLimit: `0x${tx.gasLimit.toString(16)}`,
+                  to: tx.to.toString(),
+                  value: `0x${tx.value.toString(16)}`,
+                  chainId: request.getChainId(),
+                  data: `0x${tx.data.toString('hex')}`
+                },
+                publicKey: ''
+              }
+            }
+          ],
+          data: await this.getDataSingle(),
+          context
+        }
+      }
+
+      case DataType.typedData:
+        break
+      case DataType.personalMessage:
+        throw new Error('Message signing is not supported yet.')
+      // const signRequest: MessageSignRequest = {
+      //   message: data.toString('hex'),
+      //   publicKey: ''
+      // }
+
+      // return {
+      //   result: [
+      //     {
+      //       id: ownRequestId,
+      //       protocol: MainProtocolSymbols.ETH,
+      //       type: IACMessageType.MessageSignRequest,
+      //       payload: signRequest
+      //     }
+      //   ],
+      //   data: await this.getDataSingle(),
+      //   context
+      // }
+
+      case DataType.typedTransaction: {
+        return {
+          result: [
+            {
+              id: ownRequestId,
+              protocol: MainProtocolSymbols.ETH,
+              type: IACMessageType.TransactionSignRequest,
+              payload: {
+                transaction: {
+                  serialized: data.toString('hex'),
+                  derivationPath: request.getDerivationPath(),
+                  masterFingerprint: sourceFingerprint
+                },
+                publicKey: ''
+              }
+            }
+          ],
+          data: await this.getDataSingle(),
+          context
+        }
+      }
+
+      default:
+        throw new Error(`Unable to handle data type "${request.getDataType()}"`)
     }
   }
 }

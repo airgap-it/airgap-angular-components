@@ -15,7 +15,7 @@ export class CurrencySymbolNgRxFacade extends BaseNgRxFacade<CurrencySymbolStore
     this.symbolSrc$ = this.store.select((state) => state.src)
   }
 
-  public afterViewInit(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void {
+  public initWithSymbol(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void {
     this.store.setInitialSrc(this.getSymbolInputs(symbol, protocolIdentifier))
   }
 

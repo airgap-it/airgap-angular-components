@@ -1,4 +1,4 @@
-import { AirGapWallet, ICoinProtocol, MessageSignRequest, UnsignedTransaction } from '@airgap/coinlib-core'
+import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, MessageSignRequest, UnsignedTransaction } from '@airgap/coinlib-core'
 import { Injectable } from '@angular/core'
 
 type Unsigned = UnsignedTransaction | MessageSignRequest
@@ -17,16 +17,23 @@ export class KeyPairService {
     mnemonic: string,
     password: string,
     withExtendedPrivateKey: boolean = false,
-    derivationPath: string = protocol.standardDerivationPath
+    derivationPath: string = protocol.standardDerivationPath,
+    childDerivationPath?: string
   ): Promise<string> {
-    if (!(await this.checkPassword(protocol, unsigned, mnemonic, derivationPath, password))) {
+    if (!(await this.checkPassword(protocol, unsigned, mnemonic, withExtendedPrivateKey, derivationPath, password))) {
       throw new Error('Invalid BIP-39 passphrase')
     }
 
-    if (withExtendedPrivateKey && this.isUnsignedTransaction(unsigned)) {
+    if (withExtendedPrivateKey) {
       const extendedPrivateKey: string = await protocol.getExtendedPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
 
-      return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction)
+      if (this.isUnsignedTransaction(unsigned)) {
+        return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction, childDerivationPath)
+      } else {
+        throw new Error('Message signing with xPubs not supported yet.')
+        // const privateKey = await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
+        // return protocol.signMessage(unsigned.message, { privateKey })
+      }
     } else {
       const privateKey: Buffer = await protocol.getPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
 
@@ -40,6 +47,7 @@ export class KeyPairService {
     protocol: ICoinProtocol,
     unsigned: Unsigned,
     mnemonic: string,
+    withExtendedPrivateKey: boolean = false,
     derivationPath: string,
     password: string
   ): Promise<boolean> {
@@ -48,7 +56,12 @@ export class KeyPairService {
       return true
     }
 
-    const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)
+    const publicKey: string =
+      withExtendedPrivateKey &&
+      protocol.identifier ===
+        MainProtocolSymbols.ETH /* We need to check for ETH, because BTC returns an xPub for getPublicKeyFromMnemonic and getExtendedPublicKeyFromMnemonic doesn't exist */
+        ? await (protocol as any).getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
+        : await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)
 
     return publicKey === unsigned.publicKey
   }

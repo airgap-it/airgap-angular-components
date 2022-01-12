@@ -1,5 +1,5 @@
 import { ProtocolSymbols } from '@airgap/coinlib-core'
-import { AfterViewInit, Component, Inject, Injector, Input, OnChanges, SimpleChanges } from '@angular/core'
+import { Component, Inject, Injector, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { first } from 'rxjs/operators'
 import { BaseComponent } from '../../base/base.component'
 import { currencySymbolFacade, CurrencySymbolFacade, CURRENCY_SYMBOL_FACADE } from './currency-symbol.facade'
@@ -10,7 +10,7 @@ import { currencySymbolFacade, CurrencySymbolFacade, CURRENCY_SYMBOL_FACADE } fr
   styleUrls: ['./currency-symbol.component.scss'],
   providers: [{ provide: CURRENCY_SYMBOL_FACADE, useFactory: currencySymbolFacade, deps: [Injector] }]
 })
-export class CurrencySymbolComponent extends BaseComponent<CurrencySymbolFacade> implements AfterViewInit, OnChanges {
+export class CurrencySymbolComponent extends BaseComponent<CurrencySymbolFacade> implements OnChanges {
   @Input()
   public symbol: string | undefined
 
@@ -21,11 +21,17 @@ export class CurrencySymbolComponent extends BaseComponent<CurrencySymbolFacade>
     super(facade)
   }
 
-  public ngAfterViewInit(): void {
-    this.facade.afterViewInit(this.symbol, this.protocolIdentifier)
+  public ngOnInit() {
+    this.facade.initWithSymbol(this.symbol, this.protocolIdentifier)
+
+    return super.ngOnInit()
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.symbol === undefined || changes.protocolIdentifier === undefined) {
+      return
+    }
+
     if (
       changes.symbol.previousValue !== changes.symbol.currentValue ||
       changes.protocolIdentifier.previousValue !== changes.protocolIdentifier.currentValue
