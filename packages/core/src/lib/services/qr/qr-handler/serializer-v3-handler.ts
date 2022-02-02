@@ -3,6 +3,7 @@ import {
   IACMessageDefinitionObjectV3,
   IACMessageType,
   MainProtocolSymbols,
+  MessageSignRequest,
   SerializerV3,
   UnsignedBitcoinSegwitTransaction
 } from '@airgap/coinlib-core'
@@ -213,26 +214,41 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       }
 
       case DataType.typedData:
-        break
-      case DataType.personalMessage:
-        throw new Error('Message signing is not supported yet.')
-      // const signRequest: MessageSignRequest = {
-      //   message: data.toString('hex'),
-      //   publicKey: ''
-      // }
+        const typedDataSignRequest: MessageSignRequest = {
+          message: data.toString(),
+          publicKey: ''
+        }
 
-      // return {
-      //   result: [
-      //     {
-      //       id: ownRequestId,
-      //       protocol: MainProtocolSymbols.ETH,
-      //       type: IACMessageType.MessageSignRequest,
-      //       payload: signRequest
-      //     }
-      //   ],
-      //   data: await this.getDataSingle(),
-      //   context
-      // }
+        return {
+          result: [
+            {
+              id: ownRequestId,
+              protocol: MainProtocolSymbols.ETH,
+              type: IACMessageType.MessageSignRequest,
+              payload: typedDataSignRequest
+            }
+          ],
+          data: await this.getDataSingle(),
+          context
+        }
+      case DataType.personalMessage:
+        const signRequest: MessageSignRequest = {
+          message: `0x${data.toString('hex')}`,
+          publicKey: ''
+        }
+
+        return {
+          result: [
+            {
+              id: ownRequestId,
+              protocol: MainProtocolSymbols.ETH,
+              type: IACMessageType.MessageSignRequest,
+              payload: signRequest
+            }
+          ],
+          data: await this.getDataSingle(),
+          context
+        }
 
       case DataType.typedTransaction: {
         return {
