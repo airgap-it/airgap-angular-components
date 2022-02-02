@@ -42,13 +42,15 @@ export class TokenService {
         )
       )
 
-      const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetailsFromSigned(signedTransaction)
+      try {
+        const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetailsFromSigned(signedTransaction)
 
-      if (transactions.length !== 1) {
-        throw Error('`getTransactionDetailsFromSigned` returned more than 1 transaction!')
-      }
+        if (transactions.length !== 1) {
+          throw Error('`getTransactionDetailsFromSigned` returned more than 1 transaction!')
+        }
 
-      return transactions[0]
+        return transactions[0]
+      } catch (error) {}
     }
 
     return tx
@@ -74,14 +76,15 @@ export class TokenService {
           )
         )
       )
+      try {
+        const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetails(unsignedTransaction) 
+        if (transactions.length !== 1) {
+          throw Error('`getTransactionDetails` returned more than 1 transaction!')
+        }
+  
+        return transactions[0]
+      } catch (error) {}
 
-      const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetails(unsignedTransaction)
-
-      if (transactions.length !== 1) {
-        throw Error('`getTransactionDetails` returned more than 1 transaction!')
-      }
-
-      return transactions[0]
     }
 
     return tx
