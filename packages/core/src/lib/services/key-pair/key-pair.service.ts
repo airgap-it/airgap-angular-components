@@ -30,9 +30,8 @@ export class KeyPairService {
       if (this.isUnsignedTransaction(unsigned)) {
         return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction, childDerivationPath)
       } else {
-        throw new Error('Message signing with xPubs not supported yet.')
-        // const privateKey = await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
-        // return protocol.signMessage(unsigned.message, { privateKey })
+        const privateKey = await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
+        return protocol.signMessage(unsigned.message, { privateKey })
       }
     } else {
       const privateKey: Buffer = await protocol.getPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
