@@ -35,8 +35,8 @@ export class MetamaskGenerator extends IACQrGenerator {
       this.data = await this.generateCryptoAccountMessage(element)
     } else if (element.type === IACMessageType.TransactionSignResponse) {
       this.data = await this.generateMessage(element)
-      // } else if (element.type === IACMessageType.MessageSignResponse) {
-      //   this.data = await this.generateMessage(element)
+    } else if (element.type === IACMessageType.MessageSignResponse) {
+      this.data = await this.generateMessage(element)
     } else {
       throw new Error('Not Supported')
     }
@@ -55,7 +55,7 @@ export class MetamaskGenerator extends IACQrGenerator {
       const element = data[0]
       return (
         element.protocol === MainProtocolSymbols.ETH &&
-        [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse /*, IACMessageType.MessageSignResponse */].includes(
+        [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse, IACMessageType.MessageSignResponse].includes(
           element.type
         )
       )
