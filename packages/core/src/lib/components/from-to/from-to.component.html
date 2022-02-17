@@ -12,11 +12,22 @@
       </ion-row>
     </ion-col>
     <ion-col size="9">
+      <ng-container *ngIf="type">
+        <ion-label class="ion-text-uppercase">{{ 'from-to.type_label' | translate }}</ion-label>
+        <div class="ion-margin-bottom">
+          <span class="typography--mono">
+            <ion-chip>
+              <ion-label>{{ type }}</ion-label>
+            </ion-chip>
+          </span>
+        </div>
+      </ng-container>
+
       <airgap-titled-text
-        *ngIf="transaction.extra && transaction.extra.type"
+        *ngIf="destination"
         class="ion-padding-bottom"
-        [title]="'from-to.type_label' | translate"
-        [text]="transaction.extra.type"
+        [title]="'from-to.destination_label' | translate"
+        [text]="destination"
       ></airgap-titled-text>
 
       <airgap-titled-text
@@ -68,14 +79,27 @@
     </ion-col>
   </ion-row>
 
-  <ion-row class="rawdata--container" *ngIf="transaction.transactionDetails">
-    <ion-col class="ion-no-padding">
-      <ion-item class="ion-no-padding" lines="none">
-        <ion-label>{{ 'from-to.transaction-details_label' | translate }}</ion-label>
-        <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" slot="end"></ion-toggle>
-      </ion-item>
-      <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
-      <ion-button *ngIf="displayRawData" (click)="copyToClipboard()">Copy data to clipboard</ion-button>
-    </ion-col>
-  </ion-row>
+  <div class="rawdata--container">
+    <ion-row *ngIf="transaction.transactionDetails">
+      <ion-col class="ion-no-padding">
+  
+        <ion-item class="ion-no-padding" lines="none">
+          <ion-label>{{ 'from-to.transaction-details_label' | translate }}</ion-label>
+          <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" slot="end"></ion-toggle>
+        </ion-item>
+        <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
+        <ion-button *ngIf="displayRawData" (click)="copyToClipboard()">Copy data to clipboard</ion-button>
+      </ion-col>
+    </ion-row>
+  
+    <ion-row class="rawdata--container" *ngIf="interactionData">
+      <ion-col class="ion-no-padding">
+        <ion-item class="ion-no-padding" lines="none">
+          <ion-label>{{ 'from-to.details' | translate }}</ion-label>
+          <ion-toggle [checked]="displayDetails" (ionChange)="toggleDisplayDetails()" slot="end"></ion-toggle>
+        </ion-item>
+        <pre *ngIf="displayDetails" class="ion-no-margin">{{ interactionData | json }}</pre>
+      </ion-col>
+    </ion-row>
+  </div>
 </ng-container>
