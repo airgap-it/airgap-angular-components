@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core'
 import { IonicModule } from '@ionic/angular'
 import { TranslateModule } from '@ngx-translate/core'
 import { MomentModule } from 'ngx-moment'
-
 import { QRCodeModule } from 'angularx-qrcode'
 import { FormsModule } from '@angular/forms'
 import { PipesModule } from '../pipes/pipes.module'
@@ -31,7 +30,7 @@ import { IACQrComponent } from './iac-qr/iac-qr.component'
     IACQrComponent,
     AccountItemComponent,
     AccountSelectionComponent,
-    QrSettingsComponent
+    QrSettingsComponent,
   ],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule, FormsModule],
   exports: [
@@ -45,7 +44,7 @@ import { IACQrComponent } from './iac-qr/iac-qr.component'
     AccountSelectionComponent,
     QrComponent,
     IACQrComponent,
-    QrSettingsComponent
+    QrSettingsComponent,
   ]
 })
 export class ComponentsModule {}
