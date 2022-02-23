@@ -8,6 +8,8 @@
     "status_label": "Status",
     "from_label": "From",
     "to_label": "To",
+    "destination_label": "Destination",
+    "details": "Display details",
     "transaction-details_label": "Display extra transaction details"
   },
   "clipboard": {

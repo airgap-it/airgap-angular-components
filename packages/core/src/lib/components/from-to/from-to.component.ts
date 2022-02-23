@@ -14,10 +14,32 @@ export class FromToComponent {
   @Input()
   public displayRawData: boolean = false
 
+  @Input()
+  public displayDetails: boolean = false
+
+  @Input()
+  public interactionData: any | undefined
+
+  public get type(): string | undefined {
+    return this.transaction?.transactionDetails?.parameters?.entrypoint ?? this.transaction?.extra?.type
+  }
+
+  public get destination(): string | undefined {
+    const result: string | undefined = this.transaction?.transactionDetails?.destination ?? this.transaction?.extra?.destination
+    if (result && this.transaction?.to.includes(result)) {
+      return undefined
+    }
+    return result
+  }
+
   constructor(private readonly clipboardService: ClipboardService) { }
 
   public toggleDisplayRawData(): void {
     this.displayRawData = !this.displayRawData
+  }
+
+  public toggleDisplayDetails(): void {
+    this.displayDetails = !this.displayDetails
   }
 
   public copyToClipboard(): void {
