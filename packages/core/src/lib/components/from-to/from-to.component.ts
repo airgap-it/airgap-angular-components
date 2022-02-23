@@ -25,7 +25,7 @@ export class FromToComponent {
   }
 
   public get destination(): string | undefined {
-    const result: string | undefined = this.transaction?.transactionDetails?.destination
+    const result: string | undefined = this.transaction?.transactionDetails?.destination ?? this.transaction?.extra?.destination
     if (result && this.transaction?.to.includes(result)) {
       return undefined
     }
