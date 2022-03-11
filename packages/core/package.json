@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "main": "dist/bundles/airgap-angular-core.umd.js",
   "module": "dist/fesm2015/airgap-angular-core.js",
   "es2015": "dist/fesm2015/airgap-angular-core.js",
