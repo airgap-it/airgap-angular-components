@@ -27,6 +27,8 @@ import {
   TezosWRAP,
   TezosQUIPU,
   MoonbeamProtocol,
+  AstarProtocol
+  // ShidenProtocol
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -47,7 +49,9 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new GroestlcoinProtocol(),
     new MoonriverProtocol(),
     new MoonbeamProtocol(),
-    new BitcoinProtocol()
+    new BitcoinProtocol(),
+    new AstarProtocol()
+    // new ShidenProtocol()
   ]
 }
 
