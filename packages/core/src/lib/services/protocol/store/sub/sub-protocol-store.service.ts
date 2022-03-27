@@ -11,7 +11,7 @@ import {
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
-import { ethTokens } from '../../tokens'
+import { ethTokens, rskTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 
 export interface SubProtocolsMap {
@@ -35,6 +35,7 @@ SubProtocolsMap,
 SubProtocolStoreConfig
 > {
   private _ethTokenIdentifers: Set<string> | undefined
+  private _rskTokenIdentifers: Set<string> | undefined
 
   constructor() {
     super('SubProtocolService')
@@ -48,12 +49,21 @@ SubProtocolStoreConfig
     return this._ethTokenIdentifers
   }
 
+  private get rskTokenIdentifiers(): Set<string> {
+    if (this._rskTokenIdentifers === undefined) {
+      this._rskTokenIdentifers = new Set(rskTokens.map((rskToken: Token) => rskToken.identifier))
+    }
+
+    return this._rskTokenIdentifers
+  }
+
   public isIdentifierValid(identifier: string): boolean {
     const mainIdentifier = getMainIdentifier(identifier as SubProtocolSymbols)
 
     return (
       Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols)
       || this.ethTokenIdentifiers.has(identifier)
+      || this.rskTokenIdentifiers.has(identifier)
       || (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier)
     )
   }

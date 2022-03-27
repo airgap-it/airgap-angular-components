@@ -244,13 +244,14 @@ describe('MainProtocolStoreService', () => {
       MainProtocolSymbols.BTC,
       MainProtocolSymbols.COSMOS,
       MainProtocolSymbols.ETH,
+      MainProtocolSymbols.RBTC,
       MainProtocolSymbols.GRS,
       MainProtocolSymbols.KUSAMA,
       MainProtocolSymbols.POLKADOT,
       MainProtocolSymbols.XTZ
     ]
 
-    const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'aeternity', 'bitcoin', 'ethereum', 'tezos', 'ksm', 'dot', 'atom']
+    const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'aeternity', 'bitcoin', 'ethereum', 'rsk', 'tezos', 'ksm', 'dot', 'atom']
 
     it('should check if the identifier is valid', () => {
       service.init({
