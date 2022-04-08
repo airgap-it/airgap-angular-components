@@ -27,8 +27,11 @@ import {
   TezosWRAP,
   TezosQUIPU,
   MoonbeamProtocol,
-  AstarProtocol
-  // ShidenProtocol
+  AstarProtocol,
+  ShidenProtocol,
+  TezosKolibriUSD,
+  TezosUBTC,
+  TezosDOGA,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -50,8 +53,8 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new MoonriverProtocol(),
     new MoonbeamProtocol(),
     new BitcoinProtocol(),
-    new AstarProtocol()
-    // new ShidenProtocol()
+    new AstarProtocol(),
+    new ShidenProtocol()
   ]
 }
 
@@ -73,6 +76,9 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
     [tezosProtocol, new TezosPlenty()],
     [tezosProtocol, new TezosWRAP()],
     [tezosProtocol, new TezosQUIPU()],
+    [tezosProtocol, new TezosKolibriUSD()],
+    [tezosProtocol, new TezosUBTC()],
+    [tezosProtocol, new TezosDOGA()],
     [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens.map(
       (token: Token) =>
