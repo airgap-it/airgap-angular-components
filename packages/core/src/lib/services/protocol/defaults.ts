@@ -32,6 +32,8 @@ import {
   TezosKolibriUSD,
   TezosUBTC,
   TezosDOGA,
+  TezosBTCTez,
+  TezosETH,
 } from '@airgap/coinlib-core'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
@@ -79,6 +81,8 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
     [tezosProtocol, new TezosKolibriUSD()],
     [tezosProtocol, new TezosUBTC()],
     [tezosProtocol, new TezosDOGA()],
+    [tezosProtocol, new TezosBTCTez()],
+    [tezosProtocol, new TezosETH],
     [tezosProtocol, new TezosKtProtocol()],
     ...ethTokens.map(
       (token: Token) =>
