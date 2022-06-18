@@ -3,6 +3,14 @@ import { Token } from '../../types/Token'
 
 export const ethTokens: Token[] = [
   {
+    symbol: 'WETH',
+    name: 'Wrapped ETH (erc20)',
+    marketSymbol: 'weth',
+    identifier: 'eth-erc20-weth',
+    contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    decimals: 18
+  },
+  {
     symbol: 'XCHF',
     name: 'CryptoFranc',
     marketSymbol: 'xchf',
