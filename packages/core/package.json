@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "main": "dist/bundles/airgap-angular-core.umd.js",
   "module": "dist/fesm2015/airgap-angular-core.js",
   "es2015": "dist/fesm2015/airgap-angular-core.js",
@@ -27,7 +27,7 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "^0.13.3",
+    "@airgap/coinlib-core": "^0.13.4",
     "@angular/animations": "^11.2.9",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
