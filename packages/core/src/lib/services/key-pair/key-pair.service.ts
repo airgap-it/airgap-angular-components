@@ -1,11 +1,4 @@
-import {
-  AirGapWallet,
-  ICoinProtocol,
-  MainProtocolSymbols,
-  MessageSignRequest,
-  SubProtocolSymbols,
-  UnsignedTransaction
-} from '@airgap/coinlib-core'
+import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, MessageSignRequest, UnsignedTransaction } from '@airgap/coinlib-core'
 import { Injectable } from '@angular/core'
 
 type Unsigned = UnsignedTransaction | MessageSignRequest
@@ -63,11 +56,9 @@ export class KeyPairService {
     }
 
     const publicKey: string =
-      withExtendedPrivateKey &&
-      [MainProtocolSymbols.ETH, SubProtocolSymbols.ETH_ERC20, SubProtocolSymbols.ETH_ERC20_XCHF].includes(
-        protocol.identifier
-      ) /* We need to check for ETH, because BTC returns an xPub for getPublicKeyFromMnemonic and getExtendedPublicKeyFromMnemonic doesn't exist */
-        ? await (protocol as any).getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
+      withExtendedPrivateKey && protocol.identifier.startsWith(MainProtocolSymbols.ETH)
+        ? /* We need to check for ETH, because BTC returns an xPub for getPublicKeyFromMnemonic and getExtendedPublicKeyFromMnemonic doesn't exist */
+          await (protocol as any).getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
         : await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)
 
     return publicKey === unsigned.publicKey
