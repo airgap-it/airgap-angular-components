@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.30-beta.3",
+  "version": "0.0.31",
   "main": "dist/bundles/airgap-angular-ngrx.umd.js",
   "module": "dist/fesm2015/airgap-angular-ngrx.js",
   "es2015": "dist/fesm2015/airgap-angular-ngrx.js",
@@ -28,7 +28,7 @@
   },
   "peerDependencies": {
     "@airgap/angular-core": "^0.0.28",
-    "@airgap/coinlib-core": "0.13.4-beta.1",
+    "@airgap/coinlib-core": "0.13.5",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
     "@angular/platform-browser": "^11.2.9",
