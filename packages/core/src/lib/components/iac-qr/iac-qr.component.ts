@@ -49,6 +49,9 @@ export class IACQrComponent implements OnDestroy {
   public margin: number = 2
 
   @Input()
+  qrFormatPreference: QRType
+
+  @Input()
   public set messageDefinitionObjects(value: IACMessageDefinitionObjectV3[]) {
     this._messageDefinitionObjects = value
     this.convertToDataArray()
@@ -70,7 +73,12 @@ export class IACQrComponent implements OnDestroy {
   ) {
     this.singleChunkSize = this.serializerService.singleChunkSize
     this.multiChunkSize = this.serializerService.multiChunkSize
+  }
 
+  ngOnInit() {
+    this.timeout = setInterval(async () => {
+      this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
+    }, this.serializerService.displayTimePerChunk)
     const v3Generator = new SerializerV3Generator()
     const v2Generator = new SerializerV2Generator()
 
@@ -84,19 +92,42 @@ export class IACQrComponent implements OnDestroy {
     this.availableQRTypes.push(QRType.V3)
     this.availableQRTypes.push(QRType.V2)
 
-    if (this.serializerService.useV3) {
-      this.activeGenerator = v3Generator
-      this.qrType = QRType.V3
-    } else {
-      this.activeGenerator = v2Generator
-      this.qrType = QRType.V2
-    }
-  }
+    if (this.qrFormatPreference) {
+      switch (this.qrFormatPreference) {
+        case QRType.BC_UR:
+          this.qrType = QRType.BC_UR
+          this.activeGenerator = new BCURTypesGenerator()
+          break
 
-  ngOnInit() {
-    this.timeout = setInterval(async () => {
-      this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
-    }, this.serializerService.displayTimePerChunk)
+        case QRType.OUTPUT_DESCRIPTOR:
+          this.qrType = QRType.OUTPUT_DESCRIPTOR
+          this.activeGenerator = new OutputDescriptorGenerator()
+          break
+
+        case QRType.XPUB:
+          this.qrType = QRType.XPUB
+          this.activeGenerator = new XPubGenerator()
+          break
+
+        case QRType.METAMASK:
+          this.qrType = QRType.METAMASK
+          this.activeGenerator = new MetamaskGenerator()
+          break
+
+        default:
+          this.activeGenerator = v3Generator
+          this.qrType = QRType.V3
+          break
+      }
+    } else {
+      if (this.serializerService.useV3) {
+        this.activeGenerator = v3Generator
+        this.qrType = QRType.V3
+      } else {
+        this.activeGenerator = v2Generator
+        this.qrType = QRType.V2
+      }
+    }
   }
 
   public updateGenerator(value: QRType) {
