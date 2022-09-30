@@ -19,6 +19,14 @@ export const ethTokens: Token[] = [
     decimals: 6
   },
   {
+    symbol: 'MNW',
+    name: 'Morpheus.Network',
+    marketSymbol: 'mnw',
+    identifier: 'eth-erc20-mnw',
+    contractAddress: '0xd3e4ba569045546d09cf021ecc5dfe42b1d7f6e4',
+    decimals: 18
+  },
+  {
     symbol: 'BNB',
     name: 'Binance Coin',
     marketSymbol: 'bnb',
