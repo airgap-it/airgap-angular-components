@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@angular/core'
 import {
   Directory,
   Encoding,
+  FileInfo,
   FilesystemPlugin,
   ReaddirResult,
   ReadFileOptions,
@@ -146,7 +147,7 @@ export class FilesystemService {
         path,
         directory
       })
-      .then((result: ReaddirResult) => new Set(result.files))
+      .then((result: ReaddirResult) => new Set(result.files.map((fileInfo: FileInfo) => fileInfo.uri)))
   }
 
   private getLinkFilePath(path: string): string {
