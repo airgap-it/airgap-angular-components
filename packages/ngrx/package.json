@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.32-beta.9",
+  "version": "0.0.32",
   "main": "dist/bundles/airgap-angular-ngrx.umd.js",
   "module": "dist/fesm2015/airgap-angular-ngrx.js",
   "es2015": "dist/fesm2015/airgap-angular-ngrx.js",
