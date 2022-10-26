@@ -12,21 +12,21 @@ export class AddressService {
 
   constructor(private readonly protocolService: ProtocolService) {}
 
-  public registerExternalAliasResolver(externalResolver: ExternalAliasResolver, protocol: ICoinProtocol): void
-  public registerExternalAliasResolver(
+  public async registerExternalAliasResolver(externalResolver: ExternalAliasResolver, protocol: ICoinProtocol): Promise<void>
+  public async registerExternalAliasResolver(
     externalResolver: ExternalAliasResolver,
     protocol: ProtocolSymbols,
     network: string | ProtocolNetwork
-  ): void
-  public registerExternalAliasResolver(
+  ): Promise<void>
+  public async registerExternalAliasResolver(
     externalResolver: ExternalAliasResolver,
     protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
     network?: string | ProtocolNetwork
-  ): void {
+  ): Promise<void> {
     const protocolNetworkIdentifier: string =
       typeof protocolOrIdentifier === 'string'
-        ? getProtocolAndNetworkIdentifier(protocolOrIdentifier, network ?? '')
-        : getProtocolAndNetworkIdentifier(protocolOrIdentifier)
+        ? await getProtocolAndNetworkIdentifier(protocolOrIdentifier, network ?? '')
+        : await getProtocolAndNetworkIdentifier(protocolOrIdentifier)
 
     if (!this.externalResolvers.has(protocolNetworkIdentifier)) {
       this.externalResolvers.set(protocolNetworkIdentifier, [])
@@ -57,7 +57,7 @@ export class AddressService {
   ): Promise<boolean> {
     const protocol: ICoinProtocol = await this.protocolService.getProtocol(protocolOrIdentifier, network, false)
 
-    return this.protocolService.isAddressOfProtocol(protocol.identifier, data)
+    return this.protocolService.isAddressOfProtocol(await protocol.getIdentifier(), data)
   }
 
   public async isAlias(data: string, protocol: ICoinProtocol): Promise<boolean>
@@ -68,7 +68,7 @@ export class AddressService {
     network?: string | ProtocolNetwork
   ): Promise<boolean> {
     const protocol: ICoinProtocol = await this.protocolService.getProtocol(protocolOrIdentifier, network, false)
-    const protocolNetworkIdentifier: string = getProtocolAndNetworkIdentifier(protocol)
+    const protocolNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
 
     const externalValidations: boolean[] = await Promise.all(
       this.externalResolvers.get(protocolNetworkIdentifier)?.map((resolver: ExternalAliasResolver) => resolver.validateReceiver(data)) ?? []
@@ -90,7 +90,7 @@ export class AddressService {
       return addressOrAlias
     }
 
-    const protocolNetworkIdentifier: string = getProtocolAndNetworkIdentifier(protocol)
+    const protocolNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
     const externalResolvers: ExternalAliasResolver[] = this.externalResolvers.get(protocolNetworkIdentifier) ?? []
 
     for (const resolver of externalResolvers) {
@@ -113,7 +113,7 @@ export class AddressService {
     const protocol: ICoinProtocol = await this.protocolService.getProtocol(protocolOrIdentifier, network, false)
 
     if (await this.isAddress(addressOrAlias, protocol)) {
-      const protocolNetworkIdentifier: string = getProtocolAndNetworkIdentifier(protocol)
+      const protocolNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
       const externalResolvers: ExternalAliasResolver[] = this.externalResolvers.get(protocolNetworkIdentifier) ?? []
 
       for (const resolver of externalResolvers) {

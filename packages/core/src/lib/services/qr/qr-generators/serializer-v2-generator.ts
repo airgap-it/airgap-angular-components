@@ -1,4 +1,5 @@
-import { IACMessageDefinitionObject, IACMessageDefinitionObjectV3, Serializer } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObject, IACMessageDefinitionObjectV3, Serializer } from '@airgap/serializer'
+
 import { IACQrGenerator } from '../../iac/qr-generator'
 import { convertV3ToV2 } from '../../serializer/serializer.service'
 
@@ -23,11 +24,13 @@ export class SerializerV2Generator extends IACQrGenerator {
   public async nextPart(): Promise<string> {
     const next = this.parts[this.counter % this.parts.length]
     this.counter += 1
+
     return next
   }
 
   public async getSingle(prefix: string): Promise<string> {
     const part = this.parts.length === 1 ? this.parts[0] : (await serializer.serialize(this.data))[0]
+
     return this.prefixSingle(part, prefix, 'd')
   }
 

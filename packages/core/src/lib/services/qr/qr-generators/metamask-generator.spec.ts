@@ -1,10 +1,6 @@
-import {
-  IACMessageDefinitionObjectV3,
-  IACMessageType,
-  MainProtocolSymbols,
-  RawEthereumTransaction,
-  SignedEthereumTransaction
-} from '@airgap/coinlib-core'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { SignedEthereumTransaction } from '@airgap/ethereum'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { MetamaskGenerator } from './metamask-generator'
 
 describe('MetamaskGenerator', () => {

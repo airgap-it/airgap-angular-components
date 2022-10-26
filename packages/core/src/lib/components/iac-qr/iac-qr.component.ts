@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, Inject } from '@angular/core'
 
 import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
-import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3 } from '@airgap/serializer'
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 import { SerializerService } from '../../services/serializer/serializer.service'
 import { APP_CONFIG, AppConfig } from '../../config/app-config'
@@ -49,7 +49,7 @@ export class IACQrComponent implements OnDestroy {
   public margin: number = 2
 
   @Input()
-  qrFormatPreference: QRType
+  public qrFormatPreference: QRType
 
   @Input()
   public set messageDefinitionObjects(value: IACMessageDefinitionObjectV3[]) {
@@ -75,7 +75,7 @@ export class IACQrComponent implements OnDestroy {
     this.multiChunkSize = this.serializerService.multiChunkSize
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.timeout = setInterval(async () => {
       this.qrdata = this.activeGenerator ? await this.activeGenerator.nextPart() : ''
     }, this.serializerService.displayTimePerChunk)
@@ -130,7 +130,7 @@ export class IACQrComponent implements OnDestroy {
     }
   }
 
-  public updateGenerator(value: QRType) {
+  public updateGenerator(value: QRType): void {
     const generator = this.generatorsMap.get(value)
     if (generator) {
       this.qrType = value
@@ -148,7 +148,7 @@ export class IACQrComponent implements OnDestroy {
   }
 
   public async copyToClipboard(): Promise<void> {
-    let copyString: string = this.activeGenerator ? await this.activeGenerator.getSingle(this.appConfig.otherApp.urlScheme) : ''
+    const copyString: string = this.activeGenerator ? await this.activeGenerator.getSingle(this.appConfig.otherApp.urlScheme) : ''
 
     await this.clipboardService.copyAndShowToast(copyString)
   }

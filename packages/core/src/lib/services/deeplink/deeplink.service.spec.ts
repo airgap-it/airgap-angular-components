@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing'
+import { IACMessageDefinitionObjectV3 } from '@airgap/serializer'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 
-import { APP_LAUNCHER_PLUGIN, APP_PLUGIN } from '../../capacitor-plugins/injection-tokens'
+import { APP_LAUNCHER_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { AppLauncherPluginMock } from '../../../../test/utils/plugins-mock'
 import { DeeplinkService } from './deeplink.service'
-import { IACMessageDefinitionObjectV3, MainProtocolSymbols } from '@airgap/coinlib-core'
 
 describe('DeeplinkService', () => {
   let service: DeeplinkService

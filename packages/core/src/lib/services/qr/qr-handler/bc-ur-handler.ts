@@ -1,14 +1,9 @@
-import {
-  generateId,
-  IACMessageDefinitionObjectV3,
-  IACMessageType,
-  MainProtocolSymbols,
-  UnsignedBitcoinSegwitTransaction
-} from '@airgap/coinlib-core'
+import { UnsignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, generateId, IACMessageType } from '@airgap/serializer'
+import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
-
-import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 
 export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'BCURTypesHandler'

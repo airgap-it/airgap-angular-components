@@ -1,13 +1,5 @@
-import {
-  EthereumERC20ProtocolConfig,
-  EthereumERC20ProtocolOptions,
-  EthereumProtocolNetwork,
-  GenericERC20,
-  IAirGapTransaction,
-  SignedTransaction,
-  SubProtocolSymbols,
-  UnsignedTransaction
-} from '@airgap/coinlib-core'
+import { IAirGapTransaction, SignedTransaction, SubProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
+import { GenericERC20, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, EthereumERC20ProtocolConfig } from '@airgap/ethereum'
 import { Injectable } from '@angular/core'
 
 import { Token } from '../../types/Token'
@@ -81,7 +73,7 @@ export class TokenService {
         if (transactions.length !== 1) {
           throw Error('`getTransactionDetails` returned more than 1 transaction!')
         }
-  
+
         return transactions[0]
       } catch (error) {}
 

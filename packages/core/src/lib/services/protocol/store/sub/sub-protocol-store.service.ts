@@ -5,7 +5,6 @@ import {
   ProtocolNetwork,
   SubProtocolSymbols,
   MainProtocolSymbols,
-  getProtocolOptionsByIdentifier,
   isNetworkEqual
 } from '@airgap/coinlib-core'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
@@ -13,6 +12,7 @@ import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/prot
 import { Token } from '../../../../types/Token'
 import { ethTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
+import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 
 export interface SubProtocolsMap {
   [key: string]: {
@@ -29,10 +29,10 @@ export interface SubProtocolStoreConfig {
   providedIn: 'root'
 })
 export class SubProtocolStoreService extends BaseProtocolStoreService<
-ICoinSubProtocol,
-SubProtocolSymbols,
-SubProtocolsMap,
-SubProtocolStoreConfig
+  ICoinSubProtocol,
+  SubProtocolSymbols,
+  SubProtocolsMap,
+  SubProtocolStoreConfig
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
@@ -52,34 +52,42 @@ SubProtocolStoreConfig
     const mainIdentifier = getMainIdentifier(identifier as SubProtocolSymbols)
 
     return (
-      Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols)
-      || this.ethTokenIdentifiers.has(identifier)
-      || (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier)
+      Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) ||
+      this.ethTokenIdentifiers.has(identifier) ||
+      (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier)
     )
   }
 
-  public getProtocolByIdentifier(
+  public async getProtocolByIdentifier(
     identifier: SubProtocolSymbols,
     network?: ProtocolNetwork | string,
     activeOnly: boolean = true,
     retry: boolean = true
-  ): ICoinSubProtocol | undefined {
+  ): Promise<ICoinSubProtocol | undefined> {
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
       const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
-      const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
-      const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+      const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
       const found = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
 
       if (!found && retry) {
-        const mainnetProtocol = this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
+        const mainnetProtocol: ICoinSubProtocol | undefined = await this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
         if (mainnetProtocol === undefined) {
-          const protocols = Object.values(subProtocolsMap).map(values => values[identifier])
-          return protocols.find(protocol => protocol?.identifier === identifier)
+          const protocols: (ICoinSubProtocol | undefined)[] = Object.values(subProtocolsMap).map((values) => values[identifier])
+          const filtered: (ICoinSubProtocol | undefined)[] = await Promise.all(
+            protocols.map(async (protocol: ICoinSubProtocol | undefined) => {
+              return protocol && (await protocol.getIdentifier()) === identifier ? protocol : undefined
+            })
+          )
+
+          return filtered.find((protocol: ICoinSubProtocol | undefined) => protocol !== undefined)
         }
+
         return mainnetProtocol
       }
+
       return found
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -89,26 +97,33 @@ SubProtocolStoreConfig
     }
   }
 
-  public getNetworksForProtocol(identifier: SubProtocolSymbols, activeOnly: boolean = true): ProtocolNetwork[] {
-    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : this.supportedProtocols
+  public async getNetworksForProtocol(identifier: SubProtocolSymbols, activeOnly: boolean = true): Promise<ProtocolNetwork[]> {
+    const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
+    const networks: (ProtocolNetwork | undefined)[] = await Promise.all(
+      Object.values(subProtocolsMap).map(async (entry) => {
+        const protocol = entry[identifier]
 
-    return Object.values(subProtocolsMap)
-      .map((entry) => entry[identifier]?.options.network)
-      .filter((network: ProtocolNetwork | undefined) => network !== undefined) as ProtocolNetwork[]
+        return protocol ? (await protocol.getOptions()).network : undefined
+      })
+    )
+
+    return networks.filter((network: ProtocolNetwork | undefined) => network !== undefined)
   }
 
-  protected transformConfig(config: SubProtocolStoreConfig): BaseProtocolStoreConfig<SubProtocolsMap> {
-    return {
-      passiveProtocols: this.createSubProtocolMap(config.passiveSubProtocols),
-      activeProtocols: this.createSubProtocolMap(config.activeSubProtocols)
-    }
+  protected async transformConfig(config: SubProtocolStoreConfig): Promise<BaseProtocolStoreConfig<SubProtocolsMap>> {
+    const [passiveProtocols, activeProtocols]: SubProtocolsMap[] = await Promise.all([
+      this.createSubProtocolMap(config.passiveSubProtocols),
+      this.createSubProtocolMap(config.activeSubProtocols)
+    ])
+
+    return { passiveProtocols, activeProtocols }
   }
 
-  protected mergeProtocols(protocols1: SubProtocolsMap, protocols2: SubProtocolsMap): SubProtocolsMap {
+  protected async mergeProtocols(protocols1: SubProtocolsMap, protocols2: SubProtocolsMap): Promise<SubProtocolsMap> {
     return this.mergeSubProtocolMaps(protocols1, protocols2)
   }
 
-  protected removeProtocolDuplicates(): void {
+  protected async removeProtocolDuplicates(): Promise<void> {
     // if a sub protocol has been set as passive and active, it's considered active
     const passiveEntries: [string, SubProtocolSymbols][] = Object.entries(this.passiveProtocols)
       .map(([protocolAndNetworkIdentifier, subProtocols]: [string, { [subProtocolIdentifier in SubProtocolSymbols]?: ICoinSubProtocol }]) =>
@@ -127,49 +142,56 @@ SubProtocolStoreConfig
           filtered[protocolAndNetworkIdentifier] = {}
         }
 
-        filtered[protocolAndNetworkIdentifier][subProtocolIdentifier] = this.passiveProtocols[protocolAndNetworkIdentifier][
-          subProtocolIdentifier
-        ]
+        filtered[protocolAndNetworkIdentifier][subProtocolIdentifier] =
+          this.passiveProtocols[protocolAndNetworkIdentifier][subProtocolIdentifier]
       }
     })
 
     this._passiveProtocols = filtered
   }
 
-  private createSubProtocolMap(protocols: [ICoinProtocol, ICoinSubProtocol][]): SubProtocolsMap {
+  private async createSubProtocolMap(protocols: [ICoinProtocol, ICoinSubProtocol][]): Promise<SubProtocolsMap> {
     const subProtocolMap: SubProtocolsMap = {}
 
-    protocols.forEach(([protocol, subProtocol]: [ICoinProtocol, ICoinSubProtocol]) => {
-      if (!subProtocol.identifier.startsWith(protocol.identifier)) {
-        throw new Error(`Sub protocol ${subProtocol.name} is not supported for protocol ${protocol.identifier}.`)
+    for (const [protocol, subProtocol] of protocols) {
+      const [protocolIdentifier, protocolOptions, subProtocolIdentifier, subProtocolName, subProtocolOptions] = await Promise.all([
+        protocol.getIdentifier(),
+        protocol.getOptions(),
+        subProtocol.getIdentifier(),
+        subProtocol.getName(),
+        subProtocol.getOptions()
+      ])
+
+      if (!subProtocolIdentifier.startsWith(protocolIdentifier)) {
+        throw new Error(`Sub protocol ${subProtocolName} is not supported for protocol ${protocolIdentifier}.`)
       }
 
-      if (!isNetworkEqual(protocol.options.network, subProtocol.options.network)) {
-        throw new Error(`Sub protocol ${subProtocol.name} must have the same network as the main protocol.`)
+      if (!isNetworkEqual(protocolOptions.network, subProtocolOptions.network)) {
+        throw new Error(`Sub protocol ${subProtocolName} must have the same network as the main protocol.`)
       }
 
-      const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(protocol)
+      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
 
       if (subProtocolMap[protocolAndNetworkIdentifier] === undefined) {
         subProtocolMap[protocolAndNetworkIdentifier] = {}
       }
 
-      subProtocolMap[protocolAndNetworkIdentifier][subProtocol.identifier as SubProtocolSymbols] = subProtocol
-    })
+      subProtocolMap[protocolAndNetworkIdentifier][subProtocolIdentifier as SubProtocolSymbols] = subProtocol
+    }
 
     return subProtocolMap
   }
 
-  private mergeSubProtocolMaps(
+  private async mergeSubProtocolMaps(
     first: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap,
     second: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap
-  ): SubProtocolsMap {
+  ): Promise<SubProtocolsMap> {
     if (Array.isArray(first) && Array.isArray(second)) {
       return this.createSubProtocolMap(first.concat(second))
     }
 
-    const firstMap: SubProtocolsMap = Array.isArray(first) ? this.createSubProtocolMap(first) : first
-    const secondMap: SubProtocolsMap = Array.isArray(second) ? this.createSubProtocolMap(second) : second
+    const firstMap: SubProtocolsMap = Array.isArray(first) ? await this.createSubProtocolMap(first) : first
+    const secondMap: SubProtocolsMap = Array.isArray(second) ? await this.createSubProtocolMap(second) : second
 
     const mergedMap: SubProtocolsMap = {}
 

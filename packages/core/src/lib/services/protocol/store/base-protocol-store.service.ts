@@ -12,7 +12,7 @@ export abstract class BaseProtocolStoreService<
   CollectionType = unknown,
   ConfigType = BaseProtocolStoreConfig<CollectionType>
 > {
-  protected _supportedProtocols: CollectionType | undefined
+  protected _supportedProtocols: Promise<CollectionType | undefined>
 
   protected _passiveProtocols: CollectionType | undefined
   protected _activeProtocols: CollectionType | undefined
@@ -27,7 +27,7 @@ export abstract class BaseProtocolStoreService<
     return this._passiveProtocols !== undefined && this._activeProtocols !== undefined
   }
 
-  public get supportedProtocols(): CollectionType {
+  public get supportedProtocols(): Promise<CollectionType> {
     if (this._supportedProtocols === undefined) {
       const passiveProtocols: CollectionType = this._passiveProtocols ?? this.notInitialized()
       const activeProtocols: CollectionType = this._activeProtocols ?? this.notInitialized()
@@ -46,12 +46,12 @@ export abstract class BaseProtocolStoreService<
     return this._activeProtocols ?? this.notInitialized()
   }
 
-  public addActiveProtocols(protocols: CollectionType): void {
+  public async addActiveProtocols(protocols: CollectionType): Promise<void> {
     const activeProtocols: CollectionType = this._activeProtocols ?? this.notInitialized()
-    this._activeProtocols = this.mergeProtocols(protocols, activeProtocols)
+    this._activeProtocols = await this.mergeProtocols(protocols, activeProtocols)
   }
 
-  public init(config: ConfigType): void {
+  public async init(config: ConfigType): Promise<void> {
     if (this.isInitialized) {
       // eslint-disable-next-line no-console
       console.log(`[${this._tag}] already initialized`)
@@ -59,12 +59,12 @@ export abstract class BaseProtocolStoreService<
       return
     }
 
-    const transformedConfig = this.transformConfig(config)
+    const transformedConfig: BaseProtocolStoreConfig<CollectionType> = await this.transformConfig(config)
 
     this._passiveProtocols = transformedConfig.passiveProtocols
     this._activeProtocols = transformedConfig.activeProtocols
 
-    this.removeProtocolDuplicates()
+    await this.removeProtocolDuplicates()
   }
 
   public abstract isIdentifierValid(identifier: string): boolean
@@ -73,11 +73,11 @@ export abstract class BaseProtocolStoreService<
     identifier: SymbolType,
     network?: ProtocolNetwork | string,
     activeOnly?: boolean
-  ): ICoinType | undefined
-  public abstract getNetworksForProtocol(identifier: SymbolType, activeOnly?: boolean): ProtocolNetwork[]
+  ): Promise<ICoinType | undefined>
+  public abstract getNetworksForProtocol(identifier: SymbolType, activeOnly?: boolean): Promise<ProtocolNetwork[]>
 
-  protected abstract transformConfig(config: ConfigType): BaseProtocolStoreConfig<CollectionType>
-  protected abstract mergeProtocols(protocols1: CollectionType, protocols2: CollectionType | undefined): CollectionType
+  protected abstract transformConfig(config: ConfigType): Promise<BaseProtocolStoreConfig<CollectionType>>
+  protected abstract mergeProtocols(protocols1: CollectionType, protocols2: CollectionType | undefined): Promise<CollectionType>
 
-  protected abstract removeProtocolDuplicates(): void
+  protected abstract removeProtocolDuplicates(): Promise<void>
 }

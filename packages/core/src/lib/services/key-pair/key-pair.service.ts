@@ -1,4 +1,5 @@
-import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, MessageSignRequest, UnsignedTransaction } from '@airgap/coinlib-core'
+import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
+import { MessageSignRequest } from '@airgap/serializer'
 import { Injectable } from '@angular/core'
 
 type Unsigned = UnsignedTransaction | MessageSignRequest
@@ -17,9 +18,10 @@ export class KeyPairService {
     mnemonic: string,
     password: string,
     withExtendedPrivateKey: boolean = false,
-    derivationPath: string = protocol.standardDerivationPath,
+    optionalDerivationPath?: string,
     childDerivationPath?: string
   ): Promise<string> {
+    const derivationPath: string = optionalDerivationPath ?? (await protocol.getStandardDerivationPath())
     if (!(await this.checkPassword(protocol, unsigned, mnemonic, withExtendedPrivateKey, derivationPath, password))) {
       throw new Error('Invalid BIP-39 passphrase')
     }
@@ -31,10 +33,11 @@ export class KeyPairService {
         return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction, childDerivationPath)
       } else {
         const privateKey = await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
+
         return protocol.signMessage(unsigned.message, { privateKey })
       }
     } else {
-      const privateKey: Buffer = await protocol.getPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
+      const privateKey: string = await protocol.getPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
 
       return this.isUnsignedTransaction(unsigned)
         ? protocol.signWithPrivateKey(privateKey, unsigned.transaction)
@@ -56,7 +59,7 @@ export class KeyPairService {
     }
 
     const publicKey: string =
-      withExtendedPrivateKey && protocol.identifier.startsWith(MainProtocolSymbols.ETH)
+      withExtendedPrivateKey && (await protocol.getIdentifier()).startsWith(MainProtocolSymbols.ETH)
         ? /* We need to check for ETH, because BTC returns an xPub for getPublicKeyFromMnemonic and getExtendedPublicKeyFromMnemonic doesn't exist */
           await (protocol as any).getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
         : await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)

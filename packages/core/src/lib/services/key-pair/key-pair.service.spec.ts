@@ -1,23 +1,12 @@
-import {
-  AeternityProtocol,
-  BitcoinProtocol,
-  BitcoinSegwitProtocol,
-  CosmosProtocol,
-  EthereumERC20ProtocolConfig,
-  EthereumERC20ProtocolOptions,
-  EthereumProtocol,
-  EthereumProtocolNetwork,
-  GenericERC20,
-  GroestlcoinProtocol,
-  ICoinProtocol,
-  KusamaProtocol,
-  MoonbeamProtocol,
-  MoonriverProtocol,
-  PolkadotProtocol,
-  SubProtocolSymbols,
-  TezosProtocol,
-  TezosShieldedTezProtocol
-} from '@airgap/coinlib-core'
+import { AeternityProtocol } from '@airgap/aeternity'
+import { BitcoinSegwitProtocol, BitcoinProtocol } from '@airgap/bitcoin'
+import { ICoinProtocol, MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core'
+import { CosmosProtocol } from '@airgap/cosmos'
+import { EthereumProtocol, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, GenericERC20 } from '@airgap/ethereum'
+import { GroestlcoinProtocol } from '@airgap/groestlcoin'
+import { MoonriverProtocol, MoonbeamProtocol } from '@airgap/moonbeam'
+import { PolkadotProtocol, KusamaProtocol } from '@airgap/polkadot'
+import { TezosProtocol, TezosShieldedTezProtocol } from '@airgap/tezos'
 import { TestBed } from '@angular/core/testing'
 
 import { KeyPairService } from './key-pair.service'
@@ -39,6 +28,21 @@ describe('KeypairService', () => {
     service = TestBed.inject(KeyPairService)
   })
 
+  const checkPassword = async (protocols: ICoinProtocol[]) => {
+    for (let i = 0; i < protocols.length; i++) {
+      const protocol = protocols[i]
+
+      const publicKey = (await protocol.getIdentifier()).startsWith(MainProtocolSymbols.ETH)
+        ? await (protocol as EthereumProtocol).getExtendedPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
+        : await protocol.getPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
+      unsigned = { ...unsigned, publicKey }
+
+      const checkPassed = await service.checkPassword(protocol, unsigned, mnemonic, true, hdDerivationPath, password)
+
+      expect(checkPassed).toBe(true)
+    }
+  }
+
   it('should be created', () => {
     expect(service).toBeTruthy()
   })
@@ -58,7 +62,7 @@ describe('KeypairService', () => {
       new TezosShieldedTezProtocol()
     ]
 
-    checkPassword(protocols, true)
+    await checkPassword(protocols)
   })
 
   it('should correctly verify validity of BIP-39 passphrase for protocols supporting `getExtendedPublicKeyFromMnemonic()`', async () => {
@@ -81,27 +85,14 @@ describe('KeypairService', () => {
       }
     ]
 
-    const erc20Protocols = configs.map((config) => {
+    const erc20Protocols: ICoinProtocol[] = configs.map((config) => {
       const options = new EthereumERC20ProtocolOptions(new EthereumProtocolNetwork(), config)
+
       return new GenericERC20(options)
     })
 
-    const protocols = [new EthereumProtocol()].concat(erc20Protocols)
-    checkPassword(protocols, true)
+    const protocols: ICoinProtocol[] = [new EthereumProtocol(), ...erc20Protocols]
+
+    await checkPassword(protocols)
   })
-
-  const checkPassword = async (protocols: ICoinProtocol[], isExtended: boolean) => {
-    for (let i = 0; i < protocols.length; i++) {
-      let protocol = protocols[i]
-
-      const publicKey = isExtended
-        ? await (protocol as EthereumProtocol).getExtendedPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
-        : await protocol.getPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
-      unsigned = { ...unsigned, publicKey }
-
-      const checkPassed = await service.checkPassword(protocol, unsigned, mnemonic, true, hdDerivationPath, password)
-
-      expect(checkPassed).toBe(true)
-    }
-  }
 })
