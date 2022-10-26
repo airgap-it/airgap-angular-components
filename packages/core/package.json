@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.32",
+  "version": "0.0.33-beta.1",
   "main": "dist/bundles/airgap-angular-core.umd.js",
   "module": "dist/fesm2015/airgap-angular-core.js",
   "es2015": "dist/fesm2015/airgap-angular-core.js",
@@ -27,7 +27,18 @@
     "tslib": "^2.2.0"
   },
   "peerDependencies": {
-    "@airgap/coinlib-core": "0.13.5",
+    "@airgap/aeternity": "^0.13.7-beta.12",
+    "@airgap/astar": "^0.13.7-beta.12",
+    "@airgap/bitcoin": "^0.13.7-beta.12",
+    "@airgap/coinlib-core": "^0.13.7-beta.12",
+    "@airgap/cosmos": "^0.13.7-beta.12",
+    "@airgap/ethereum": "^0.13.7-beta.12",
+    "@airgap/groestlcoin": "^0.13.7-beta.12",
+    "@airgap/moonbeam": "^0.13.7-beta.12",
+    "@airgap/polkadot": "^0.13.7-beta.12",
+    "@airgap/serializer": "^0.13.7-beta.12",
+    "@airgap/substrate": "^0.13.7-beta.12",
+    "@airgap/tezos": "^0.13.7-beta.12",
     "@angular/animations": "^11.2.9",
     "@angular/common": "^11.2.9",
     "@angular/core": "^11.2.9",
@@ -51,15 +62,19 @@
     "@ionic/storage": "2.2.0",
     "@keystonehq/bc-ur-registry": "0.4.4",
     "@keystonehq/bc-ur-registry-eth": "0.7.5",
+    "@ngraveio/bc-ur": "^1.1.3",
     "@ngx-translate/core": "^13.0.0",
     "angularx-qrcode": "^11.0.0",
     "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
+    "bip32": "2.0.6",
+    "bs58check": "^2.1.2",
     "moment": "^2.29.1",
     "myetherwallet-blockies": "^0.1.1",
     "ngx-moment": "^5.0.0",
     "rlp": "2.2.7",
     "rxjs": "^6.6.7",
+    "uuid": "^8.3.2",
     "zone.js": "^0.11.4"
   }
 }

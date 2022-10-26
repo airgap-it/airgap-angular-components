@@ -1,20 +1,10 @@
 import { TestBed } from '@angular/core/testing'
 
-import {
-  AeternityProtocol,
-  BitcoinProtocol,
-  TezosProtocol,
-  CosmosProtocol,
-  TezosProtocolNetwork,
-  TezosProtocolOptions,
-  CosmosProtocolNetwork,
-  BitcoinProtocolNetwork,
-  BitcoinProtocolOptions,
-  CosmosProtocolOptions,
-  MainProtocolSymbols,
-  NetworkType,
-  ProtocolNetwork
-} from '@airgap/coinlib-core'
+import { MainProtocolSymbols, NetworkType, ProtocolNetwork } from '@airgap/coinlib-core'
+import { AeternityProtocol } from '@airgap/aeternity'
+import { BitcoinProtocolNetwork, BitcoinProtocol, BitcoinProtocolOptions } from '@airgap/bitcoin'
+import { CosmosProtocolNetwork, CosmosProtocol, CosmosProtocolOptions } from '@airgap/cosmos'
+import { TezosProtocolNetwork, TezosProtocol, TezosProtocolOptions } from '@airgap/tezos'
 import { getIdentifiers } from '../../utils/test'
 import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
@@ -51,16 +41,16 @@ describe('MainProtocolStoreService', () => {
         passiveIdentifiers: MainProtocolSymbols[]
       }
     ): void {
-      it(description, () => {
+      it(description, async () => {
         const config = createConfig()
         const expected = createExpected()
 
-        service.init(config)
+        await service.init(config)
 
-        const supportedIdentifiers = getIdentifiers(service.supportedProtocols)
+        const supportedIdentifiers = await getIdentifiers(await service.supportedProtocols)
 
-        const activeIdentifiers = getIdentifiers(service.activeProtocols)
-        const passiveIdentifiers = getIdentifiers(service.passiveProtocols)
+        const activeIdentifiers = await getIdentifiers(service.activeProtocols)
+        const passiveIdentifiers = await getIdentifiers(service.passiveProtocols)
 
         expect(service.isInitialized).toBeTrue()
 
@@ -71,12 +61,12 @@ describe('MainProtocolStoreService', () => {
       })
     }
 
-    it('should throw an error when not initialized', () => {
+    it('should throw an error when not initialized', async () => {
       expect(service.isInitialized).toBeFalse()
 
       try {
         // eslint-disable-next-line no-unused-expressions
-        service.supportedProtocols
+        await service.supportedProtocols
       } catch (error) {
         expect(error.toString()).toEqual('Error: MainProtocolService not initialized yet. Call `init` first.')
       }
@@ -137,20 +127,20 @@ describe('MainProtocolStoreService', () => {
     )
 
     it('should be initialized once', async () => {
-      service.init({
+      await service.init({
         passiveProtocols: [new AeternityProtocol()],
         activeProtocols: [new BitcoinProtocol()]
       })
 
-      service.init({
+      await service.init({
         passiveProtocols: [new CosmosProtocol()],
         activeProtocols: [new TezosProtocol()]
       })
 
-      const supportedIdentifiers = getIdentifiers(service.supportedProtocols)
+      const supportedIdentifiers = await getIdentifiers(await service.supportedProtocols)
 
-      const activeIdentifiers = getIdentifiers(service.activeProtocols)
-      const passiveIdentifiers = getIdentifiers(service.passiveProtocols)
+      const activeIdentifiers = await getIdentifiers(service.activeProtocols)
+      const passiveIdentifiers = await getIdentifiers(service.passiveProtocols)
 
       const expectedPassiveIdentifiers = [MainProtocolSymbols.AE]
       const expectedActiveIdentifiers = [MainProtocolSymbols.BTC]
@@ -165,73 +155,82 @@ describe('MainProtocolStoreService', () => {
   })
 
   describe('Find Protocols', () => {
-    it('should find a main protocol by an identifier', () => {
-      service.init({
+    it('should find a main protocol by an identifier', async () => {
+      await service.init({
         activeProtocols: [new AeternityProtocol()],
         passiveProtocols: []
       })
 
-      const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.AE)
+      const foundProtocol = await service.getProtocolByIdentifier(MainProtocolSymbols.AE)
+      const foundProtocolIdentifier = foundProtocol ? await foundProtocol.getIdentifier() : undefined
 
-      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.AE)
+      expect(foundProtocolIdentifier).toBe(MainProtocolSymbols.AE)
     })
 
-    it('should not find a main protocol by an identifier if not active', () => {
-      service.init({
+    it('should not find a main protocol by an identifier if not active', async () => {
+      await service.init({
         activeProtocols: [new AeternityProtocol()],
         passiveProtocols: []
       })
 
       try {
-        service.getProtocolByIdentifier(MainProtocolSymbols.BTC)
+        await service.getProtocolByIdentifier(MainProtocolSymbols.BTC)
       } catch (error) {
         expect(error.toString()).toBe('Error: serializer(PROTOCOL_NOT_SUPPORTED): ')
       }
     })
 
-    it('should find a main passive protocol by an identifier if specified', () => {
-      service.init({
+    it('should find a main passive protocol by an identifier if specified', async () => {
+      await service.init({
         activeProtocols: [],
         passiveProtocols: [new AeternityProtocol()]
       })
 
-      const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.AE, undefined, false)
+      const foundProtocol = await service.getProtocolByIdentifier(MainProtocolSymbols.AE, undefined, false)
 
-      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.AE)
+      const foundProtocolIdentifier = foundProtocol ? await foundProtocol.getIdentifier() : undefined
+
+      expect(foundProtocolIdentifier).toBe(MainProtocolSymbols.AE)
     })
 
-    it('should find a main protocol by an identifier and network', () => {
-      service.init({
+    it('should find a main protocol by an identifier and network', async () => {
+      await service.init({
         activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
         passiveProtocols: []
       })
 
-      const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
+      const foundProtocol = await service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
 
-      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
-      expect(foundProtocol?.options.network).toBe(tezosTestnet)
+      const foundProtocolIdentifier = foundProtocol ? await foundProtocol.getIdentifier() : undefined
+      const foundProtocolOptions = foundProtocol ? await foundProtocol.getOptions() : undefined
+
+      expect(foundProtocolIdentifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocolOptions.network).toBe(tezosTestnet)
     })
 
-    it('should find a main protocol by protocol and network identifiers', () => {
-      service.init({
+    it('should find a main protocol by protocol and network identifiers', async () => {
+      await service.init({
         activeProtocols: [new TezosProtocol(), new TezosProtocol(new TezosProtocolOptions(tezosTestnet))],
         passiveProtocols: []
       })
 
-      const foundProtocol = service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
+      const foundProtocol = await service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet.identifier)
 
-      expect(foundProtocol?.identifier).toBe(MainProtocolSymbols.XTZ)
-      expect(foundProtocol?.options.network).toBe(tezosTestnet)
+      const foundProtocolIdentifier = foundProtocol ? await foundProtocol.getIdentifier() : undefined
+      const foundProtocolOptions = foundProtocol ? await foundProtocol.getOptions() : undefined
+
+      expect(foundProtocolIdentifier).toBe(MainProtocolSymbols.XTZ)
+      expect(foundProtocolOptions.network).toBe(tezosTestnet)
     })
 
-    it('should not find a main protocol by an identifier if network does not match', () => {
-      service.init({
+    it('should not find a main protocol by an identifier if network does not match', async () => {
+      await service.init({
         activeProtocols: [new TezosProtocol()],
         passiveProtocols: []
       })
 
       try {
-        service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
+        await service.getProtocolByIdentifier(MainProtocolSymbols.XTZ, tezosTestnet)
       } catch (error) {
         expect(error.toString()).toBe('Error: serializer(PROTOCOL_NOT_SUPPORTED): ')
       }
@@ -252,8 +251,8 @@ describe('MainProtocolStoreService', () => {
 
     const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'aeternity', 'bitcoin', 'ethereum', 'tezos', 'ksm', 'dot', 'atom']
 
-    it('should check if the identifier is valid', () => {
-      service.init({
+    it('should check if the identifier is valid', async () => {
+      await service.init({
         activeProtocols: [],
         passiveProtocols: []
       })
@@ -265,48 +264,54 @@ describe('MainProtocolStoreService', () => {
       expect(allInvalid).toBeTrue()
     })
 
-    it('should find networks for the requested main protocol by its identifier', () => {
+    it('should find networks for the requested main protocol by its identifier', async () => {
       const tezosProtocol = new TezosProtocol()
-      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+      const tezosTestnetProtocol = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
 
-      service.init({
-        activeProtocols: [tezosProtocol, tezosProtocolTestnet],
+      await service.init({
+        activeProtocols: [tezosProtocol, tezosTestnetProtocol],
         passiveProtocols: []
       })
 
-      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
-      const foundNetworkIdentifiers = foundNetworks.map((network: ProtocolNetwork) => network.identifier)
+      const foundNetworks = await service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+      const foundNetworkIdentifiers = await Promise.all(foundNetworks.map((network: ProtocolNetwork) => network.identifier))
+
+      const tezosProtocolOptions = await tezosProtocol.getOptions()
+      const tezosTestnetProtocolOptions = await tezosTestnetProtocol.getOptions()
 
       expect(foundNetworkIdentifiers.sort()).toEqual(
-        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+        [tezosProtocolOptions.network.identifier, tezosTestnetProtocolOptions.network.identifier].sort()
       )
     })
 
-    it('should not find networks for the requested main protocol by its identifier if not active', () => {
-      service.init({
+    it('should not find networks for the requested main protocol by its identifier if not active', async () => {
+      await service.init({
         activeProtocols: [],
         passiveProtocols: [new TezosProtocol()]
       })
 
-      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
+      const foundNetworks = await service.getNetworksForProtocol(MainProtocolSymbols.XTZ)
 
       expect(foundNetworks.length).toBe(0)
     })
 
-    it('should find networks for the requested passive main protocol by its identifier if specified', () => {
+    it('should find networks for the requested passive main protocol by its identifier if specified', async () => {
       const tezosProtocol = new TezosProtocol()
-      const tezosProtocolTestnet = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+      const tezosTestnetProtocol = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
 
-      service.init({
+      await service.init({
         activeProtocols: [tezosProtocol],
-        passiveProtocols: [tezosProtocolTestnet]
+        passiveProtocols: [tezosTestnetProtocol]
       })
 
-      const foundNetworks = service.getNetworksForProtocol(MainProtocolSymbols.XTZ, false)
-      const foundNetworkIdentifiers = foundNetworks.map((network: ProtocolNetwork) => network.identifier)
+      const foundNetworks = await service.getNetworksForProtocol(MainProtocolSymbols.XTZ, false)
+      const foundNetworkIdentifiers = await Promise.all(foundNetworks.map((network: ProtocolNetwork) => network.identifier))
+
+      const tezosProtocolOptions = await tezosProtocol.getOptions()
+      const tezosTestnetProtocolOptions = await tezosTestnetProtocol.getOptions()
 
       expect(foundNetworkIdentifiers.sort()).toEqual(
-        [tezosProtocol.options.network.identifier, tezosProtocolTestnet.options.network.identifier].sort()
+        [tezosProtocolOptions.network.identifier, tezosTestnetProtocolOptions.network.identifier].sort()
       )
     })
   })

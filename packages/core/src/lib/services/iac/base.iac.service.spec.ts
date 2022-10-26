@@ -1,4 +1,4 @@
-import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { BaseIACService, RelayMessage } from './base.iac.service'
 import { IACHandlerStatus, IACMessageTransport } from './message-handler'
 
@@ -20,6 +20,7 @@ class TestIACService extends BaseIACService {
 
   private async defaultHandler(messageDefinitionObjects: IACMessageDefinitionObjectV3[]): Promise<boolean> {
     console.log('DEFAULT HANDLER', messageDefinitionObjects)
+
     return true
   }
 }

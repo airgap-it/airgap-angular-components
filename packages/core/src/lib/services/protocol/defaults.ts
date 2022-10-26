@@ -1,42 +1,38 @@
+import { AeternityProtocol } from '@airgap/aeternity'
+import { AstarProtocol, ShidenProtocol } from '@airgap/astar'
+import { BitcoinSegwitProtocol, BitcoinProtocol } from '@airgap/bitcoin'
+import { ICoinProtocol, ICoinSubProtocol, SubProtocolSymbols } from '@airgap/coinlib-core'
+import { CosmosProtocol } from '@airgap/cosmos'
 import {
-  ICoinProtocol,
-  AeternityProtocol,
-  BitcoinSegwitProtocol,
-  BitcoinProtocol,
   EthereumProtocol,
-  GroestlcoinProtocol,
-  TezosProtocol,
-  CosmosProtocol,
-  PolkadotProtocol,
-  KusamaProtocol,
-  ICoinSubProtocol,
-  TezosKtProtocol,
   GenericERC20,
   EthereumERC20ProtocolOptions,
   EthereumProtocolNetwork,
-  EthereumERC20ProtocolConfig,
+  EthereumERC20ProtocolConfig
+} from '@airgap/ethereum'
+import { GroestlcoinProtocol } from '@airgap/groestlcoin'
+import { MoonriverProtocol, MoonbeamProtocol } from '@airgap/moonbeam'
+import { PolkadotProtocol, KusamaProtocol } from '@airgap/polkadot'
+import {
+  TezosProtocol,
   TezosUUSD,
   TezosYOU,
   TezosBTC,
   TezosUSD,
-  SubProtocolSymbols,
-  MoonriverProtocol,
   TezosUDEFI,
   TezosCTez,
   TezosPlenty,
   TezosWRAP,
   TezosQUIPU,
-  MoonbeamProtocol,
-  AstarProtocol,
-  ShidenProtocol,
   TezosKolibriUSD,
   TezosUBTC,
   TezosDOGA,
+  TezosSIRS,
   TezosBTCTez,
   TezosETH,
   TezosUSDT,
-  TezosSIRS
-} from '@airgap/coinlib-core'
+  TezosKtProtocol
+} from '@airgap/tezos'
 import { Token } from '../../types/Token'
 import { ethTokens } from './tokens'
 

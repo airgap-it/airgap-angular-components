@@ -15,7 +15,7 @@
 <h3 [innerHTML]="heading" class="ion-padding"></h3>
 
 <ion-list class="ion-padding" *ngIf="wallets">
-  <ng-container *ngFor="let wallet of wallets | walletFilter: { symbol: symbolFilter }">
+  <ng-container *ngFor="let wallet of wallets | walletFilter: { symbol: symbolFilter } | async">
     <airgap-account-item [wallet]="wallet" (click)="selectAccount(wallet)"></airgap-account-item>
   </ng-container>
 </ion-list>

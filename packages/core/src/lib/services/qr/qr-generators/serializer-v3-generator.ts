@@ -1,7 +1,8 @@
-import { IACMessageDefinitionObjectV3, SerializerV3 } from '@airgap/coinlib-core'
-import { IACQrGenerator } from '../../iac/qr-generator'
+import { IACMessageDefinitionObjectV3, SerializerV3 } from '@airgap/serializer'
 import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
+
+import { IACQrGenerator } from '../../iac/qr-generator'
 
 export class SerializerV3Generator extends IACQrGenerator {
   private encoder: UREncoder | undefined
@@ -41,6 +42,7 @@ export class SerializerV3Generator extends IACQrGenerator {
       const regex = /([^/]+$)/g
       const match = part.match(regex)
       const data = match && match[0] ? match[0] : part
+
       return this.prefixSingle(data.toUpperCase(), prefix, 'ur')
     } else {
       return ''

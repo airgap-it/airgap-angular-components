@@ -1,4 +1,6 @@
-import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols, SignedBitcoinSegwitTransaction } from '@airgap/coinlib-core'
+import { SignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { BCURTypesGenerator } from './bc-ur-generator'
 
 describe('BCURTypesGenerator', () => {

@@ -1,4 +1,5 @@
-import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols } from '@airgap/coinlib-core'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { SerializerV3Generator } from './serializer-v3-generator'
 
 describe('SerializerV3Generator', () => {

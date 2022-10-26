@@ -1,4 +1,5 @@
-import { IACMessageDefinitionObjectV3, IACMessageType, MainProtocolSymbols } from '@airgap/coinlib-core'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { OutputDescriptorGenerator } from './output-descriptor-generator'
 
 describe('OutputDescriptorGenerator', () => {

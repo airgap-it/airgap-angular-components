@@ -6,8 +6,8 @@ import {
   ProtocolSymbols,
   SubProtocolSymbols,
   MainProtocolSymbols,
-  getProtocolOptionsByIdentifier
 } from '@airgap/coinlib-core'
+import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
@@ -21,6 +21,7 @@ import {
   getDefaultActiveSubProtocols
 } from './defaults'
 import { ethTokens } from './tokens'
+import { getProtocolOptionsByIdentifier } from '../../utils/protocol/protocol-options'
 
 export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
@@ -79,7 +80,7 @@ export class ProtocolService {
     return this.subProtocolStore.activeProtocols
   }
 
-  public init(config?: ProtocolServiceConfig): void {
+  public async init(config?: ProtocolServiceConfig): Promise<void> {
     if (this.isInitialized) {
       // eslint-disable-next-line no-console
       console.log('[ProtocolService] already initialized')
@@ -87,15 +88,18 @@ export class ProtocolService {
       return
     }
 
-    this.mainProtocolStore.init({
-      passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
-      activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
-    })
-
-    this.subProtocolStore.init({
-      passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(config?.extraPassiveSubProtocols ?? []),
-      activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
-    })
+    await Promise.all([
+      this.mainProtocolStore.init({
+        passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
+        activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
+      }),
+      this.subProtocolStore.init({
+        passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(
+          config?.extraPassiveSubProtocols ?? []
+        ),
+        activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
+      })
+    ])
 
     this.isReady.resolve()
   }
@@ -131,9 +135,9 @@ export class ProtocolService {
       let protocol: ICoinProtocol | undefined
 
       if (this.mainProtocolStore.isIdentifierValid(protocolOrIdentifier)) {
-        protocol = this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
+        protocol = await this.mainProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as MainProtocolSymbols, network, activeOnly)
       } else if (this.subProtocolStore.isIdentifierValid(protocolOrIdentifier)) {
-        protocol = this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
+        protocol = await this.subProtocolStore.getProtocolByIdentifier(protocolOrIdentifier as SubProtocolSymbols, network, activeOnly)
         if (protocol === undefined) {
           const mainProtocolIdentifier = getMainIdentifier(protocolOrIdentifier)
 
@@ -154,12 +158,23 @@ export class ProtocolService {
   public async addActiveProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
 
-    const mainProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
-      this.mainProtocolStore.isIdentifierValid(protocol.identifier)
+    const filteredMainProtocols: (ICoinProtocol | undefined)[] = await Promise.all(
+      protocols.map(async (protocol: ICoinProtocol) => {
+        const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
+
+        return this.mainProtocolStore.isIdentifierValid(protocolIdentifier) ? protocol : undefined
+      })
     )
-    const subProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
-      this.subProtocolStore.isIdentifierValid(protocol.identifier)
+    const mainProtocols: ICoinProtocol[] = filteredMainProtocols.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+
+    const filteredSubProtocols: (ICoinProtocol | undefined)[] = await Promise.all(
+      protocols.map(async (protocol: ICoinProtocol) => {
+        const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
+
+        return this.subProtocolStore.isIdentifierValid(protocolIdentifier) ? protocol : undefined
+      })
     )
+    const subProtocols: ICoinProtocol[] = filteredSubProtocols.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
 
     await Promise.all([this.addActiveMainProtocols(mainProtocols), this.addActiveSubProtocols(subProtocols)])
   }
@@ -168,36 +183,53 @@ export class ProtocolService {
     await this.waitReady()
 
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
-    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
-      this.mainProtocolStore.isIdentifierValid(protocol.identifier)
-    )
+    const filtered: (ICoinProtocol | undefined)[] = await Promise.all(
+      protocols.map(async (protocol: ICoinProtocol) => {
+        const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
 
-    this.mainProtocolStore.addActiveProtocols(validProtocols)
+        return this.mainProtocolStore.isIdentifierValid(protocolIdentifier) ? protocol : undefined
+      })
+    )
+    const validProtocols: ICoinProtocol[] = filtered.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+
+    await this.mainProtocolStore.addActiveProtocols(validProtocols)
   }
 
   public async addActiveSubProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
     await this.waitReady()
 
     const protocols: ICoinProtocol[] = Array.isArray(protocolOrProtocols) ? protocolOrProtocols : [protocolOrProtocols]
-    const validProtocols: ICoinProtocol[] = protocols.filter((protocol: ICoinProtocol) =>
-      this.subProtocolStore.isIdentifierValid(protocol.identifier)
+    const filtered: (ICoinProtocol | undefined)[] = await Promise.all(
+      protocols.map(async (protocol: ICoinProtocol) => {
+        const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
+
+        return this.subProtocolStore.isIdentifierValid(protocolIdentifier) ? protocol : undefined
+      })
+    )
+    const validProtocols: ICoinProtocol[] = filtered.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+    const mapped: [string, [ProtocolSymbols, ICoinProtocol]][] = await Promise.all(
+      validProtocols.map(async (protocol: ICoinProtocol) => {
+        const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
+        const protocolOptions: ProtocolOptions = await protocol.getOptions()
+
+        const mainIdentifier: MainProtocolSymbols = getMainIdentifier(protocolIdentifier)
+        const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, protocolOptions.network)
+
+        return [protocolAndNetworkIdentifier, [protocolIdentifier, protocol]] as [string, [ProtocolSymbols, ICoinProtocol]]
+      })
     )
 
-    this.subProtocolStore.addActiveProtocols(
-      validProtocols
-        .map((protocol: ICoinProtocol) => {
-          const mainIdentifier: MainProtocolSymbols = getMainIdentifier(protocol.identifier)
-          const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, protocol.options.network)
-
-          return [protocolAndNetworkIdentifier, protocol] as [string, ICoinProtocol]
-        })
-        .reduce(
-          (obj: SubProtocolsMap, [protocolAndNetworkIdentifier, protocol]: [string, ICoinProtocol]) =>
-            Object.assign(obj, {
-              [protocolAndNetworkIdentifier]: Object.assign(obj[protocolAndNetworkIdentifier] ?? {}, { [protocol.identifier]: protocol })
-            }),
-          {}
-        )
+    await this.subProtocolStore.addActiveProtocols(
+      mapped.reduce(
+        (
+          obj: SubProtocolsMap,
+          [protocolAndNetworkIdentifier, [protocolIdentifier, protocol]]: [string, [ProtocolSymbols, ICoinProtocol]]
+        ) =>
+          Object.assign(obj, {
+            [protocolAndNetworkIdentifier]: Object.assign(obj[protocolAndNetworkIdentifier] ?? {}, { [protocolIdentifier]: protocol })
+          }),
+        {}
+      )
     )
   }
 
@@ -205,8 +237,8 @@ export class ProtocolService {
     await this.waitReady()
 
     const protocol: ICoinProtocol | undefined = this.mainProtocolStore.isIdentifierValid(protocolIdentifier)
-      ? this.mainProtocolStore.getProtocolByIdentifier(protocolIdentifier as MainProtocolSymbols, networkIdentifier, true, false)
-      : this.subProtocolStore.getProtocolByIdentifier(protocolIdentifier as SubProtocolSymbols, networkIdentifier, true, false)
+      ? await this.mainProtocolStore.getProtocolByIdentifier(protocolIdentifier as MainProtocolSymbols, networkIdentifier, true, false)
+      : await this.subProtocolStore.getProtocolByIdentifier(protocolIdentifier as SubProtocolSymbols, networkIdentifier, true, false)
 
     return protocol !== undefined
   }
@@ -218,9 +250,9 @@ export class ProtocolService {
   ): Promise<ICoinSubProtocol[]> {
     await this.waitReady()
 
-    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : mainProtocol.identifier
+    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
     const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
-    const protocolAndNetworkIdentifier: string = getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+    const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
 
@@ -235,7 +267,7 @@ export class ProtocolService {
   ): Promise<ICoinSubProtocol[]> {
     await this.waitReady()
 
-    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : mainProtocol.identifier
+    const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
 
     return Object.keys(subProtocolsMap)
@@ -250,7 +282,8 @@ export class ProtocolService {
   ): Promise<ProtocolNetwork[]> {
     await this.waitReady()
 
-    const identifier: ProtocolSymbols = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+    const identifier: ProtocolSymbols =
+      typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : await protocolOrIdentifier.getIdentifier()
 
     return this.mainProtocolStore.isIdentifierValid(identifier)
       ? this.mainProtocolStore.getNetworksForProtocol(identifier as MainProtocolSymbols, activeOnly)
@@ -273,7 +306,7 @@ export class ProtocolService {
     const protocol: ICoinProtocol =
       typeof protocolOrIdentifier === 'string' ? await this.getProtocol(protocolOrIdentifier) : protocolOrIdentifier
 
-    return address.match(protocol.addressValidationPattern) !== null
+    return address.match(await protocol.getAddressValidationPattern()) !== null
   }
 
   public async getProtocolsForAddress(address: string): Promise<ICoinProtocol[]> {
@@ -309,14 +342,17 @@ export class ProtocolService {
     network?: ProtocolNetwork,
     checkActiveOnly: boolean = true
   ): Promise<boolean> {
-    const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : protocolOrIdentifier.identifier
+    const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : await protocolOrIdentifier.getIdentifier()
     const targetNetwork: ProtocolNetwork =
       typeof protocolOrIdentifier !== 'string'
-        ? protocolOrIdentifier.options.network
+        ? (await protocolOrIdentifier.getOptions()).network
         : network ?? getProtocolOptionsByIdentifier(identifier).network
 
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
-      .then((protocol) => protocol.identifier === identifier && protocol.options.network.identifier === targetNetwork.identifier)
+      .then(
+        async (protocol) =>
+          (await protocol.getIdentifier()) === identifier && (await protocol.getOptions()).network.identifier === targetNetwork.identifier
+      )
       .catch(() => false)
   }
 }
