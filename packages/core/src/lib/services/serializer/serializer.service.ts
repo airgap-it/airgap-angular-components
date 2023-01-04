@@ -76,8 +76,8 @@ export class SerializerService {
   public _singleChunkSize: number = defaultValues.SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE
   public _multiChunkSize: number = defaultValues.SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE
 
-  private readonly serializer: Serializer = new Serializer()
-  private readonly serializerV3: SerializerV3 = new SerializerV3()
+  private readonly serializer: Serializer = Serializer.getInstance()
+  private readonly serializerV3: SerializerV3 = SerializerV3.getInstance()
 
   private _useV3: boolean = defaultValues.SETTINGS_SERIALIZER_ENABLE_V3
   private _displayTimePerChunk: number = defaultValues.SETTINGS_SERIALIZER_CHUNK_TIME

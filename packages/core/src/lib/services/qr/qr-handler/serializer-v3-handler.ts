@@ -22,7 +22,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   private resultCache: IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined
 
   constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
-    this.serializer = new SerializerV3()
+    this.serializer = SerializerV3.getInstance()
     this.callback = callback
     // completion callback
   }

@@ -34,8 +34,8 @@ import {
 import { ProtocolSymbols, ProtocolNetwork, MainProtocolSymbols, SubProtocolSymbols, assertNever, Domain } from '@airgap/coinlib-core'
 import { NotFoundError } from '@airgap/coinlib-core/errors'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
-import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/protocol/moonbeam/MoonbeamProtocolOptions'
-import { TezosETHtzProtocolConfig } from '@airgap/tezos/protocol/fa/TezosFAProtocolOptions'
+import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
+import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
 
 export const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
