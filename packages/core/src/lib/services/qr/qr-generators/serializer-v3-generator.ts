@@ -14,7 +14,7 @@ export class SerializerV3Generator extends IACQrGenerator {
   }
 
   public async create(data: IACMessageDefinitionObjectV3[], multiFragmentLength: number, singleFragmentLength: number): Promise<void> {
-    const serializer = new SerializerV3()
+    const serializer = SerializerV3.getInstance()
     const serialized = await serializer.serialize(data)
     const buffer = bs58check.decode(serialized)
     this.ur = UR.fromBuffer(buffer)

@@ -3,7 +3,7 @@ import { IACMessageDefinitionObject, IACMessageDefinitionObjectV3, Serializer } 
 import { IACQrGenerator } from '../../iac/qr-generator'
 import { convertV3ToV2 } from '../../serializer/serializer.service'
 
-const serializer = new Serializer()
+const serializer = Serializer.getInstance()
 export class SerializerV2Generator extends IACQrGenerator {
   private counter: number = 0
   private parts: string[] = []
