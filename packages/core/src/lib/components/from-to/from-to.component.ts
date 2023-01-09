@@ -20,6 +20,9 @@ export class FromToComponent {
   @Input()
   public interactionData: any | undefined
 
+  @Input()
+  public hideNetwork: boolean = false
+
   public get type(): string | undefined {
     return this.transaction?.transactionDetails?.parameters?.entrypoint ?? this.transaction?.extra?.type
   }
