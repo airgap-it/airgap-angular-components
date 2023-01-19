@@ -1,15 +1,22 @@
 import { ICoinSubProtocol, ICoinProtocol, ProtocolSymbols } from '@airgap/coinlib-core'
 import { SubProtocolsMap } from '../store/sub/sub-protocol-store.service'
 
-export function getIdentifiers(protocols: ICoinProtocol[]): ProtocolSymbols[] {
-  return protocols.map((protocol: ICoinProtocol) => protocol.identifier)
+export async function getIdentifiers(protocols: ICoinProtocol[]): Promise<ProtocolSymbols[]> {
+  return Promise.all(protocols.map((protocol: ICoinProtocol) => protocol.getIdentifier()))
 }
 
-export function getSubIdentifiers(subProtocols: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap): ProtocolSymbols[] {
-  return Array.isArray(subProtocols)
-    ? subProtocols.map((pair: [ICoinProtocol, ICoinSubProtocol]) => pair[1].identifier)
-    : (Object.values(subProtocols)
-        .map((values) => Object.values(values).map((protocol: ICoinSubProtocol | undefined) => protocol?.identifier))
-        .reduce((flatten, toFlatten) => flatten.concat(toFlatten), [])
-        .filter((identifier: ProtocolSymbols | undefined) => identifier !== undefined) as ProtocolSymbols[])
+export async function getSubIdentifiers(subProtocols: [ICoinProtocol, ICoinSubProtocol][] | SubProtocolsMap): Promise<ProtocolSymbols[]> {
+  if (Array.isArray(subProtocols)) {
+    return Promise.all(subProtocols.map((pair: [ICoinProtocol, ICoinSubProtocol]) => pair[1].getIdentifier()))
+  } else {
+    const identifiers: ProtocolSymbols[][] = await Promise.all(
+      Object.values(subProtocols).map((values) =>
+        Promise.all(Object.values(values).map((protocol: ICoinSubProtocol | undefined) => protocol?.getIdentifier()))
+      )
+    )
+
+    return identifiers
+      .reduce((flatten, toFlatten) => flatten.concat(toFlatten), [])
+      .filter((identifier: ProtocolSymbols | undefined) => identifier !== undefined)
+  }
 }

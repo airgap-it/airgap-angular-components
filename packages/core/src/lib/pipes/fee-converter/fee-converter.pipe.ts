@@ -16,7 +16,7 @@ interface FeeConverterArgs {
   name: 'feeConverter'
 })
 export class FeeConverterPipe implements PipeTransform {
-  constructor(private readonly protocolsService: ProtocolService) { }
+  constructor(private readonly protocolsService: ProtocolService) {}
 
   public async transform(value: FeeConverterValue, args: FeeConverterArgs): Promise<string> {
     if (args.protocol === undefined || !args.protocol) {
@@ -32,12 +32,15 @@ export class FeeConverterPipe implements PipeTransform {
 
     const shiftDirection: number = !reverse ? -1 : 1
 
-    const fee: BigNumber = new BigNumber(value).shiftedBy(shiftDirection * protocol.feeDecimals)
+    const protocolFeeDecimals: number = await protocol.getFeeDecimals()
+    const fee: BigNumber = new BigNumber(value).shiftedBy(shiftDirection * protocolFeeDecimals)
 
     if (fee.isNaN()) {
       throw new Error('Invalid fee amount')
     }
 
-    return `${fee.toFixed()}${args.dropSymbol ? '' : ' ' + protocol?.feeSymbol.toUpperCase()}`
+    const protocolFeeSymbol: string | undefined = protocol ? await protocol?.getFeeSymbol() : undefined
+
+    return `${fee.toFixed()}${args.dropSymbol ? '' : ` ${protocolFeeSymbol?.toUpperCase()}`}`
   }
 }

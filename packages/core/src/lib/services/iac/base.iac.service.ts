@@ -1,13 +1,13 @@
-import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
+import { Inject } from '@angular/core'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
-import { IACMessageHandler, IACMessageTransport, IACHandlerStatus, IACMessageWrapper } from './message-handler'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
 import { SerializerV3Handler } from '../qr/qr-handler/serializer-v3-handler'
 import { SerializerV2Handler } from '../qr/qr-handler/serializer-v2-handler'
 import { DeeplinkService } from '../deeplink/deeplink.service'
 import { AppConfig, APP_CONFIG } from '../../config/app-config'
-import { Inject } from '@angular/core'
+import { IACMessageHandler, IACMessageTransport, IACHandlerStatus, IACMessageWrapper } from './message-handler'
 
 export type ScanAgainCallback = (progress?: number) => void
 
@@ -57,6 +57,7 @@ export abstract class BaseIACService {
     transport: IACMessageTransport
   ): Promise<IACHandlerStatus> {
     console.debug('STORE_RESULT', message, status, transport)
+
     return status
   }
 
@@ -82,17 +83,20 @@ export abstract class BaseIACService {
               const status: IACHandlerStatus = IACHandlerStatus.SUCCESS
               await handler.handleComplete()
               await this.resetHandlers()
+
               return this.storeResult(result, status, transport)
             } catch (e) {
               console.error('Error while handling result', e)
-              let dataSingle: string = (await handler.getDataSingle()) ?? data
+              const dataSingle: string = (await handler.getDataSingle()) ?? data
 
-              await this.messageUnknownAlert(dataSingle, this.scanAgainCallback!)
+              await this.messageUnknownAlert(dataSingle, this.scanAgainCallback)
               await this.resetHandlers()
+
               return this.storeResult({ result: undefined, data: dataSingle }, IACHandlerStatus.UNSUPPORTED, transport)
             }
           } else if (handlerStatus === IACHandlerStatus.PARTIAL) {
             scanAgainCallback(await handler.getProgress())
+
             return this.storeResult({ result: data, data: await handler.getDataSingle() }, IACHandlerStatus.PARTIAL, transport)
           }
         }
@@ -102,8 +106,9 @@ export abstract class BaseIACService {
     }
     await this.resetHandlers()
 
-    await this.messageUnknownAlert(data, this.scanAgainCallback!)
-    return this.storeResult({ result: undefined, data: data }, IACHandlerStatus.UNSUPPORTED, this.transport)
+    await this.messageUnknownAlert(data, this.scanAgainCallback)
+
+    return this.storeResult({ result: undefined, data }, IACHandlerStatus.UNSUPPORTED, this.transport)
   }
 
   public async resetHandlers(): Promise<void> {
@@ -129,17 +134,18 @@ export abstract class BaseIACService {
           // eslint-disable-next-line no-console
           this.serializerMessageHandlers[typedType](
             { result: groupedByType[typedType] ?? [], data: deserializedSync.data, context: deserializedSync.context },
-            this.transport!,
-            this.scanAgainCallback!
+            this.transport,
+            this.scanAgainCallback
           ).catch(console.error)
         } else {
           // TODO: Improve types
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-console
-          this.syncTypeNotSupportedAlert(deserializedSync, this.transport!, this.scanAgainCallback!).catch(console.error)
+          this.syncTypeNotSupportedAlert(deserializedSync, this.transport, this.scanAgainCallback).catch(console.error)
 
           return IACHandlerStatus.UNSUPPORTED
         }
       }
+
       return IACHandlerStatus.SUCCESS
     } else {
       throw new Error('Empty message received!')

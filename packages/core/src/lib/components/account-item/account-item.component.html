@@ -1,13 +1,13 @@
-<ng-container *ngIf="wallet">
+<ng-container *ngIf="address && protocolSymbol && protocolIdentifier && protocolName">
   <ion-item lines="none" class="ion-no-padding">
     <ion-avatar slot="start">
-      <airgap-identicon [address]="wallet.receivingPublicAddress"></airgap-identicon>
-      <airgap-currency-symbol [symbol]="wallet.protocol.symbol" [protocolIdentifier]="wallet.protocol.identifier"></airgap-currency-symbol>
+      <airgap-identicon [address]="address"></airgap-identicon>
+      <airgap-currency-symbol [symbol]="protocolSymbol" [protocolIdentifier]="protocolIdentifier"></airgap-currency-symbol>
     </ion-avatar>
     <ion-label>
       <h2>
-        <span class="font--weight__med">{{ wallet.protocol.name }}</span>
-        {{ wallet.protocol.symbol }}
+        <span class="font--weight__med">{{ protocolName }}</span>
+        {{ protocolSymbol }}
       </h2>
       <p class="typography--mono">{{ wallet.receivingPublicAddress }}</p>
     </ion-label>

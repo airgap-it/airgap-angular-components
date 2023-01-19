@@ -1,10 +1,10 @@
+import { IACMessageDefinitionObjectV3 } from '@airgap/serializer'
 import { Injectable, Inject } from '@angular/core'
 import { AppLauncherPlugin } from '@capacitor/app-launcher'
 
 import { AppConfig, APP_CONFIG } from '../../config/app-config'
 import { APP_LAUNCHER_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
-import { IACMessageDefinitionObjectV3 } from '@airgap/coinlib-core'
 import { IACQrGenerator } from '../iac/qr-generator'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
 import { SerializerService } from '../serializer/serializer.service'
@@ -23,6 +23,7 @@ export class DeeplinkService {
 
   public async sameDeviceDeeplink(data: string | IACMessageDefinitionObjectV3[]): Promise<void> {
     const deeplinkUrl = await this.generateDeepLinkUrl(data)
+
     return new Promise((resolve, reject) => {
       this.appLauncher
         .openUrl({ url: deeplinkUrl })
@@ -56,10 +57,12 @@ export class DeeplinkService {
           this.uiEventElementsService.invalidDeeplinkAlert().catch(console.error)
         }
       }
+
       return await generator!.getSingle(this.appConfig.otherApp.urlScheme)
     } else if (typeof data === 'string') {
       return data
     }
+
     return ''
   }
 }

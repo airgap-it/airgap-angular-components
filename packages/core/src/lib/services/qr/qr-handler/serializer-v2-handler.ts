@@ -1,4 +1,4 @@
-import { IACMessageDefinitionObject, IACMessageDefinitionObjectV3, Serializer } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageDefinitionObject, Serializer } from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { convertV2ToV3 } from '../../serializer/serializer.service'
 
@@ -13,7 +13,7 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
   private completeDeserialized: IACMessageDefinitionObject[] | undefined
 
   constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
-    this.serializer = new Serializer()
+    this.serializer = Serializer.getInstance()
     this.callback = callback
   }
 
@@ -21,10 +21,12 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
     const part = this.getParsedData(_part)
     try {
       await this.serializer.deserialize([part])
+
       return true
     } catch (error) {
       try {
         await this.serializer.deserialize(part.split(','))
+
         return true
       } catch (error) {
         if (error.availablePages && error.totalPages) {
@@ -84,6 +86,7 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
       const deserialized = await this.serializer.deserialize(Array.from(this.parts))
       if (deserialized) {
         this.completeDeserialized = deserialized
+
         return IACHandlerStatus.SUCCESS
       }
     } catch (error) {
@@ -91,6 +94,7 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
         this.progress = error.availablePages.length / error.totalPages
       }
     }
+
     return IACHandlerStatus.PARTIAL
   }
 
@@ -122,6 +126,5 @@ export class SerializerV2Handler implements IACMessageHandler<IACMessageDefiniti
     this.parts = new Set()
     this.progress = 0
     this.completeDeserialized = undefined
-    return
   }
 }

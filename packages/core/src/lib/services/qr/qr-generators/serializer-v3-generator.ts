@@ -1,7 +1,8 @@
-import { IACMessageDefinitionObjectV3, SerializerV3 } from '@airgap/coinlib-core'
-import { IACQrGenerator } from '../../iac/qr-generator'
+import { IACMessageDefinitionObjectV3, SerializerV3 } from '@airgap/serializer'
 import { UR, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
+
+import { IACQrGenerator } from '../../iac/qr-generator'
 
 export class SerializerV3Generator extends IACQrGenerator {
   private encoder: UREncoder | undefined
@@ -13,7 +14,7 @@ export class SerializerV3Generator extends IACQrGenerator {
   }
 
   public async create(data: IACMessageDefinitionObjectV3[], multiFragmentLength: number, singleFragmentLength: number): Promise<void> {
-    const serializer = new SerializerV3()
+    const serializer = SerializerV3.getInstance()
     const serialized = await serializer.serialize(data)
     const buffer = bs58check.decode(serialized)
     this.ur = UR.fromBuffer(buffer)
@@ -41,6 +42,7 @@ export class SerializerV3Generator extends IACQrGenerator {
       const regex = /([^/]+$)/g
       const match = part.match(regex)
       const data = match && match[0] ? match[0] : part
+
       return this.prefixSingle(data.toUpperCase(), prefix, 'ur')
     } else {
       return ''

@@ -1,11 +1,5 @@
-import {
-  IACMessageDefinitionObjectV3,
-  IACMessageType,
-  IAirGapTransaction,
-  ICoinProtocol,
-  SignedTransaction,
-  UnsignedTransaction
-} from '@airgap/coinlib-core'
+import { IAirGapTransaction, ICoinProtocol, SignedTransaction, UnsignedTransaction } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { Injectable } from '@angular/core'
 
 import { Token } from '../../types/Token'

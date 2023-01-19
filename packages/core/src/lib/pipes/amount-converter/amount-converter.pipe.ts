@@ -34,7 +34,7 @@ export class AmountConverterPipe implements PipeTransform {
     groupSize: 3
   }
 
-  constructor(private readonly protocolsService: ProtocolService) { }
+  constructor(private readonly protocolsService: ProtocolService) {}
 
   public async transform(value: AmountConverterValue, args: AmountConverterArgs): Promise<string> {
     if (!args.protocol) {
@@ -50,16 +50,16 @@ export class AmountConverterPipe implements PipeTransform {
     }
 
     const protocol: ICoinProtocol = await this.protocolsService.getProtocol(args.protocol, args.network)
-    const amount = this.transformValueOnly(value, protocol, args.maxDigits)
+    const amount = await this.transformValueOnly(value, protocol, args.maxDigits)
 
-    return `${amount} ${protocol.symbol}`
+    return `${amount} ${await protocol.getSymbol()}`
   }
 
-  public transformValueOnly(
+  public async transformValueOnly(
     value: string | number | BigNumber,
     protocol: ICoinProtocol,
     maxDigits: number = AmountConverterPipe.defaultMaxDigits
-  ): string | undefined {
+  ): Promise<string | undefined> {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
     const valueBN = new BN(value)
@@ -68,7 +68,8 @@ export class AmountConverterPipe implements PipeTransform {
       throw new Error('Invalid amount')
     }
 
-    const amount = valueBN.shiftedBy(-1 * protocol.decimals).decimalPlaces(protocol.decimals, BigNumber.ROUND_FLOOR)
+    const protocolDecimals: number = await protocol.getDecimals()
+    const amount = valueBN.shiftedBy(-1 * protocolDecimals).decimalPlaces(protocolDecimals, BigNumber.ROUND_FLOOR)
 
     return this.formatBigNumber(amount, maxDigits)
   }

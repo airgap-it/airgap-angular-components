@@ -11,7 +11,7 @@ interface WalletFilterPipeArgs {
   name: 'walletFilter'
 })
 export class WalletFilterPipe implements PipeTransform {
-  public transform(items: AirGapWallet[], args: WalletFilterPipeArgs): AirGapWallet[] {
+  public async transform(items: AirGapWallet[], args: WalletFilterPipeArgs): Promise<AirGapWallet[]> {
     if (items === null || items?.length === 0) {
       return []
     }
@@ -23,18 +23,22 @@ export class WalletFilterPipe implements PipeTransform {
     if (!symbol && !status && !network) {
       return items
     } else {
-      return items.filter((wallet: AirGapWallet) => {
-        const symbolCompliant: boolean =
-          !symbol ||
-          wallet.protocol.symbol.toLowerCase().includes(symbol) ||
-          wallet.protocol.name.toLowerCase().includes(symbol)
-        const statusCompliant: boolean =
-          !status || (Array.isArray(status) ? status.includes(wallet.status) : wallet.status === status)
-        const networkCompliant: boolean =
-          !network || wallet.protocol.options.network.identifier === (typeof network === 'string' ? network : network.identifier)
+      const filtered: (AirGapWallet | undefined)[] = await Promise.all(
+        items.map(async (wallet: AirGapWallet) => {
+          const symbolCompliant: boolean =
+            !symbol ||
+            (await wallet.protocol.getSymbol()).toLowerCase().includes(symbol) ||
+            (await wallet.protocol.getName()).toLowerCase().includes(symbol)
+          const statusCompliant: boolean = !status || (Array.isArray(status) ? status.includes(wallet.status) : wallet.status === status)
+          const networkCompliant: boolean =
+            !network ||
+            (await wallet.protocol.getOptions()).network.identifier === (typeof network === 'string' ? network : network.identifier)
 
-        return symbolCompliant && statusCompliant && networkCompliant
-      })
+          return symbolCompliant && statusCompliant && networkCompliant ? wallet : undefined
+        })
+      )
+
+      return filtered.filter((wallet: AirGapWallet | undefined) => wallet !== undefined)
     }
   }
 }

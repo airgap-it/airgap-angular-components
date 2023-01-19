@@ -1,19 +1,15 @@
-import {
-  AccountShareResponse,
-  IACMessageDefinitionObjectV3,
-  MainProtocolSymbols,
-  MessageSignResponse,
-  SignedEthereumTransaction
-} from '@airgap/coinlib-core'
-import { IACQrGenerator } from '../../iac/qr-generator'
 import { UREncoder } from '@ngraveio/bc-ur'
 import * as bip32 from 'bip32'
 import * as uuid from 'uuid'
 
 import { CryptoKeypath, PathComponent, CryptoHDKey } from '@keystonehq/bc-ur-registry'
-import { IACMessageType } from '@airgap/coinlib-core/serializer-v3/interfaces'
 import { ETHSignature } from '@keystonehq/bc-ur-registry-eth'
 import { TransactionFactory } from '@ethereumjs/tx'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { SignedEthereumTransaction } from '@airgap/ethereum'
+import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, MessageSignResponse } from '@airgap/serializer'
+
+import { IACQrGenerator } from '../../iac/qr-generator'
 
 export class MetamaskGenerator extends IACQrGenerator {
   private encoder: UREncoder | undefined
@@ -53,6 +49,7 @@ export class MetamaskGenerator extends IACQrGenerator {
   public static async canHandle(data: IACMessageDefinitionObjectV3[]): Promise<boolean> {
     if (data.length === 1) {
       const element = data[0]
+
       return (
         element.protocol === MainProtocolSymbols.ETH &&
         [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse, IACMessageType.MessageSignResponse].includes(
@@ -91,7 +88,7 @@ export class MetamaskGenerator extends IACQrGenerator {
     const cryptoKeyPathComponents = []
     for (const component of account.derivationPath.split('/')) {
       if (component === 'm') continue
-      const index = parseInt(component)
+      const index = parseInt(component, 10)
       const hardened = component.endsWith('h') || component.endsWith("'")
       cryptoKeyPathComponents.push(new PathComponent({ index, hardened }))
     }

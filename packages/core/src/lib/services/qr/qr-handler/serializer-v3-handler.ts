@@ -1,18 +1,12 @@
-import {
-  generateId,
-  IACMessageDefinitionObjectV3,
-  IACMessageType,
-  MainProtocolSymbols,
-  MessageSignRequest,
-  SerializerV3,
-  UnsignedBitcoinSegwitTransaction
-} from '@airgap/coinlib-core'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
-import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
+import { UnsignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
+import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'
@@ -28,7 +22,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   private resultCache: IACMessageWrapper<IACMessageDefinitionObjectV3[]> | undefined
 
   constructor(callback: (data: IACMessageWrapper<IACMessageDefinitionObjectV3[]>) => void = (): void => undefined) {
-    this.serializer = new SerializerV3()
+    this.serializer = SerializerV3.getInstance()
     this.callback = callback
     // completion callback
   }
@@ -39,6 +33,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     } else {
       try {
         const ur = this.getParsedData(data)
+
         return ur && ur.length > 0 ? true : false
       } catch (e) {
         return false
@@ -55,6 +50,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       const url = new URL(data)
       ur = `UR:BYTES/${url.searchParams.get('ur')}`
     } catch (e) {}
+
     return ur ?? ''
   }
 
@@ -74,6 +70,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       if (!res) {
         // If we already have progress, but the scanner scans a "new set of QRs", it should reset itself and handle the part.
         this.reset()
+
         return this.receive(_data)
       }
     } catch (e) {
@@ -113,6 +110,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       if (decoded.type === 'crypto-psbt') {
         const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor)
         const psbt = cryptoPsbt.getPSBT().toString('hex')
+
         return this.convertPSBT(psbt)
       }
 
@@ -123,6 +121,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       }
 
       const resultUr = bs58check.encode(this.combinedData)
+
       return { result: await this.serializer.deserialize(resultUr), data: await this.getDataSingle() }
     }
 
@@ -134,16 +133,18 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
    */
   public async getDataSingle(): Promise<string | undefined> {
     if (!this.combinedData) {
-      return
+      return undefined
     }
     const ur = UR.fromBuffer(this.combinedData)
     const part = new UREncoder(ur, Number.MAX_SAFE_INTEGER).nextPart()
+
     return part.toUpperCase()
   }
 
   public async reset(): Promise<void> {
     this.decoder = new URDecoder()
     this.parts = new Set()
+
     return
   }
 

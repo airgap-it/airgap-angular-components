@@ -75,7 +75,7 @@
 
   <ion-row class="ion-align-items-center ion-padding-top">
     <ion-col size="9" offset="3">
-      <airgap-network-badge [network]="transaction.network"></airgap-network-badge>
+      <airgap-network-badge *ngIf="!hideNetwork" [network]="transaction.network"></airgap-network-badge>
     </ion-col>
   </ion-row>
 
