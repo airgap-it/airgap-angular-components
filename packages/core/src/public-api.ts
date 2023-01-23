@@ -37,6 +37,9 @@ export * from './lib/pipes/amount-converter/amount-converter.pipe'
 export * from './lib/pipes/fee-converter/fee-converter.pipe'
 export * from './lib/pipes/wallet-filter/wallet-filter.pipe'
 
+// Protocol
+export * from './lib/protocol/protocol-v0-adapter'
+
 // Services
 export * from './lib/services/address/address.service'
 export * from './lib/services/clipboard/clipboard.service'

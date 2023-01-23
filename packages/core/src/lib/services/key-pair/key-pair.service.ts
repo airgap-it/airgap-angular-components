@@ -1,6 +1,7 @@
 import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
 import { MessageSignRequest } from '@airgap/serializer'
 import { Injectable } from '@angular/core'
+import { ICoinProtocolAdapter } from '../../protocol/protocol-v0-adapter'
 
 type Unsigned = UnsignedTransaction | MessageSignRequest
 
@@ -32,7 +33,11 @@ export class KeyPairService {
       if (this.isUnsignedTransaction(unsigned)) {
         return protocol.signWithExtendedPrivateKey(extendedPrivateKey, unsigned.transaction, childDerivationPath)
       } else {
-        const privateKey = await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
+        const privateKey = (await protocol.getIdentifier()).startsWith(MainProtocolSymbols.ETH)
+          ? protocol instanceof ICoinProtocolAdapter
+            ? await protocol.getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath)
+            : await (protocol as any).getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey, childDerivationPath) // This only exists on ETH
+          : extendedPrivateKey
 
         return protocol.signMessage(unsigned.message, { privateKey })
       }
@@ -59,9 +64,8 @@ export class KeyPairService {
     }
 
     const publicKey: string =
-      withExtendedPrivateKey && (await protocol.getIdentifier()).startsWith(MainProtocolSymbols.ETH)
-        ? /* We need to check for ETH, because BTC returns an xPub for getPublicKeyFromMnemonic and getExtendedPublicKeyFromMnemonic doesn't exist */
-          await (protocol as any).getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
+      withExtendedPrivateKey && (await protocol.getSupportsHD())
+        ? await protocol.getExtendedPublicKeyFromMnemonic(mnemonic, derivationPath, password)
         : await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)
 
     return publicKey === unsigned.publicKey
