@@ -94,6 +94,8 @@ class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
   }
 }
 
+export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {}
+
 export class ICoinProtocolAdapter implements ICoinProtocol {
   public readonly symbol: string
   public readonly name: string
@@ -332,7 +334,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
 
     return {
       transactions: await this.convertTransactionDetails(transactions.transactions),
-      cursor
+      cursor: transactions.cursor ? transactions.cursor : cursor
     }
   }
 
@@ -565,7 +567,8 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const signed: SignedTransaction = await this.convertV0SignedTransactionToV1(rawTransaction)
+    const transaction = { transaction: rawTransaction, accountIdentifier: '' }
+    const signed: SignedTransaction = await this.convertV0SignedTransactionToV1(transaction)
 
     return this.v1Protocol.broadcastTransaction(signed)
   }
@@ -915,16 +918,17 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
         ? NetworkType.MAINNET
         : this.network?.type === 'testnet'
         ? NetworkType.TESTNET
-        : knownOptions?.network.type ?? NetworkType.CUSTOM
+        : this.network?.type === 'custom'
+        ? NetworkType.CUSTOM
+        : knownOptions?.network.type ?? NetworkType.MAINNET
 
-    return {
-      name: this.network.name ?? knownOptions.network.name,
-      type: networkType,
-      rpcUrl: this.network.rpcUrl ?? knownOptions.network.rpcUrl,
-      identifier: this.identifier,
-      blockExplorer: new ProtocolBlockExplorerAdapter(this.v1BlockExplorer, this.blockExplorerMetadata.url),
-      extras: knownOptions?.network.extras ?? {}
-    }
+    return new ProtocolNetworkAdapter(
+      this.network?.name ?? knownOptions?.network.name ?? '',
+      networkType,
+      this.network?.rpcUrl ?? knownOptions?.network.rpcUrl ?? '',
+      new ProtocolBlockExplorerAdapter(this.v1BlockExplorer, this.blockExplorerMetadata.url),
+      knownOptions?.network.extras ?? {}
+    )
   }
 
   private async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string): Promise<SecretKey> {
