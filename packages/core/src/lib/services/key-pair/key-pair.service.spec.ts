@@ -1,6 +1,6 @@
 import { AeternityProtocol } from '@airgap/aeternity'
 import { BitcoinSegwitProtocol, BitcoinProtocol } from '@airgap/bitcoin'
-import { ICoinProtocol, MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core'
+import { ICoinProtocol, SubProtocolSymbols } from '@airgap/coinlib-core'
 import { CosmosProtocol } from '@airgap/cosmos'
 import { EthereumProtocol, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, GenericERC20 } from '@airgap/ethereum'
 import { GroestlcoinProtocol } from '@airgap/groestlcoin'
@@ -32,8 +32,8 @@ describe('KeypairService', () => {
     for (let i = 0; i < protocols.length; i++) {
       const protocol = protocols[i]
 
-      const publicKey = (await protocol.getIdentifier()).startsWith(MainProtocolSymbols.ETH)
-        ? await (protocol as EthereumProtocol).getExtendedPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
+      const publicKey = (await protocol.getSupportsHD())
+        ? await protocol.getExtendedPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
         : await protocol.getPublicKeyFromMnemonic(mnemonic, hdDerivationPath, password)
       unsigned = { ...unsigned, publicKey }
 

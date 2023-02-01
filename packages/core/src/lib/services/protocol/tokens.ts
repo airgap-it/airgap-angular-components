@@ -92,7 +92,7 @@ export const ethTokens: Token[] = [
   },
   {
     symbol: 'VEN',
-    name: 'VeChain',
+    name: 'VeChain (erc20)',
     marketSymbol: 'ven',
     identifier: 'eth-erc20-ven',
     contractAddress: '0xD850942eF8811f2A866692A623011bDE52a462C1',
@@ -724,7 +724,15 @@ export const ethTokens: Token[] = [
   },
   {
     symbol: 'FET',
-    name: 'Fetch',
+    name: 'Fetch (erc20)',
+    marketSymbol: 'fet',
+    identifier: 'eth-erc20-fet-new',
+    contractAddress: '0xaea46a60368a7bd060eec7df8cba43b7ef41ad85',
+    decimals: 18
+  },
+  {
+    symbol: 'FET',
+    name: 'Fetch (erc20, old)',
     marketSymbol: 'fet',
     identifier: 'eth-erc20-fet',
     contractAddress: '0x1d287cc25dad7ccaf76a26bc660c5f7c8e2a05bd',

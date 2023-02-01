@@ -31,17 +31,40 @@ import {
   TezosWRAPProtocolConfig,
   TezosYOUProtocolConfig
 } from '@airgap/tezos'
-import { ProtocolSymbols, ProtocolNetwork, MainProtocolSymbols, SubProtocolSymbols, assertNever, Domain } from '@airgap/coinlib-core'
+import {
+  ProtocolSymbols,
+  ProtocolNetwork,
+  MainProtocolSymbols,
+  SubProtocolSymbols,
+  assertNever,
+  Domain,
+  NetworkType
+} from '@airgap/coinlib-core'
 import { NotFoundError } from '@airgap/coinlib-core/errors'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
+import { ProtocolNetworkAdapter } from '../../protocol/protocol-v0-adapter'
+import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
 
 export const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
   network?: ProtocolNetwork
 ): ProtocolOptions => {
   switch (identifier) {
+
+    // TODO : remove hardcoded values
+    case MainProtocolSymbols.ICP:
+      return {
+        network: new ProtocolNetworkAdapter(
+          ICP_MAINNET_PROTOCOL_NETWORK.name,
+          NetworkType.MAINNET,
+          ICP_MAINNET_PROTOCOL_NETWORK.rpcUrl,
+          undefined,
+          {}
+        ),
+        config: {},
+      }
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
     case MainProtocolSymbols.BTC:
