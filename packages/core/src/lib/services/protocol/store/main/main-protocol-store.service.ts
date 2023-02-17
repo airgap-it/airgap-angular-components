@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { ICoinProtocol, MainProtocolSymbols, ProtocolNetwork, ProtocolSymbols, isNetworkEqual } from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
+import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
+import { IsolatedModulesPlugin } from '../../../../capacitor-plugins/definitions'
 
 export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
 
@@ -16,12 +18,12 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   ICoinProtocol[],
   MainProtocolStoreConfig
 > {
-  constructor() {
+  constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
     super('MainProtocolService')
   }
 
   public isIdentifierValid(identifier: string): boolean {
-    return Object.values(MainProtocolSymbols).includes(identifier as MainProtocolSymbols)
+    return Object.values(MainProtocolSymbols).includes(identifier as MainProtocolSymbols) || !identifier.includes('-')
   }
 
   public async getProtocolByIdentifier(
@@ -31,7 +33,8 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     retry: boolean = true
   ): Promise<ICoinProtocol | undefined> {
     try {
-      const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(identifier).network
+      const targetNetwork: ProtocolNetwork | string =
+        network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, identifier)).network
       const protocols: ICoinProtocol[] = activeOnly ? this.activeProtocols : await this.supportedProtocols
       const candidates: (ICoinProtocol | undefined)[] = await Promise.all(
         protocols.map(async (protocol: ICoinProtocol) => {

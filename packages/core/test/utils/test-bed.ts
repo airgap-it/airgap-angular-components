@@ -9,6 +9,8 @@ import { Storage } from '@ionic/storage'
 import { ComponentsModule } from '../../src/lib/components/components.module'
 import { PipesModule } from '../../src/lib/pipes/pipes.module'
 import { APP_CONFIG, AppConfig } from '../../src/lib/config/app-config'
+import { ISOLATED_MODULES_PLUGIN } from '../../src/lib/capacitor-plugins/injection-tokens'
+import { IsolatedModules } from '../../src/lib/capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { StorageMock } from './storage-mock'
 
 export class TestBedUtils {
@@ -39,7 +41,8 @@ export class TestBedUtils {
     ]
     const mandatoryProviders: any[] = [
       { provide: Storage, useClass: StorageMock },
-      { provide: APP_CONFIG, useValue: appConfig }
+      { provide: APP_CONFIG, useValue: appConfig },
+      { provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }
     ]
 
     if (!useIonicOnlyTestBed) {

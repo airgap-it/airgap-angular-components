@@ -1,12 +1,16 @@
 import { TestBed } from '@angular/core/testing'
+import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
+import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 
 import { AddressService } from './address.service'
 
-describe('ContactsService', () => {
+describe('AddressService', () => {
   let service: AddressService
 
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({
+      providers: [{ provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }]
+    })
     service = TestBed.inject(AddressService)
   })
 

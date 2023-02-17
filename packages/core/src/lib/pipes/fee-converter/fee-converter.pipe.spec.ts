@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
+import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'
 import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
@@ -8,9 +10,15 @@ import { FeeConverterPipe } from './fee-converter.pipe'
 describe('FeeConverter Pipe', () => {
   let feeConverterPipe: FeeConverterPipe
   let protocolService: ProtocolService
+  let isolatedModules: IsolatedModulesPlugin
 
   beforeAll(() => {
-    protocolService = new ProtocolService(new MainProtocolStoreService(), new SubProtocolStoreService())
+    isolatedModules = new IsolatedModules()
+    protocolService = new ProtocolService(
+      new MainProtocolStoreService(isolatedModules),
+      new SubProtocolStoreService(isolatedModules),
+      isolatedModules
+    )
     protocolService.init()
   })
 
@@ -61,10 +69,10 @@ describe('FeeConverter Pipe', () => {
   it('should return an empty string when protocolIdentifier unknown', async () => {
     try {
       await feeConverterPipe.transform('1', {
-        protocol: 'unknown-protocol' as any
+        protocol: 'unknown_protocol' as any
       })
     } catch (error) {
-      expect(error.toString()).toEqual('Error: Protocol unknown-protocol not supported')
+      expect(error.toString()).toEqual('Error: Protocol unknown_protocol not supported')
     }
   })
 

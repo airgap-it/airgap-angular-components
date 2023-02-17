@@ -8,7 +8,7 @@ import {
   ICoinProtocol,
   ICoinSubProtocol,
   IProtocolTransactionCursor,
-  NetworkType,
+  NetworkType as NetworkTypeV0,
   ProtocolBlockExplorer,
   ProtocolNetwork as ProtocolNetworkV0,
   ProtocolSymbols,
@@ -24,7 +24,7 @@ import {
   AirGapTransactionWarning,
   AirGapTransactionWarningType
 } from '@airgap/coinlib-core/interfaces/IAirGapTransaction'
-import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
+import { ProtocolOptions as ProtocolOptionsV0 } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import {
   AddressWithCursor,
   AirGapAnyProtocol,
@@ -64,6 +64,7 @@ import {
   newSignature,
   ProtocolMetadata,
   ProtocolNetwork,
+  ProtocolNetworkType,
   ProtocolSymbol,
   ProtocolUnitsMetadata,
   PublicKey,
@@ -77,24 +78,58 @@ import {
   UnsignedTransaction
 } from '@airgap/module-kit'
 import BigNumber from 'bignumber.js'
-import { TransactionSignRequest, TransactionSignResponse } from '@airgap/serializer'
-import { getProtocolOptionsByIdentifier } from '../utils/protocol/protocol-options'
+import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
+import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
 
 class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
-  constructor(private readonly v1BlockExplorer: AirGapBlockExplorer, url: string) {
+  constructor(private readonly blockExplorerV1: AirGapBlockExplorer, url: string) {
     super(url)
   }
 
   public async getAddressLink(address: string): Promise<string> {
-    return this.v1BlockExplorer.createAddressUrl(address)
+    return this.blockExplorerV1.createAddressUrl(address)
   }
 
   public async getTransactionLink(transactionId: string): Promise<string> {
-    return this.v1BlockExplorer.createTransactionUrl(transactionId)
+    return this.blockExplorerV1.createTransactionUrl(transactionId)
   }
 }
 
-export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {}
+export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {
+  constructor(
+    name: string,
+    type: ProtocolNetworkType | NetworkTypeV0,
+    rpcUrl: string,
+    blockExplorer?: ProtocolBlockExplorer,
+    extras: unknown = {}
+  ) {
+    const networkType: NetworkTypeV0 = Object.values(NetworkTypeV0).includes(type as NetworkTypeV0)
+      ? (type as NetworkTypeV0)
+      : type === 'mainnet'
+      ? NetworkTypeV0.MAINNET
+      : type === 'testnet'
+      ? NetworkTypeV0.TESTNET
+      : NetworkTypeV0.CUSTOM
+
+    super(name, networkType, rpcUrl, blockExplorer, extras)
+  }
+}
+
+export class ProtocolOptionsAdapter implements ProtocolOptionsV0 {
+  constructor(public readonly network: ProtocolNetworkV0, public readonly config: unknown = {}) {}
+}
+
+export class TransactionValidatorAdapter implements TransactionValidator {
+  constructor(private readonly protocolIdentifier: string, private readonly serializerCompanion: AirGapV3SerializerCompanion) {}
+
+  public async validateUnsignedTransaction(transaction: TransactionSignRequest): Promise<any> {
+    return this.serializerCompanion.validateTransactionSignRequest(this.protocolIdentifier, transaction)
+  }
+
+  public async validateSignedTransaction(transaction: TransactionSignResponse): Promise<any> {
+    return this.serializerCompanion.validateTransactionSignResponse(this.protocolIdentifier, transaction)
+  }
+}
 
 export class ICoinProtocolAdapter implements ICoinProtocol {
   public readonly symbol: string
@@ -111,41 +146,49 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   public readonly addressIsCaseSensitive: boolean
   public readonly addressValidationPattern: string
   public readonly addressPlaceholder: string
-  public readonly options: ProtocolOptions
+  public readonly options: ProtocolOptionsV0
   public readonly cryptoClient: CryptoClient
 
   private readonly networkV0: ProtocolNetworkV0
+  private readonly blockExplorerV0: ProtocolBlockExplorerAdapter | undefined
 
   public static async create(
-    v1Protocol: AirGapAnyProtocol,
-    v1BlockExplorer: AirGapBlockExplorer,
+    protocolV1: AirGapAnyProtocol,
+    blockExplorerV1: AirGapBlockExplorer | undefined,
     v3SerializerCompanion: AirGapV3SerializerCompanion,
     extra: {
       protocolMetadata?: ProtocolMetadata
-      network?: ProtocolNetwork
-      blockExplorerMetadata?: BlockExplorerMetadata
+      network?: ProtocolNetwork | null
+      blockExplorerMetadata?: BlockExplorerMetadata | null
     } = {}
   ): Promise<ICoinProtocolAdapter> {
-    const [protocolMetadata, network, blockExplorerMetadata]: [ProtocolMetadata, ProtocolNetwork | undefined, BlockExplorerMetadata] =
-      await Promise.all([
-        extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : v1Protocol.getMetadata(),
-        extra.network
-          ? Promise.resolve(extra.network)
-          : isOnlineProtocol(v1Protocol)
-          ? v1Protocol.getNetwork()
-          : Promise.resolve(undefined),
-        extra.blockExplorerMetadata ? Promise.resolve(extra.blockExplorerMetadata) : v1BlockExplorer.getMetadata()
-      ])
+    const [protocolMetadata, network, blockExplorerMetadata]: [
+      ProtocolMetadata,
+      ProtocolNetwork | undefined,
+      BlockExplorerMetadata | undefined
+    ] = await Promise.all([
+      extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
+      extra.network
+        ? Promise.resolve(extra.network)
+        : extra.network === null || !isOnlineProtocol(protocolV1)
+        ? Promise.resolve(undefined)
+        : protocolV1.getNetwork(),
+      extra.blockExplorerMetadata
+        ? Promise.resolve(extra.blockExplorerMetadata)
+        : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
+        ? Promise.resolve(undefined)
+        : blockExplorerV1.getMetadata()
+    ])
 
-    return new ICoinProtocolAdapter(v1Protocol, protocolMetadata, network, v1BlockExplorer, blockExplorerMetadata, v3SerializerCompanion)
+    return new ICoinProtocolAdapter(protocolV1, protocolMetadata, network, blockExplorerV1, blockExplorerMetadata, v3SerializerCompanion)
   }
 
   protected constructor(
-    public readonly v1Protocol: AirGapAnyProtocol,
+    public readonly protocolV1: AirGapAnyProtocol,
     private readonly protocolMetadata: ProtocolMetadata,
     private readonly network: ProtocolNetwork | undefined,
-    private readonly v1BlockExplorer: AirGapBlockExplorer,
-    private readonly blockExplorerMetadata: BlockExplorerMetadata,
+    blockExplorerV1: AirGapBlockExplorer | undefined,
+    blockExplorerMetadata: BlockExplorerMetadata | undefined,
     private readonly v3SerializerCompanion: AirGapV3SerializerCompanion
   ) {
     const units: ProtocolUnitsMetadata = this.protocolMetadata.units
@@ -182,25 +225,23 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       return { unitSymbol, factor }
     })
 
-    this.supportsHD = isBip32Protocol(this.v1Protocol)
+    this.supportsHD = isBip32Protocol(this.protocolV1)
 
     this.standardDerivationPath = this.protocolMetadata.account?.standardDerivationPath ?? 'm/'
     this.addressIsCaseSensitive = this.protocolMetadata.account.address?.isCaseSensitive ?? false
     this.addressValidationPattern = this.protocolMetadata.account?.address?.regex ?? '*+'
     this.addressPlaceholder = this.protocolMetadata.account?.address?.placeholder ?? ''
 
-    this.networkV0 = this.getNetwork()
-
-    let knownOptions: ProtocolOptions | undefined
+    let knownOptions: ProtocolOptionsV0 | undefined
     try {
-      knownOptions = getProtocolOptionsByIdentifier(this.protocolMetadata.identifier as ProtocolSymbols)
+      knownOptions = getProtocolOptionsByIdentifierLegacy(this.protocolMetadata.identifier as ProtocolSymbols)
       // eslint-disable-next-line no-empty
     } catch {}
 
-    this.options = {
-      network: this.networkV0,
-      config: knownOptions?.config ?? {}
-    }
+    this.blockExplorerV0 =
+      blockExplorerV1 && blockExplorerMetadata ? new ProtocolBlockExplorerAdapter(blockExplorerV1, blockExplorerMetadata.url) : undefined
+    this.networkV0 = this.getNetwork(knownOptions)
+    this.options = new ProtocolOptionsAdapter(this.networkV0, knownOptions?.config ?? {})
   }
 
   public async getSymbol(): Promise<string> {
@@ -259,16 +300,24 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     return this.addressPlaceholder
   }
 
-  public async getOptions(): Promise<ProtocolOptions> {
+  public async getOptions(): Promise<ProtocolOptionsV0> {
     return this.options
   }
 
   public async getBlockExplorerLinkForAddress(address: string): Promise<string> {
-    return this.v1BlockExplorer.createAddressUrl(address)
+    if (this.blockExplorerV0 === undefined) {
+      throw new Error('Method not supported, BlockExplorer not found.')
+    }
+
+    return this.blockExplorerV0.getAddressLink(address)
   }
 
   public async getBlockExplorerLinkForTxId(txId: string): Promise<string> {
-    return this.v1BlockExplorer.createTransactionUrl(txId)
+    if (this.blockExplorerV0 === undefined) {
+      throw new Error('Method not supported, BlockExplorer not found.')
+    }
+
+    return this.blockExplorerV0.getTransactionLink(txId)
   }
 
   public async getTransactionsFromPublicKey(
@@ -276,11 +325,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     limit: number,
     cursor?: IProtocolTransactionCursor
   ): Promise<IAirGapTransactionResult> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required interface: Online.')
     }
 
-    const transactions: AirGapTransactionsWithCursor = await this.v1Protocol.getTransactionsForPublicKey(
+    const transactions: AirGapTransactionsWithCursor = await this.protocolV1.getTransactionsForPublicKey(
       newPublicKey(publicKey, this.getBytesFormat(publicKey)),
       limit,
       cursor as TransactionCursor
@@ -297,11 +346,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     limit: number,
     cursor?: IProtocolTransactionCursor
   ): Promise<IAirGapTransactionResult> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required interface: Online, Bip32.')
     }
 
-    const transactions: AirGapTransactionsWithCursor = await this.v1Protocol.getTransactionsForPublicKey(
+    const transactions: AirGapTransactionsWithCursor = await this.protocolV1.getTransactionsForPublicKey(
       newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
       limit,
       cursor as TransactionCursor
@@ -318,16 +367,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     limit: number,
     cursor?: IProtocolTransactionCursor
   ): Promise<IAirGapTransactionResult> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
 
     let transactions: AirGapTransactionsWithCursor
-    if (addresses.length === 1 && canFetchDataForAddress(this.v1Protocol)) {
-      transactions = await this.v1Protocol.getTransactionsForAddress(addresses[0], limit, cursor as TransactionCursor)
-    } else if (canFetchDataForMultipleAddresses(this.v1Protocol)) {
+    if (addresses.length === 1 && canFetchDataForAddress(this.protocolV1)) {
+      transactions = await this.protocolV1.getTransactionsForAddress(addresses[0], limit, cursor as TransactionCursor)
+    } else if (canFetchDataForMultipleAddresses(this.protocolV1)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      transactions = await this.v1Protocol.getTransactionsForAddresses(addresses, limit, cursor as TransactionCursor)
+      transactions = await this.protocolV1.getTransactionsForAddresses(addresses, limit, cursor as TransactionCursor)
     } else {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
@@ -339,16 +388,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getBalanceOfAddresses(addresses: string[], _data?: { [key: string]: unknown }): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
 
     let balance: Balance
-    if (addresses.length === 1 && canFetchDataForAddress(this.v1Protocol)) {
-      balance = await this.v1Protocol.getBalanceOfAddress(addresses[0])
-    } else if (canFetchDataForMultipleAddresses(this.v1Protocol)) {
+    if (addresses.length === 1 && canFetchDataForAddress(this.protocolV1)) {
+      balance = await this.protocolV1.getBalanceOfAddress(addresses[0])
+    } else if (canFetchDataForMultipleAddresses(this.protocolV1)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      balance = await this.v1Protocol.getBalanceOfAddresses(addresses)
+      balance = await this.protocolV1.getBalanceOfAddresses(addresses)
     } else {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
@@ -357,11 +406,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getBalanceOfPublicKey(publicKey: string, _data?: { [key: string]: unknown; addressIndex?: number }): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const balance: Balance = await this.v1Protocol.getBalanceOfPublicKey(newPublicKey(publicKey, this.getBytesFormat(publicKey)))
+    const balance: Balance = await this.protocolV1.getBalanceOfPublicKey(newPublicKey(publicKey, this.getBytesFormat(publicKey)))
 
     return newAmount(balance.total).blockchain(this.protocolMetadata.units).value
   }
@@ -371,11 +420,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     _offset: number,
     _data?: { [key: string]: unknown }
   ): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
     }
 
-    const balance: Balance = await this.v1Protocol.getBalanceOfPublicKey(
+    const balance: Balance = await this.protocolV1.getBalanceOfPublicKey(
       newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey))
     )
 
@@ -383,16 +432,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getAvailableBalanceOfAddresses(addresses: string[], _data?: { [key: string]: unknown }): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
 
     let balance: Balance
-    if (addresses.length === 1 && canFetchDataForAddress(this.v1Protocol)) {
-      balance = await this.v1Protocol.getBalanceOfAddress(addresses[0])
-    } else if (canFetchDataForMultipleAddresses(this.v1Protocol)) {
+    if (addresses.length === 1 && canFetchDataForAddress(this.protocolV1)) {
+      balance = await this.protocolV1.getBalanceOfAddress(addresses[0])
+    } else if (canFetchDataForMultipleAddresses(this.protocolV1)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      balance = await this.v1Protocol.getBalanceOfAddresses(addresses)
+      balance = await this.protocolV1.getBalanceOfAddresses(addresses)
     } else {
       throw new Error('Method not supported, required interface: Online, FetchDataForAddress/FetchDataForMultipleAddresses.')
     }
@@ -401,11 +450,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getTransactionStatuses(transactionHash: string[]): Promise<AirGapTransactionStatusV0[]> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isTransactionStatusChecker(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isTransactionStatusChecker(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, TransactionStatusChecker.')
     }
 
-    const statuses: Record<string, AirGapTransactionStatus> = await this.v1Protocol.getTransactionStatus(transactionHash)
+    const statuses: Record<string, AirGapTransactionStatus> = await this.protocolV1.getTransactionStatus(transactionHash)
 
     return transactionHash.map((hash: string) => {
       const status: AirGapTransactionStatus = statuses[hash]
@@ -424,11 +473,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     fee?: string,
     _data?: { [key: string]: unknown }
   ): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
     }
 
-    const maxAmount: Amount = await this.v1Protocol.getTransactionMaxAmountWithPublicKey(
+    const maxAmount: Amount = await this.protocolV1.getTransactionMaxAmountWithPublicKey(
       newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
       recipients,
       {
@@ -445,11 +494,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     fee?: string,
     _data?: { [key: string]: unknown; addressIndex?: number }
   ): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const maxAmount: Amount = await this.v1Protocol.getTransactionMaxAmountWithPublicKey(
+    const maxAmount: Amount = await this.protocolV1.getTransactionMaxAmountWithPublicKey(
       newPublicKey(publicKey, this.getBytesFormat(publicKey)),
       recipients,
       {
@@ -466,11 +515,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     values: string[],
     _data?: { [key: string]: unknown }
   ): Promise<FeeDefaultsV0> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
     }
 
-    const feeEstimation: FeeEstimation = await this.v1Protocol.getTransactionFeeWithPublicKey(
+    const feeEstimation: FeeEstimation = await this.protocolV1.getTransactionFeeWithPublicKey(
       newExtendedPublicKey(publicKey, this.getBytesFormat(publicKey)),
       this.combineTransactionDetails(recipients, values)
     )
@@ -488,7 +537,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     values: string[],
     _data?: { [key: string]: unknown }
   ): Promise<FeeDefaultsV0> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
@@ -501,7 +550,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       amount: newAmount(values[index], 'blockchain')
     }))
 
-    const feeEstimation: FeeEstimation = await this.v1Protocol.getTransactionFeeWithPublicKey(
+    const feeEstimation: FeeEstimation = await this.protocolV1.getTransactionFeeWithPublicKey(
       newPublicKey(publicKey, this.getBytesFormat(publicKey)),
       transactionDetails
     )
@@ -521,11 +570,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     fee: string,
     _extras?: { [key: string]: unknown }
   ): Promise<any> {
-    if (!isOnlineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const transaction: UnsignedTransaction = await this.v1Protocol.prepareTransactionWithPublicKey(
+    const transaction: UnsignedTransaction = await this.protocolV1.prepareTransactionWithPublicKey(
       newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
       this.combineTransactionDetails(recipients, values),
       {
@@ -545,11 +594,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     fee: string,
     _extras?: { [key: string]: unknown }
   ): Promise<any> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const transaction: UnsignedTransaction = await this.v1Protocol.prepareTransactionWithPublicKey(
+    const transaction: UnsignedTransaction = await this.protocolV1.prepareTransactionWithPublicKey(
       newPublicKey(publicKey, this.getBytesFormat(publicKey)),
       this.combineTransactionDetails(recipients, values),
       {
@@ -563,18 +612,18 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async broadcastTransaction(rawTransaction: any): Promise<string> {
-    if (!isOnlineProtocol(this.v1Protocol)) {
+    if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
     const transaction = { transaction: rawTransaction, accountIdentifier: '' }
     const signed: SignedTransaction = await this.convertV0SignedTransactionToV1(transaction)
 
-    return this.v1Protocol.broadcastTransaction(signed)
+    return this.protocolV1.broadcastTransaction(signed)
   }
 
   public async getAddressFromPublicKey(publicKey: string, _cursor?: IProtocolAddressCursor): Promise<IAirGapAddressResult> {
-    const address: AddressWithCursor | string = await this.v1Protocol.getAddressFromPublicKey(
+    const address: AddressWithCursor | string = await this.protocolV1.getAddressFromPublicKey(
       newPublicKey(publicKey, this.getBytesFormat(publicKey))
     )
 
@@ -585,16 +634,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getAddressesFromPublicKey(publicKey: string, _cursor?: IProtocolAddressCursor): Promise<IAirGapAddressResult[]> {
-    if (hasMultiAddressPublicKeys(this.v1Protocol)) {
+    if (hasMultiAddressPublicKeys(this.protocolV1)) {
       const pk: PublicKey = newPublicKey(publicKey, this.getBytesFormat(publicKey))
       const addresses: IAirGapAddressResult[] = []
-      const firstAddress: AddressWithCursor | string = await this.v1Protocol.getAddressFromPublicKey(pk)
+      const firstAddress: AddressWithCursor | string = await this.protocolV1.getAddressFromPublicKey(pk)
 
       let nextAddress: AddressWithCursor | undefined =
         typeof firstAddress === 'string' ? { address: firstAddress, cursor: { hasNext: false } } : firstAddress
       while (nextAddress !== undefined && nextAddress.cursor.hasNext) {
         addresses.push(nextAddress)
-        nextAddress = await this.v1Protocol.getNextAddressFromPublicKey(pk, nextAddress.cursor)
+        nextAddress = await this.protocolV1.getNextAddressFromPublicKey(pk, nextAddress.cursor)
       }
 
       return addresses
@@ -608,11 +657,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     visibilityDerivationIndex: number,
     addressDerivationIndex: number
   ): Promise<IAirGapAddressResult> {
-    if (!isBip32Protocol(this.v1Protocol)) {
+    if (!isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Bip32.')
     }
 
-    const derivedPublicKey: PublicKey = await this.v1Protocol.deriveFromExtendedPublicKey(
+    const derivedPublicKey: PublicKey = await this.protocolV1.deriveFromExtendedPublicKey(
       newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
       visibilityDerivationIndex,
       addressDerivationIndex
@@ -627,7 +676,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     addressCount: number,
     offset: number
   ): Promise<IAirGapAddressResult[]> {
-    if (!isBip32Protocol(this.v1Protocol)) {
+    if (!isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Bip32.')
     }
 
@@ -648,16 +697,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.publicKey)) {
-      if (!isBip32Protocol(this.v1Protocol)) {
+      if (!isBip32Protocol(this.protocolV1)) {
         throw new Error('Method not supported, required inferface: Bip32.')
       }
 
-      transactions = await this.v1Protocol.getDetailsFromTransaction(
+      transactions = await this.protocolV1.getDetailsFromTransaction(
         unsigned,
         newExtendedPublicKey(transaction.publicKey, this.getBytesFormat(transaction.publicKey))
       )
     } else {
-      transactions = await this.v1Protocol.getDetailsFromTransaction(
+      transactions = await this.protocolV1.getDetailsFromTransaction(
         unsigned,
         newPublicKey(transaction.publicKey, this.getBytesFormat(transaction.publicKey))
       )
@@ -681,16 +730,16 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.accountIdentifier)) {
-      if (!isBip32Protocol(this.v1Protocol)) {
+      if (!isBip32Protocol(this.protocolV1)) {
         throw new Error('Method not supported, required inferface: Bip32.')
       }
 
-      transactions = await this.v1Protocol.getDetailsFromTransaction(
+      transactions = await this.protocolV1.getDetailsFromTransaction(
         signed,
         newExtendedPublicKey(transaction.accountIdentifier, this.getBytesFormat(transaction.accountIdentifier))
       )
     } else {
-      transactions = await this.v1Protocol.getDetailsFromTransaction(
+      transactions = await this.protocolV1.getDetailsFromTransaction(
         signed,
         newPublicKey(transaction.accountIdentifier, this.getBytesFormat(transaction.accountIdentifier))
       )
@@ -707,11 +756,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async verifyMessage(message: string, signature: string, publicKey: string): Promise<boolean> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canSignMessage(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canSignMessage(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, SignMessage.')
     }
 
-    return this.v1Protocol.verifyMessageWithPublicKey(
+    return this.protocolV1.verifyMessageWithPublicKey(
       message,
       newSignature(signature, this.getBytesFormat(signature)),
       newPublicKey(publicKey, this.getBytesFormat(publicKey))
@@ -719,39 +768,39 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async encryptAsymmetric(payload: string, publicKey: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canEncryptAsymmetric(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canEncryptAsymmetric(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, AsymmetricEncryption.')
     }
 
-    return this.v1Protocol.encryptAsymmetricWithPublicKey(payload, newPublicKey(publicKey, this.getBytesFormat(publicKey)))
+    return this.protocolV1.encryptAsymmetricWithPublicKey(payload, newPublicKey(publicKey, this.getBytesFormat(publicKey)))
   }
 
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.v1Protocol.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
 
     return keyPair.publicKey.value
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.v1Protocol.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
 
     return keyPair.secretKey.value
   }
 
   public async getExtendedPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.v1Protocol.getExtendedKeyPairFromSecret(
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret(
       { type: 'mnemonic', value: mnemonic, password },
       derivationPath
     )
@@ -760,11 +809,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getExtendedPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.v1Protocol.getExtendedKeyPairFromSecret(
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret(
       { type: 'mnemonic', value: mnemonic, password },
       derivationPath
     )
@@ -773,47 +822,47 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async getPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: KeyPair = await this.v1Protocol.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
 
     return keyPair.publicKey.value
   }
 
   public async getPrivateKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.v1Protocol.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
 
     return keyPair.secretKey.value
   }
 
   public async getExtendedPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.v1Protocol.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
 
     return keyPair.publicKey.value
   }
 
   public async getExtendedPrivateKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.v1Protocol.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
 
     return keyPair.secretKey.value
   }
 
   public async signWithExtendedPrivateKey(extendedPrivateKey: string, transaction: any, childDerivationPath?: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
@@ -828,14 +877,14 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       ? await this.deriveSecretKey(extendedSecretKey, childDerivationPath)
       : extendedSecretKey
 
-    const signed: SignedTransaction = await this.v1Protocol.signTransactionWithSecretKey(unsigned, secretKey)
+    const signed: SignedTransaction = await this.protocolV1.signTransactionWithSecretKey(unsigned, secretKey)
     const signedV0: TransactionSignResponse = await this.convertV1SignedTransactionToV0(signed, '')
 
     return signedV0.transaction
   }
 
   public async signWithPrivateKey(privateKey: string, transaction: any): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
@@ -844,7 +893,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       publicKey: ''
     })
 
-    const signed: SignedTransaction = await this.v1Protocol.signTransactionWithSecretKey(
+    const signed: SignedTransaction = await this.protocolV1.signTransactionWithSecretKey(
       unsigned,
       newSecretKey(privateKey, this.getBytesFormat(privateKey))
     )
@@ -854,11 +903,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async signMessage(message: string, keypair: { publicKey?: string; privateKey: string }): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canSignMessage(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canSignMessage(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, SignMessage.')
     }
 
-    const signature: Signature = await this.v1Protocol.signMessageWithKeyPair(message, {
+    const signature: Signature = await this.protocolV1.signMessageWithKeyPair(message, {
       secretKey: newSecretKey(keypair.privateKey, this.getBytesFormat(keypair.privateKey)),
       publicKey: newPublicKey(keypair.publicKey ?? '', this.getBytesFormat(keypair.publicKey ?? ''))
     })
@@ -867,34 +916,34 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   }
 
   public async decryptAsymmetric(encryptedPayload: string, keypair: { publicKey?: string; privateKey: string }): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canEncryptAsymmetric(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canEncryptAsymmetric(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, AsymmetricEncryption.')
     }
 
-    return this.v1Protocol.decryptAsymmetricWithKeyPair(encryptedPayload, {
+    return this.protocolV1.decryptAsymmetricWithKeyPair(encryptedPayload, {
       secretKey: newSecretKey(keypair.privateKey, this.getBytesFormat(keypair.privateKey)),
       publicKey: newPublicKey(keypair.publicKey ?? '', this.getBytesFormat(keypair.publicKey ?? ''))
     })
   }
 
   public async encryptAES(payload: string, privateKey: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canEncryptAES(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canEncryptAES(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
 
-    return this.v1Protocol.encryptAESWithSecretKey(payload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
+    return this.protocolV1.encryptAESWithSecretKey(payload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
   }
 
   public async decryptAES(encryptedPayload: string, privateKey: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !canEncryptAES(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !canEncryptAES(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
 
-    return this.v1Protocol.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
+    return this.protocolV1.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
   }
 
   public async getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey: string, childDerivationPath: string): Promise<string> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
@@ -906,33 +955,24 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     return secretKey.value
   }
 
-  private getNetwork(): ProtocolNetworkV0 {
-    let knownOptions: ProtocolOptions | undefined
+  private getNetwork(protocolOptions?: ProtocolOptionsV0): ProtocolNetworkV0 {
+    let knownOptions: ProtocolOptionsV0 | undefined
     try {
-      knownOptions = getProtocolOptionsByIdentifier(this.identifier)
+      knownOptions = protocolOptions ?? getProtocolOptionsByIdentifierLegacy(this.identifier)
       // eslint-disable-next-line no-empty
     } catch {}
 
-    const networkType: NetworkType =
-      this.network?.type === 'mainnet'
-        ? NetworkType.MAINNET
-        : this.network?.type === 'testnet'
-        ? NetworkType.TESTNET
-        : this.network?.type === 'custom'
-        ? NetworkType.CUSTOM
-        : knownOptions?.network.type ?? NetworkType.MAINNET
-
     return new ProtocolNetworkAdapter(
       this.network?.name ?? knownOptions?.network.name ?? '',
-      networkType,
+      this.network?.type ?? knownOptions?.network.type ?? 'mainnet',
       this.network?.rpcUrl ?? knownOptions?.network.rpcUrl ?? '',
-      new ProtocolBlockExplorerAdapter(this.v1BlockExplorer, this.blockExplorerMetadata.url),
+      this.blockExplorerV0,
       knownOptions?.network.extras ?? {}
     )
   }
 
   private async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string): Promise<SecretKey> {
-    if (!isOfflineProtocol(this.v1Protocol) || !isBip32Protocol(this.v1Protocol)) {
+    if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error(`Protocol doesn't support secret key derivation, missing inferface: Offline, Bip32.`)
     }
 
@@ -946,7 +986,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
 
     const [visibilityIndex, addressIndex]: number[] = childDerivationPath.split('/').map((index: string) => parseInt(index, 10))
 
-    return this.v1Protocol.deriveFromExtendedSecretKey(extendedSecretKey, visibilityIndex, addressIndex)
+    return this.protocolV1.deriveFromExtendedSecretKey(extendedSecretKey, visibilityIndex, addressIndex)
   }
 
   private async getSerializerIdentifier(): Promise<string> {
@@ -1093,32 +1133,40 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
 
   public static async create(
     v1Protocol: AirGapAnyProtocol & SubProtocol,
-    v1BlockExplorer: AirGapBlockExplorer,
+    v1BlockExplorer: AirGapBlockExplorer | undefined,
     v3SerializerCompanion: AirGapV3SerializerCompanion,
     extra: {
       protocolMetadata?: ProtocolMetadata
-      network?: ProtocolNetwork
-      blockExplorerMetadata?: BlockExplorerMetadata
+      network?: ProtocolNetwork | null
+      blockExplorerMetadata?: BlockExplorerMetadata | null
       type?: SubProtocolType
-      contractAddress?: string
+      contractAddress?: string | null
     } = {}
   ): Promise<ICoinSubProtocolAdapter> {
     const [protocolMetadata, network, blockExplorerMetadata, type, contractAddress]: [
       ProtocolMetadata,
       ProtocolNetwork | undefined,
-      BlockExplorerMetadata,
+      BlockExplorerMetadata | undefined,
       SubProtocolType,
       string | undefined
     ] = await Promise.all([
       extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : v1Protocol.getMetadata(),
-      extra.network ? Promise.resolve(extra.network) : isOnlineProtocol(v1Protocol) ? v1Protocol.getNetwork() : Promise.resolve(undefined),
-      extra.blockExplorerMetadata ? Promise.resolve(extra.blockExplorerMetadata) : v1BlockExplorer.getMetadata(),
+      extra.network
+        ? Promise.resolve(extra.network)
+        : extra.network === null || !isOnlineProtocol(v1Protocol)
+        ? Promise.resolve(undefined)
+        : v1Protocol.getNetwork(),
+      extra.blockExplorerMetadata
+        ? Promise.resolve(extra.blockExplorerMetadata)
+        : extra.blockExplorerMetadata === null || v1BlockExplorer === undefined
+        ? Promise.resolve(undefined)
+        : v1BlockExplorer.getMetadata(),
       extra.type ? Promise.resolve(extra.type) : v1Protocol.getType(),
       extra.contractAddress
         ? Promise.resolve(extra.contractAddress)
-        : hasConfigurableContract(v1Protocol)
-        ? v1Protocol.getContractAddress()
-        : Promise.resolve(undefined)
+        : extra.contractAddress === null || !hasConfigurableContract(v1Protocol)
+        ? Promise.resolve(undefined)
+        : v1Protocol.getContractAddress()
     ])
 
     return new ICoinSubProtocolAdapter(
@@ -1134,16 +1182,16 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
   }
 
   private constructor(
-    public readonly v1Protocol: AirGapAnyProtocol & SubProtocol,
+    public readonly protocolV1: AirGapAnyProtocol & SubProtocol,
     protocolMetadata: ProtocolMetadata,
     network: ProtocolNetwork | undefined,
-    v1BlockExplorer: AirGapBlockExplorer,
-    blockExplorerMetadata: BlockExplorerMetadata,
+    v1BlockExplorer: AirGapBlockExplorer | undefined,
+    blockExplorerMetadata: BlockExplorerMetadata | undefined,
     v3SerializerCompanion: AirGapV3SerializerCompanion,
     type: SubProtocolType,
     contractAddress: string | undefined
   ) {
-    super(v1Protocol, protocolMetadata, network, v1BlockExplorer, blockExplorerMetadata, v3SerializerCompanion)
+    super(protocolV1, protocolMetadata, network, v1BlockExplorer, blockExplorerMetadata, v3SerializerCompanion)
 
     this.subProtocolType = type === 'account' ? SubProtocolTypeV0.ACCOUNT : SubProtocolTypeV0.TOKEN
     this.contractAddress = contractAddress

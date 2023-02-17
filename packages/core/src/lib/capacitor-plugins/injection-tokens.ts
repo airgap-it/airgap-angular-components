@@ -6,7 +6,7 @@ import { FilesystemPlugin } from '@capacitor/filesystem'
 import { SplashScreenPlugin } from '@capacitor/splash-screen'
 import { StatusBarPlugin } from '@capacitor/status-bar'
 
-import { AppInfoPlugin } from './definitions'
+import { AppInfoPlugin, IsolatedModulesPlugin, ZipPlugin } from './definitions'
 
 export const APP_PLUGIN = new InjectionToken<AppPlugin>('AppPlugin')
 export const APP_INFO_PLUGIN = new InjectionToken<AppInfoPlugin>('AppInfoPlugin')
@@ -15,3 +15,5 @@ export const CLIPBOARD_PLUGIN = new InjectionToken<ClipboardPlugin>('ClipboardPl
 export const FILESYSTEM_PLUGIN = new InjectionToken<FilesystemPlugin>('FilesystemPlugin')
 export const SPLASH_SCREEN_PLUGIN = new InjectionToken<SplashScreenPlugin>('SplashScreenPlugin')
 export const STATUS_BAR_PLUGIN = new InjectionToken<StatusBarPlugin>('StatusBarPlugin')
+export const ISOLATED_MODULES_PLUGIN = new InjectionToken<IsolatedModulesPlugin>('IsolatedModulesPlugin')
+export const ZIP_PLUGIN = new InjectionToken<ZipPlugin>('ZipPlugin')
