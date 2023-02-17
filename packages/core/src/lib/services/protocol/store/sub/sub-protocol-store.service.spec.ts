@@ -15,6 +15,8 @@ import {
   TezosUSDProtocolConfig
 } from '@airgap/tezos'
 import { getSubIdentifiers } from '../../utils/test'
+import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
+import { IsolatedModules } from '../../../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { SubProtocolStoreService, SubProtocolStoreConfig } from './sub-protocol-store.service'
 
 describe('SubProtocolStoreService', () => {
@@ -29,7 +31,9 @@ describe('SubProtocolStoreService', () => {
   })
 
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({
+      providers: [{ provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }]
+    })
     service = TestBed.inject(SubProtocolStoreService)
   })
 

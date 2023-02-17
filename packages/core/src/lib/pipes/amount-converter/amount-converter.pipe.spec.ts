@@ -4,6 +4,8 @@ import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
 import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'
+import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
+import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { AmountConverterPipe } from './amount-converter.pipe'
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -12,9 +14,15 @@ const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
 describe('AmountConverter Pipe', () => {
   let protocolService: ProtocolService
   let amountConverterPipe: AmountConverterPipe
+  let isolatedModules: IsolatedModulesPlugin
 
   beforeAll(() => {
-    protocolService = new ProtocolService(new MainProtocolStoreService(), new SubProtocolStoreService())
+    isolatedModules = new IsolatedModules()
+    protocolService = new ProtocolService(
+      new MainProtocolStoreService(isolatedModules),
+      new SubProtocolStoreService(isolatedModules),
+      isolatedModules
+    )
     protocolService.init()
   })
 

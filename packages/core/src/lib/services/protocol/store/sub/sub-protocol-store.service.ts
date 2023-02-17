@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
 import {
   ICoinProtocol,
   ICoinSubProtocol,
@@ -13,6 +13,8 @@ import { Token } from '../../../../types/Token'
 import { ethTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
+import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
+import { IsolatedModulesPlugin } from '../../../../capacitor-plugins/definitions'
 
 export interface SubProtocolsMap {
   [key: string]: {
@@ -36,7 +38,7 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
-  constructor() {
+  constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
     super('SubProtocolService')
   }
 
@@ -54,7 +56,8 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     return (
       Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) ||
       this.ethTokenIdentifiers.has(identifier) ||
-      (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier)
+      (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier) ||
+      identifier.includes('-')
     )
   }
 
@@ -66,7 +69,8 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
   ): Promise<ICoinSubProtocol | undefined> {
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
-      const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
+      const targetNetwork: ProtocolNetwork | string =
+        network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, mainIdentifier)).network
       const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
       const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols

@@ -44,27 +44,20 @@ import { NotFoundError } from '@airgap/coinlib-core/errors'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
-import { ProtocolNetworkAdapter } from '../../protocol/protocol-v0-adapter'
 import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
+import { ProtocolNetwork as ProtocolNetworkV1 } from '@airgap/module-kit'
+import { ProtocolNetworkAdapter, ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
+import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
 
-export const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
+export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
   network?: ProtocolNetwork
 ): ProtocolOptions => {
   switch (identifier) {
-
-    // TODO : remove hardcoded values
     case MainProtocolSymbols.ICP:
-      return {
-        network: new ProtocolNetworkAdapter(
-          ICP_MAINNET_PROTOCOL_NETWORK.name,
-          NetworkType.MAINNET,
-          ICP_MAINNET_PROTOCOL_NETWORK.rpcUrl,
-          undefined,
-          {}
-        ),
-        config: {},
-      }
+      return new ProtocolOptionsAdapter(
+        network ?? new ProtocolNetworkAdapter(ICP_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, ICP_MAINNET_PROTOCOL_NETWORK.rpcUrl)
+      )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
     case MainProtocolSymbols.BTC:
@@ -192,9 +185,44 @@ export const getProtocolOptionsByIdentifier: (identifier: ProtocolSymbols, netwo
     default:
       // Maybe we get an identifier of a sub-protocol that is not in the known list. In that case, get the options of the parent
       if ((identifier as string).includes('-')) {
-        return getProtocolOptionsByIdentifier((identifier as string).split('-')[0] as any)
+        return getProtocolOptionsByIdentifierLegacy((identifier as string).split('-')[0] as any)
       }
       assertNever(identifier)
       throw new NotFoundError(Domain.UTILS, `No protocol options found for ${identifier}`)
+  }
+}
+
+const cache: Record<string, ProtocolOptions> = {}
+export const getProtocolOptionsByIdentifier: (
+  isolatedModules: IsolatedModulesPlugin,
+  identifier: ProtocolSymbols,
+  network?: ProtocolNetwork
+) => Promise<ProtocolOptions> = async (
+  isolatedModules: IsolatedModulesPlugin,
+  identifier: ProtocolSymbols,
+  network?: ProtocolNetwork
+): Promise<ProtocolOptions> => {
+  try {
+    return getProtocolOptionsByIdentifierLegacy(identifier, network)
+  } catch {
+    if (network) {
+      return { network, config: {} }
+    }
+
+    if (!cache[identifier]) {
+      const defaultNetwork = (
+        await isolatedModules.callMethod({
+          target: 'onlineProtocol',
+          method: 'getNetwork',
+          protocolIdentifier: identifier
+        })
+      ).value as ProtocolNetworkV1
+
+      cache[identifier] = new ProtocolOptionsAdapter(
+        new ProtocolNetworkAdapter(defaultNetwork?.name ?? 'Mainnet', defaultNetwork?.type ?? 'mainnet', defaultNetwork?.rpcUrl ?? '')
+      )
+    }
+
+    return cache[identifier]
   }
 }

@@ -29,6 +29,8 @@ import {
   TezosUUSD
 } from '@airgap/tezos'
 import { duplicatesRemoved } from '../../utils/array'
+import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
+import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { getIdentifiers, getSubIdentifiers } from './utils/test'
 import { ProtocolService, ProtocolServiceConfig } from './protocol.service'
 import {
@@ -57,7 +59,9 @@ describe('ProtocolService', () => {
   })
 
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({
+      providers: [{ provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }]
+    })
     service = TestBed.inject(ProtocolService)
 
     tezosMainnet = new TezosProtocolNetwork('Mainnet', NetworkType.MAINNET)
