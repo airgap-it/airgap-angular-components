@@ -176,6 +176,7 @@ export class IsolatedModulesService {
     return isSubProtocol(protocol) && isolatedProtocol.type === 'sub'
       ? ICoinSubProtocolAdapter.create(protocol, blockExplorer, v3SerializerCompanion, {
           protocolMetadata: isolatedProtocol.protocolMetadata,
+          crypto: isolatedProtocol.crypto,
           network: isolatedProtocol.network,
           blockExplorerMetadata: isolatedProtocol.blockExplorerMetadata,
           type: isolatedProtocol.subType,
@@ -183,6 +184,7 @@ export class IsolatedModulesService {
         })
       : ICoinProtocolAdapter.create(protocol, blockExplorer, v3SerializerCompanion, {
           protocolMetadata: isolatedProtocol.protocolMetadata,
+          crypto: isolatedProtocol.crypto,
           network: isolatedProtocol.network,
           blockExplorerMetadata: isolatedProtocol.blockExplorerMetadata
         })

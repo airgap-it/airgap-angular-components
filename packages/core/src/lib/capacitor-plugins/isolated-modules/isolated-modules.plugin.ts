@@ -15,6 +15,7 @@ import {
   AirGapOnlineProtocol,
   AirGapV3SerializerCompanion,
   BlockExplorerMetadata,
+  CryptoConfiguration,
   hasConfigurableContract,
   isSubProtocol,
   OfflineProtocolConfiguration,
@@ -149,7 +150,9 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     this.moduleIndices[identifier] = moduleIndex
     this.offlineProtocols[this.protocolKey(identifier)] = protocol
 
-    return [await this.getIsolatedProtocolConfiguration(protocol, 'offline')]
+    const crypto: CryptoConfiguration = await protocol.getCryptoConfiguration()
+
+    return [await this.getIsolatedProtocolConfiguration(protocol, 'offline', undefined, undefined, crypto)]
   }
 
   private async loadOnlineProtocols(
@@ -191,7 +194,8 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     protocol: AirGapAnyProtocol,
     mode: IsolatedProtocol['mode'],
     blockExplorerMetadata?: BlockExplorerMetadata,
-    network?: ProtocolNetwork
+    network?: ProtocolNetwork,
+    crypto?: CryptoConfiguration
   ): Promise<IsolatedProtocol> {
     const protocolMetadata: ProtocolMetadata = await protocol.getMetadata()
 
@@ -201,6 +205,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       protocolMetadata,
       blockExplorerMetadata: blockExplorerMetadata ?? null,
       network: network ?? null,
+      crypto: crypto ?? null,
       methods: this.collectMethods(protocol)
     }
 
@@ -254,28 +259,28 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
 
   private async callOfflineProtocolMethod(options: OfflineProtocolCallMethodOptions): Promise<CallMethodResult> {
     const protocol: AirGapOfflineProtocol = await this.getOfflineProtocol(options.protocolIdentifier)
-    const method = protocol[options.method] as any
+    const method = protocol[options.method].bind(protocol)
 
     return { value: await method(...(options.args ?? [])) }
   }
 
   private async callOnlineProtocolMethod(options: OnlineProtocolCallMethodOptions): Promise<CallMethodResult> {
     const protocol: AirGapOnlineProtocol = await this.getOnlineProtocol(options.protocolIdentifier, options.networkId)
-    const method = protocol[options.method] as any
+    const method = protocol[options.method].bind(protocol)
 
     return { value: await method(...(options.args ?? [])) }
   }
 
   private async callBlockExplorerMethod(options: BlockExplorerCallMethodOptions): Promise<CallMethodResult> {
     const blockExplorer: AirGapBlockExplorer = await this.getBlockExplorer(options.protocolIdentifier, options.networkId)
-    const method = blockExplorer[options.method] as any
+    const method = blockExplorer[options.method].bind(blockExplorer)
 
     return { value: await method(...(options.args ?? [])) }
   }
 
   private async callV3SerializerCompanionMethod(options: V3SerializerCompanionCallMethodOptions): Promise<CallMethodResult> {
     const v3SerializerCompanion: AirGapV3SerializerCompanion = await this.getV3SerializerCompanion(options.moduleIdentifier)
-    const method = v3SerializerCompanion[options.method] as any
+    const method = v3SerializerCompanion[options.method].bind(v3SerializerCompanion)
 
     return { value: await method(...(options.args ?? [])) }
   }

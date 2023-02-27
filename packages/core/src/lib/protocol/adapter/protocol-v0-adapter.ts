@@ -25,6 +25,7 @@ import {
   AirGapTransactionWarningType
 } from '@airgap/coinlib-core/interfaces/IAirGapTransaction'
 import { ProtocolOptions as ProtocolOptionsV0 } from '@airgap/coinlib-core/utils/ProtocolOptions'
+import { derive, mnemonicToSeed } from '@airgap/crypto'
 import {
   AddressWithCursor,
   AirGapAnyProtocol,
@@ -44,6 +45,8 @@ import {
   canFetchDataForAddress,
   canFetchDataForMultipleAddresses,
   canSignMessage,
+  CryptoConfiguration,
+  CryptoDerivative,
   ExtendedKeyPair,
   ExtendedSecretKey,
   FeeDefaults,
@@ -158,16 +161,23 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     v3SerializerCompanion: AirGapV3SerializerCompanion,
     extra: {
       protocolMetadata?: ProtocolMetadata
+      crypto?: CryptoConfiguration | null
       network?: ProtocolNetwork | null
       blockExplorerMetadata?: BlockExplorerMetadata | null
     } = {}
   ): Promise<ICoinProtocolAdapter> {
-    const [protocolMetadata, network, blockExplorerMetadata]: [
+    const [protocolMetadata, crypto, network, blockExplorerMetadata]: [
       ProtocolMetadata,
+      CryptoConfiguration | undefined,
       ProtocolNetwork | undefined,
       BlockExplorerMetadata | undefined
     ] = await Promise.all([
       extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
+      extra.crypto
+        ? Promise.resolve(extra.crypto)
+        : extra.crypto === null || !isOfflineProtocol(protocolV1)
+        ? Promise.resolve(undefined)
+        : protocolV1.getCryptoConfiguration(),
       extra.network
         ? Promise.resolve(extra.network)
         : extra.network === null || !isOnlineProtocol(protocolV1)
@@ -180,12 +190,21 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
         : blockExplorerV1.getMetadata()
     ])
 
-    return new ICoinProtocolAdapter(protocolV1, protocolMetadata, network, blockExplorerV1, blockExplorerMetadata, v3SerializerCompanion)
+    return new ICoinProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      blockExplorerV1,
+      blockExplorerMetadata,
+      v3SerializerCompanion
+    )
   }
 
   protected constructor(
     public readonly protocolV1: AirGapAnyProtocol,
     private readonly protocolMetadata: ProtocolMetadata,
+    private readonly crypto: CryptoConfiguration | undefined,
     private readonly network: ProtocolNetwork | undefined,
     blockExplorerV1: AirGapBlockExplorer | undefined,
     blockExplorerMetadata: BlockExplorerMetadata | undefined,
@@ -633,6 +652,7 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     }
   }
 
+  private static readonly addressesLimit: number = 10000
   public async getAddressesFromPublicKey(publicKey: string, _cursor?: IProtocolAddressCursor): Promise<IAirGapAddressResult[]> {
     if (hasMultiAddressPublicKeys(this.protocolV1)) {
       const pk: PublicKey = newPublicKey(publicKey, this.getBytesFormat(publicKey))
@@ -641,9 +661,11 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
 
       let nextAddress: AddressWithCursor | undefined =
         typeof firstAddress === 'string' ? { address: firstAddress, cursor: { hasNext: false } } : firstAddress
-      while (nextAddress !== undefined && nextAddress.cursor.hasNext) {
-        addresses.push(nextAddress)
+      addresses.push(nextAddress)
+
+      while (nextAddress !== undefined && nextAddress.cursor.hasNext && addresses.length < ICoinProtocolAdapter.addressesLimit) {
         nextAddress = await this.protocolV1.getNextAddressFromPublicKey(pk, nextAddress.cursor)
+        addresses.push(nextAddress)
       }
 
       return addresses
@@ -780,9 +802,10 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const seed: Buffer = await mnemonicToSeed(crypto, mnemonic, password)
 
-    return keyPair.publicKey.value
+    return this.getPublicKeyFromHexSecret(seed.toString('hex'), derivationPath)
   }
 
   public async getPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
@@ -790,9 +813,10 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'mnemonic', value: mnemonic, password }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const seed: Buffer = await mnemonicToSeed(crypto, mnemonic, password)
 
-    return keyPair.secretKey.value
+    return this.getPrivateKeyFromHexSecret(seed.toString('hex'), derivationPath)
   }
 
   public async getExtendedPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
@@ -800,12 +824,10 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret(
-      { type: 'mnemonic', value: mnemonic, password },
-      derivationPath
-    )
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const seed: Buffer = await mnemonicToSeed(crypto, mnemonic, password)
 
-    return keyPair.publicKey.value
+    return this.getExtendedPublicKeyFromHexSecret(seed.toString('hex'), derivationPath)
   }
 
   public async getExtendedPrivateKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
@@ -813,12 +835,10 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret(
-      { type: 'mnemonic', value: mnemonic, password },
-      derivationPath
-    )
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const seed: Buffer = await mnemonicToSeed(crypto, mnemonic, password)
 
-    return keyPair.secretKey.value
+    return this.getExtendedPrivateKeyFromHexSecret(seed.toString('hex'), derivationPath)
   }
 
   public async getPublicKeyFromHexSecret(secret: string, derivationPath: string): Promise<string> {
@@ -826,7 +846,9 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const derivative: CryptoDerivative = await derive(crypto, Buffer.from(secret, 'hex'), derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromDerivative(derivative)
 
     return keyPair.publicKey.value
   }
@@ -836,7 +858,9 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const derivative: CryptoDerivative = await derive(crypto, Buffer.from(secret, 'hex'), derivationPath)
+    const keyPair: KeyPair = await this.protocolV1.getKeyPairFromDerivative(derivative)
 
     return keyPair.secretKey.value
   }
@@ -846,7 +870,9 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const derivative: CryptoDerivative = await derive(crypto, Buffer.from(secret, 'hex'), derivationPath)
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromDerivative(derivative)
 
     return keyPair.publicKey.value
   }
@@ -856,7 +882,9 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromSecret({ type: 'hex', value: secret }, derivationPath)
+    const crypto: CryptoConfiguration = this.crypto ?? (await this.protocolV1.getCryptoConfiguration())
+    const derivative: CryptoDerivative = await derive(crypto, Buffer.from(secret, 'hex'), derivationPath)
+    const keyPair: ExtendedKeyPair = await this.protocolV1.getExtendedKeyPairFromDerivative(derivative)
 
     return keyPair.secretKey.value
   }
@@ -1132,48 +1160,56 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
   public readonly contractAddress?: string
 
   public static async create(
-    v1Protocol: AirGapAnyProtocol & SubProtocol,
-    v1BlockExplorer: AirGapBlockExplorer | undefined,
+    protocolV1: AirGapAnyProtocol & SubProtocol,
+    blockExplorerV1: AirGapBlockExplorer | undefined,
     v3SerializerCompanion: AirGapV3SerializerCompanion,
     extra: {
       protocolMetadata?: ProtocolMetadata
+      crypto?: CryptoConfiguration | null
       network?: ProtocolNetwork | null
       blockExplorerMetadata?: BlockExplorerMetadata | null
       type?: SubProtocolType
       contractAddress?: string | null
     } = {}
   ): Promise<ICoinSubProtocolAdapter> {
-    const [protocolMetadata, network, blockExplorerMetadata, type, contractAddress]: [
+    const [protocolMetadata, crypto, network, blockExplorerMetadata, type, contractAddress]: [
       ProtocolMetadata,
+      CryptoConfiguration | undefined,
       ProtocolNetwork | undefined,
       BlockExplorerMetadata | undefined,
       SubProtocolType,
       string | undefined
     ] = await Promise.all([
-      extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : v1Protocol.getMetadata(),
+      extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
+      extra.crypto
+        ? Promise.resolve(extra.crypto)
+        : extra.crypto === null || !isOfflineProtocol(protocolV1)
+        ? Promise.resolve(undefined)
+        : protocolV1.getCryptoConfiguration(),
       extra.network
         ? Promise.resolve(extra.network)
-        : extra.network === null || !isOnlineProtocol(v1Protocol)
+        : extra.network === null || !isOnlineProtocol(protocolV1)
         ? Promise.resolve(undefined)
-        : v1Protocol.getNetwork(),
+        : protocolV1.getNetwork(),
       extra.blockExplorerMetadata
         ? Promise.resolve(extra.blockExplorerMetadata)
-        : extra.blockExplorerMetadata === null || v1BlockExplorer === undefined
+        : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
         ? Promise.resolve(undefined)
-        : v1BlockExplorer.getMetadata(),
-      extra.type ? Promise.resolve(extra.type) : v1Protocol.getType(),
+        : blockExplorerV1.getMetadata(),
+      extra.type ? Promise.resolve(extra.type) : protocolV1.getType(),
       extra.contractAddress
         ? Promise.resolve(extra.contractAddress)
-        : extra.contractAddress === null || !hasConfigurableContract(v1Protocol)
+        : extra.contractAddress === null || !hasConfigurableContract(protocolV1)
         ? Promise.resolve(undefined)
-        : v1Protocol.getContractAddress()
+        : protocolV1.getContractAddress()
     ])
 
     return new ICoinSubProtocolAdapter(
-      v1Protocol,
+      protocolV1,
       protocolMetadata,
+      crypto,
       network,
-      v1BlockExplorer,
+      blockExplorerV1,
       blockExplorerMetadata,
       v3SerializerCompanion,
       type,
@@ -1184,6 +1220,7 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
   private constructor(
     public readonly protocolV1: AirGapAnyProtocol & SubProtocol,
     protocolMetadata: ProtocolMetadata,
+    crypto: CryptoConfiguration | undefined,
     network: ProtocolNetwork | undefined,
     v1BlockExplorer: AirGapBlockExplorer | undefined,
     blockExplorerMetadata: BlockExplorerMetadata | undefined,
@@ -1191,7 +1228,7 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
     type: SubProtocolType,
     contractAddress: string | undefined
   ) {
-    super(protocolV1, protocolMetadata, network, v1BlockExplorer, blockExplorerMetadata, v3SerializerCompanion)
+    super(protocolV1, protocolMetadata, crypto, network, v1BlockExplorer, blockExplorerMetadata, v3SerializerCompanion)
 
     this.subProtocolType = type === 'account' ? SubProtocolTypeV0.ACCOUNT : SubProtocolTypeV0.TOKEN
     this.contractAddress = contractAddress
