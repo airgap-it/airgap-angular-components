@@ -2,10 +2,11 @@ import {
   AddressWithCursor,
   AirGapOfflineProtocol,
   AirGapTransaction,
+  CryptoConfiguration,
+  CryptoDerivative,
   KeyPair,
   ProtocolMetadata,
   PublicKey,
-  Secret,
   SecretKey,
   SignedTransaction,
   UnsignedTransaction
@@ -34,8 +35,17 @@ export class IsolatedAirGapOfflineProtocol extends IsolatedBase<AirGapOfflinePro
     return this.callMethod('getDetailsFromTransaction', [transaction, publicKey])
   }
 
-  public async getKeyPairFromSecret(secret: Secret, derivationPath?: string): Promise<KeyPair> {
-    return this.callMethod('getKeyPairFromSecret', [secret, derivationPath])
+  private cryptoConfiguration: CryptoConfiguration | undefined = this.isolatedProtocol.crypto
+  public async getCryptoConfiguration(): Promise<CryptoConfiguration> {
+    if (this.cryptoConfiguration === undefined) {
+      this.cryptoConfiguration = await this.callMethod('getCryptoConfiguration')
+    }
+
+    return this.cryptoConfiguration
+  }
+
+  public async getKeyPairFromDerivative(derivative: CryptoDerivative): Promise<KeyPair> {
+    return this.callMethod('getKeyPairFromDerivative', [derivative])
   }
 
   public async signTransactionWithSecretKey(transaction: UnsignedTransaction, secretKey: SecretKey): Promise<SignedTransaction> {

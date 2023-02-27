@@ -1,6 +1,7 @@
 /* eslint-disable spaced-comment */
 import {
   BlockExplorerMetadata,
+  CryptoConfiguration,
   ProtocolConfiguration,
   ProtocolMetadata,
   ProtocolNetwork,
@@ -26,6 +27,7 @@ interface IsolatedAnyProtocol<T extends string> {
   protocolMetadata: ProtocolMetadata
   blockExplorerMetadata: BlockExplorerMetadata | null
   network: ProtocolNetwork | null
+  crypto: CryptoConfiguration | null
   methods: string[]
 }
 type IsolatedMainProtocol = IsolatedAnyProtocol<'main'>
