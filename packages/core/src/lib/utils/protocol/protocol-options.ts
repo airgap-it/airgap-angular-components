@@ -46,6 +46,7 @@ import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbe
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
 import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
 import { ProtocolNetwork as ProtocolNetworkV1 } from '@airgap/module-kit'
+import { CKBTC_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/icrc/CkBTCProtocol'
 import { ProtocolNetworkAdapter, ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
 import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
 
@@ -57,6 +58,11 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
     case MainProtocolSymbols.ICP:
       return new ProtocolOptionsAdapter(
         network ?? new ProtocolNetworkAdapter(ICP_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, ICP_MAINNET_PROTOCOL_NETWORK.rpcUrl)
+      )
+    case MainProtocolSymbols.ICP_CKBTC:
+      return new ProtocolOptionsAdapter(
+        network ??
+          new ProtocolNetworkAdapter(CKBTC_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, CKBTC_MAINNET_PROTOCOL_NETWORK.rpcUrl)
       )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
