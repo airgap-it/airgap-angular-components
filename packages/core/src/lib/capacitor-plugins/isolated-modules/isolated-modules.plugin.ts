@@ -47,25 +47,29 @@ import { assertNever } from '../../utils/utils'
 import { IsolatedModule, IsolatedProtocol } from '../../types/isolated-modules/IsolatedModule'
 
 export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin {
-  private readonly modules: AirGapModule[] = [
-    new BitcoinModule(),
-    new EthereumModule(),
-    new TezosModule(),
-    new PolkadotModule(),
-    new CosmosModule(),
-    new AeternityModule(),
-    new GroestlcoinModule(),
-    new MoonbeamModule(),
-    new AstarModule(),
-    new ICPModule()
-  ]
-
   private readonly offlineProtocols: Record<string, AirGapOfflineProtocol> = {}
   private readonly onlineProtocols: Record<string, AirGapOnlineProtocol> = {}
   private readonly blockExplorers: Record<string, AirGapBlockExplorer> = {}
   private readonly v3SerializerCompanions: Record<string, AirGapV3SerializerCompanion> = {}
 
   private readonly moduleIndices: Record<string, number> = {}
+
+  constructor(
+    private readonly modules: AirGapModule[] = [
+      new BitcoinModule(),
+      new EthereumModule(),
+      new TezosModule(),
+      new PolkadotModule(),
+      new CosmosModule(),
+      new AeternityModule(),
+      new GroestlcoinModule(),
+      new MoonbeamModule(),
+      new AstarModule(),
+      new ICPModule()
+    ]
+  ) {
+    super()
+  }
 
   public async previewModule(_options: PreviewModuleOptions): Promise<PreviewModuleResult> {
     throw new Error('Isolated module preview not supported in a browser')
