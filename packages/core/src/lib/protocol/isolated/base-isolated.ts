@@ -21,7 +21,7 @@ export abstract class IsolatedBase<I> {
         this[method] = (...args) => {
           return this.callMethod<any, string>(
             method,
-            args.map((arg: unknown) => (typeof arg === 'undefined' ? UNDEFINED_STRING : arg))
+            args
           )
         }
       }

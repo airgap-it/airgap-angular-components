@@ -2,9 +2,13 @@
 /* eslint-disable max-classes-per-file */
 import {
   CryptoClient,
+  DelegateeDetails,
+  DelegationDetails,
+  DelegatorDetails,
   FeeDefaults as FeeDefaultsV0,
   IAirGapTransaction,
   IAirGapTransactionResult,
+  ICoinDelegateProtocol,
   ICoinProtocol,
   ICoinSubProtocol,
   IProtocolTransactionCursor,
@@ -82,7 +86,11 @@ import {
 } from '@airgap/module-kit'
 import BigNumber from 'bignumber.js'
 import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
+import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
 import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
+import { supportsV1Delegation } from '../../utils/protocol/delegation'
+
+// ProtocolBlockExplorer
 
 class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
   constructor(private readonly blockExplorerV1: AirGapBlockExplorer, url: string) {
@@ -97,6 +105,8 @@ class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
     return this.blockExplorerV1.createTransactionUrl(transactionId)
   }
 }
+
+// ProtocolNetwork
 
 export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {
   constructor(
@@ -118,9 +128,13 @@ export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {
   }
 }
 
+// ProtocolOptions
+
 export class ProtocolOptionsAdapter implements ProtocolOptionsV0 {
   constructor(public readonly network: ProtocolNetworkV0, public readonly config: unknown = {}) {}
 }
+
+// TransactionValidator
 
 export class TransactionValidatorAdapter implements TransactionValidator {
   constructor(private readonly protocolIdentifier: string, private readonly serializerCompanion: AirGapV3SerializerCompanion) {}
@@ -134,7 +148,9 @@ export class TransactionValidatorAdapter implements TransactionValidator {
   }
 }
 
-export class ICoinProtocolAdapter implements ICoinProtocol {
+// ICoinProtocol
+
+export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtocol> implements ICoinProtocol {
   public readonly symbol: string
   public readonly name: string
   public readonly marketSymbol: string
@@ -155,54 +171,8 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
   private readonly networkV0: ProtocolNetworkV0
   private readonly blockExplorerV0: ProtocolBlockExplorerAdapter | undefined
 
-  public static async create(
-    protocolV1: AirGapAnyProtocol,
-    blockExplorerV1: AirGapBlockExplorer | undefined,
-    v3SerializerCompanion: AirGapV3SerializerCompanion,
-    extra: {
-      protocolMetadata?: ProtocolMetadata
-      crypto?: CryptoConfiguration | null
-      network?: ProtocolNetwork | null
-      blockExplorerMetadata?: BlockExplorerMetadata | null
-    } = {}
-  ): Promise<ICoinProtocolAdapter> {
-    const [protocolMetadata, crypto, network, blockExplorerMetadata]: [
-      ProtocolMetadata,
-      CryptoConfiguration | undefined,
-      ProtocolNetwork | undefined,
-      BlockExplorerMetadata | undefined
-    ] = await Promise.all([
-      extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
-      extra.crypto
-        ? Promise.resolve(extra.crypto)
-        : extra.crypto === null || !isOfflineProtocol(protocolV1)
-        ? Promise.resolve(undefined)
-        : protocolV1.getCryptoConfiguration(),
-      extra.network
-        ? Promise.resolve(extra.network)
-        : extra.network === null || !isOnlineProtocol(protocolV1)
-        ? Promise.resolve(undefined)
-        : protocolV1.getNetwork(),
-      extra.blockExplorerMetadata
-        ? Promise.resolve(extra.blockExplorerMetadata)
-        : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
-        ? Promise.resolve(undefined)
-        : blockExplorerV1.getMetadata()
-    ])
-
-    return new ICoinProtocolAdapter(
-      protocolV1,
-      protocolMetadata,
-      crypto,
-      network,
-      blockExplorerV1,
-      blockExplorerMetadata,
-      v3SerializerCompanion
-    )
-  }
-
-  protected constructor(
-    public readonly protocolV1: AirGapAnyProtocol,
+  constructor(
+    public readonly protocolV1: T,
     private readonly protocolMetadata: ProtocolMetadata,
     private readonly crypto: CryptoConfiguration | undefined,
     private readonly network: ProtocolNetwork | undefined,
@@ -1145,80 +1115,85 @@ export class ICoinProtocolAdapter implements ICoinProtocol {
     }))
   }
 
-  private getBytesFormat(bytes: string): BytesStringFormat {
+  protected getBytesFormat(bytes: string): BytesStringFormat {
     return isHex(bytes) ? 'hex' : 'encoded'
   }
 
-  private isExtendedPublicKey(publicKey: string): boolean {
+  protected isExtendedPublicKey(publicKey: string): boolean {
     return publicKey.startsWith('xpub') || publicKey.startsWith('ypub') || publicKey.startsWith('zpub')
   }
 }
 
-export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICoinSubProtocol {
+// ICoinDelegateProtocol
+
+export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDelegateProtocol>
+  extends ICoinProtocolAdapter<T>
+  implements ICoinDelegateProtocol
+{
+  public async getDefaultDelegatee(): Promise<string> {
+    return this.protocolV1.getDefaultDelegatee()
+  }
+
+  public async getCurrentDelegateesForPublicKey(publicKey: string): Promise<string[]> {
+    return this.protocolV1.getCurrentDelegateesForPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  }
+
+  public async getCurrentDelegateesForAddress(address: string): Promise<string[]> {
+    return this.protocolV1.getCurrentDelegateesForAddress(address)
+  }
+
+  public async getDelegateeDetails(address: string): Promise<DelegateeDetails> {
+    return this.protocolV1.getDelegateeDetails(address)
+  }
+
+  public async isPublicKeyDelegating(publicKey: string): Promise<boolean> {
+    return this.protocolV1.isPublicKeyDelegating({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  }
+
+  public async isAddressDelegating(address: string): Promise<boolean> {
+    return this.protocolV1.isAddressDelegating(address)
+  }
+
+  public async getDelegatorDetailsFromPublicKey(publicKey: string): Promise<DelegatorDetails> {
+    return this.protocolV1.getDelegatorDetailsFromPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  }
+
+  public async getDelegatorDetailsFromAddress(address: string): Promise<DelegatorDetails> {
+    return this.protocolV1.getDelegatorDetailsFromAddress(address)
+  }
+
+  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[]): Promise<DelegationDetails> {
+    return this.protocolV1.getDelegationDetailsFromPublicKey(
+      { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
+      delegatees
+    )
+  }
+
+  public async getDelegationDetailsFromAddress(address: string, delegatees: string[]): Promise<DelegationDetails> {
+    return this.protocolV1.getDelegationDetailsFromAddress(address, delegatees)
+  }
+
+  public async prepareDelegatorActionFromPublicKey(publicKey: string, type: any, data?: any): Promise<any[]> {
+    return this.protocolV1.prepareDelegatorActionFromPublicKey(
+      { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
+      type,
+      data
+    )
+  }
+}
+
+// ICoinSubProtocol
+
+export class ICoinSubProtocolAdapter<T extends AirGapAnyProtocol & SubProtocol = AirGapAnyProtocol & SubProtocol>
+  extends ICoinProtocolAdapter<T>
+  implements ICoinSubProtocol
+{
   public readonly isSubProtocol: boolean = true
   public readonly subProtocolType: SubProtocolTypeV0
   public readonly contractAddress?: string
 
-  public static async create(
-    protocolV1: AirGapAnyProtocol & SubProtocol,
-    blockExplorerV1: AirGapBlockExplorer | undefined,
-    v3SerializerCompanion: AirGapV3SerializerCompanion,
-    extra: {
-      protocolMetadata?: ProtocolMetadata
-      crypto?: CryptoConfiguration | null
-      network?: ProtocolNetwork | null
-      blockExplorerMetadata?: BlockExplorerMetadata | null
-      type?: SubProtocolType
-      contractAddress?: string | null
-    } = {}
-  ): Promise<ICoinSubProtocolAdapter> {
-    const [protocolMetadata, crypto, network, blockExplorerMetadata, type, contractAddress]: [
-      ProtocolMetadata,
-      CryptoConfiguration | undefined,
-      ProtocolNetwork | undefined,
-      BlockExplorerMetadata | undefined,
-      SubProtocolType,
-      string | undefined
-    ] = await Promise.all([
-      extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
-      extra.crypto
-        ? Promise.resolve(extra.crypto)
-        : extra.crypto === null || !isOfflineProtocol(protocolV1)
-        ? Promise.resolve(undefined)
-        : protocolV1.getCryptoConfiguration(),
-      extra.network
-        ? Promise.resolve(extra.network)
-        : extra.network === null || !isOnlineProtocol(protocolV1)
-        ? Promise.resolve(undefined)
-        : protocolV1.getNetwork(),
-      extra.blockExplorerMetadata
-        ? Promise.resolve(extra.blockExplorerMetadata)
-        : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
-        ? Promise.resolve(undefined)
-        : blockExplorerV1.getMetadata(),
-      extra.type ? Promise.resolve(extra.type) : protocolV1.getType(),
-      extra.contractAddress
-        ? Promise.resolve(extra.contractAddress)
-        : extra.contractAddress === null || !hasConfigurableContract(protocolV1)
-        ? Promise.resolve(undefined)
-        : protocolV1.getContractAddress()
-    ])
-
-    return new ICoinSubProtocolAdapter(
-      protocolV1,
-      protocolMetadata,
-      crypto,
-      network,
-      blockExplorerV1,
-      blockExplorerMetadata,
-      v3SerializerCompanion,
-      type,
-      contractAddress
-    )
-  }
-
-  private constructor(
-    public readonly protocolV1: AirGapAnyProtocol & SubProtocol,
+  constructor(
+    protocolV1: T,
     protocolMetadata: ProtocolMetadata,
     crypto: CryptoConfiguration | undefined,
     network: ProtocolNetwork | undefined,
@@ -1244,5 +1219,225 @@ export class ICoinSubProtocolAdapter extends ICoinProtocolAdapter implements ICo
 
   public async getContractAddress(): Promise<string | undefined> {
     return this.contractAddress
+  }
+}
+
+export class ICoinDelegateSubProtocolAdapter<
+    T extends AirGapAnyProtocol & AirGapDelegateProtocol & SubProtocol = AirGapAnyProtocol & AirGapDelegateProtocol & SubProtocol
+  >
+  extends ICoinSubProtocolAdapter<T>
+  implements ICoinSubProtocol, ICoinDelegateProtocol
+{
+  private readonly delegateProtocolAdapter: ICoinDelegateProtocolAdapter<T>
+
+  constructor(
+    protocolV1: T,
+    protocolMetadata: ProtocolMetadata,
+    crypto: CryptoConfiguration | undefined,
+    network: ProtocolNetwork | undefined,
+    v1BlockExplorer: AirGapBlockExplorer | undefined,
+    blockExplorerMetadata: BlockExplorerMetadata | undefined,
+    v3SerializerCompanion: AirGapV3SerializerCompanion,
+    type: SubProtocolType,
+    contractAddress: string | undefined
+  ) {
+    super(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      v1BlockExplorer,
+      blockExplorerMetadata,
+      v3SerializerCompanion,
+      type,
+      contractAddress
+    )
+
+    this.delegateProtocolAdapter = new ICoinDelegateProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      v1BlockExplorer,
+      blockExplorerMetadata,
+      v3SerializerCompanion
+    )
+  }
+
+  public async getDefaultDelegatee(): Promise<string> {
+    return this.delegateProtocolAdapter.getDefaultDelegatee()
+  }
+
+  public async getCurrentDelegateesForPublicKey(publicKey: string): Promise<string[]> {
+    return this.delegateProtocolAdapter.getCurrentDelegateesForPublicKey(publicKey)
+  }
+
+  public async getCurrentDelegateesForAddress(address: string): Promise<string[]> {
+    return this.delegateProtocolAdapter.getCurrentDelegateesForAddress(address)
+  }
+
+  public async getDelegateeDetails(address: string): Promise<DelegateeDetails> {
+    return this.delegateProtocolAdapter.getDelegateeDetails(address)
+  }
+
+  public async isPublicKeyDelegating(publicKey: string): Promise<boolean> {
+    return this.delegateProtocolAdapter.isPublicKeyDelegating(publicKey)
+  }
+
+  public async isAddressDelegating(address: string): Promise<boolean> {
+    return this.delegateProtocolAdapter.isAddressDelegating(address)
+  }
+
+  public async getDelegatorDetailsFromPublicKey(publicKey: string): Promise<DelegatorDetails> {
+    return this.delegateProtocolAdapter.getDelegatorDetailsFromPublicKey(publicKey)
+  }
+
+  public async getDelegatorDetailsFromAddress(address: string): Promise<DelegatorDetails> {
+    return this.delegateProtocolAdapter.getDelegatorDetailsFromAddress(address)
+  }
+
+  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[]): Promise<DelegationDetails> {
+    return this.delegateProtocolAdapter.getDelegationDetailsFromPublicKey(publicKey, delegatees)
+  }
+
+  public async getDelegationDetailsFromAddress(address: string, delegatees: string[]): Promise<DelegationDetails> {
+    return this.delegateProtocolAdapter.getDelegationDetailsFromAddress(address, delegatees)
+  }
+
+  public async prepareDelegatorActionFromPublicKey(publicKey: string, type: any, data?: any): Promise<any[]> {
+    return this.delegateProtocolAdapter.prepareDelegatorActionFromPublicKey(publicKey, type, data)
+  }
+}
+
+// Factories
+
+export async function createICoinProtocolAdapter<T extends AirGapAnyProtocol>(
+  protocolV1: T,
+  blockExplorerV1: AirGapBlockExplorer | undefined,
+  v3SerializerCompanion: AirGapV3SerializerCompanion,
+  extra: {
+    protocolMetadata?: ProtocolMetadata
+    crypto?: CryptoConfiguration | null
+    network?: ProtocolNetwork | null
+    blockExplorerMetadata?: BlockExplorerMetadata | null
+  } = {}
+): Promise<ICoinProtocolAdapter<T>> {
+  const [protocolMetadata, crypto, network, blockExplorerMetadata]: [
+    ProtocolMetadata,
+    CryptoConfiguration | undefined,
+    ProtocolNetwork | undefined,
+    BlockExplorerMetadata | undefined
+  ] = await Promise.all([
+    extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
+    extra.crypto
+      ? Promise.resolve(extra.crypto)
+      : extra.crypto === null || !isOfflineProtocol(protocolV1)
+      ? Promise.resolve(undefined)
+      : protocolV1.getCryptoConfiguration(),
+    extra.network
+      ? Promise.resolve(extra.network)
+      : extra.network === null || !isOnlineProtocol(protocolV1)
+      ? Promise.resolve(undefined)
+      : protocolV1.getNetwork(),
+    extra.blockExplorerMetadata
+      ? Promise.resolve(extra.blockExplorerMetadata)
+      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
+      ? Promise.resolve(undefined)
+      : blockExplorerV1.getMetadata()
+  ])
+
+  if (supportsV1Delegation(protocolV1)) {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return new ICoinDelegateProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      blockExplorerV1,
+      blockExplorerMetadata,
+      v3SerializerCompanion
+    )
+  } else {
+    return new ICoinProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      blockExplorerV1,
+      blockExplorerMetadata,
+      v3SerializerCompanion
+    )
+  }
+}
+
+export async function createICoinSubProtocolAdapter<T extends AirGapAnyProtocol & SubProtocol>(
+  protocolV1: T,
+  blockExplorerV1: AirGapBlockExplorer | undefined,
+  v3SerializerCompanion: AirGapV3SerializerCompanion,
+  extra: {
+    protocolMetadata?: ProtocolMetadata
+    crypto?: CryptoConfiguration | null
+    network?: ProtocolNetwork | null
+    blockExplorerMetadata?: BlockExplorerMetadata | null
+    type?: SubProtocolType
+    contractAddress?: string | null
+  } = {}
+): Promise<ICoinSubProtocolAdapter<T>> {
+  const [protocolMetadata, crypto, network, blockExplorerMetadata, type, contractAddress]: [
+    ProtocolMetadata,
+    CryptoConfiguration | undefined,
+    ProtocolNetwork | undefined,
+    BlockExplorerMetadata | undefined,
+    SubProtocolType,
+    string | undefined
+  ] = await Promise.all([
+    extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
+    extra.crypto
+      ? Promise.resolve(extra.crypto)
+      : extra.crypto === null || !isOfflineProtocol(protocolV1)
+      ? Promise.resolve(undefined)
+      : protocolV1.getCryptoConfiguration(),
+    extra.network
+      ? Promise.resolve(extra.network)
+      : extra.network === null || !isOnlineProtocol(protocolV1)
+      ? Promise.resolve(undefined)
+      : protocolV1.getNetwork(),
+    extra.blockExplorerMetadata
+      ? Promise.resolve(extra.blockExplorerMetadata)
+      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
+      ? Promise.resolve(undefined)
+      : blockExplorerV1.getMetadata(),
+    extra.type ? Promise.resolve(extra.type) : protocolV1.getType(),
+    extra.contractAddress
+      ? Promise.resolve(extra.contractAddress)
+      : extra.contractAddress === null || !hasConfigurableContract(protocolV1)
+      ? Promise.resolve(undefined)
+      : protocolV1.getContractAddress()
+  ])
+
+  if (supportsV1Delegation(protocolV1)) {
+    return new ICoinDelegateSubProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      blockExplorerV1,
+      blockExplorerMetadata,
+      v3SerializerCompanion,
+      type,
+      contractAddress
+    )
+  } else {
+    return new ICoinSubProtocolAdapter(
+      protocolV1,
+      protocolMetadata,
+      crypto,
+      network,
+      blockExplorerV1,
+      blockExplorerMetadata,
+      v3SerializerCompanion,
+      type,
+      contractAddress
+    )
   }
 }

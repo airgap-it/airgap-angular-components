@@ -106,7 +106,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     if (this.decoder.isComplete() && this.decoder.isSuccess()) {
       const decoded = this.decoder.resultUR()
       this.combinedData = decoded.decodeCBOR()
-      console.log('TYPE ', decoded.type)
+
       if (decoded.type === 'crypto-psbt') {
         const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor)
         const psbt = cryptoPsbt.getPSBT().toString('hex')

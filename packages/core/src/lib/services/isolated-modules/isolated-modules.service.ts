@@ -10,7 +10,13 @@ import {
   V3SchemaConfiguration
 } from '@airgap/module-kit'
 import { Directory, FileInfo, FilesystemPlugin, ReaddirResult } from '@capacitor/filesystem'
-import { ICoinProtocolAdapter, ICoinSubProtocolAdapter, TransactionValidatorAdapter } from '../../protocol/adapter/protocol-v0-adapter'
+import {
+  createICoinProtocolAdapter,
+  createICoinSubProtocolAdapter,
+  ICoinProtocolAdapter,
+  ICoinSubProtocolAdapter,
+  TransactionValidatorAdapter
+} from '../../protocol/adapter/protocol-v0-adapter'
 import { FILESYSTEM_PLUGIN, ISOLATED_MODULES_PLUGIN, ZIP_PLUGIN } from '../../capacitor-plugins/injection-tokens'
 import { IsolatedModulesPlugin, LoadModulesResult, PreviewModuleResult, ZipPlugin } from '../../capacitor-plugins/definitions'
 import { IsolatedModule, IsolatedProtocol } from '../../types/isolated-modules/IsolatedModule'
@@ -174,7 +180,7 @@ export class IsolatedModulesService {
     )
 
     return isSubProtocol(protocol) && isolatedProtocol.type === 'sub'
-      ? ICoinSubProtocolAdapter.create(protocol, blockExplorer, v3SerializerCompanion, {
+      ? createICoinSubProtocolAdapter(protocol, blockExplorer, v3SerializerCompanion, {
           protocolMetadata: isolatedProtocol.protocolMetadata,
           crypto: isolatedProtocol.crypto,
           network: isolatedProtocol.network,
@@ -182,7 +188,7 @@ export class IsolatedModulesService {
           type: isolatedProtocol.subType,
           contractAddress: isolatedProtocol.contractAddress
         })
-      : ICoinProtocolAdapter.create(protocol, blockExplorer, v3SerializerCompanion, {
+      : createICoinProtocolAdapter(protocol, blockExplorer, v3SerializerCompanion, {
           protocolMetadata: isolatedProtocol.protocolMetadata,
           crypto: isolatedProtocol.crypto,
           network: isolatedProtocol.network,
