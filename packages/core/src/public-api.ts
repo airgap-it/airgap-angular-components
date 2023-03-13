@@ -82,6 +82,7 @@ export * from './lib/types/Token'
 
 // Utils
 export * from './lib/utils/isolated-modules/isolated-modules-metadata'
+export * from './lib/utils/protocol/delegation'
 export * from './lib/utils/protocol/protocol-identifier'
 export * from './lib/utils/protocol/protocol-network-identifier'
 export * from './lib/utils/airgap-transaction'

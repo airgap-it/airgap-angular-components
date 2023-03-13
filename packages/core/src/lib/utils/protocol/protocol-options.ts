@@ -45,6 +45,7 @@ import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
 import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
+import { COREUM_PROTOCOL_NETWORK } from '@airgap/coreum/v1/protocol/CoreumProtocol'
 import { ProtocolNetwork as ProtocolNetworkV1 } from '@airgap/module-kit'
 import { CKBTC_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/icrc/CkBTCProtocol'
 import { ProtocolNetworkAdapter, ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
@@ -63,6 +64,10 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
       return new ProtocolOptionsAdapter(
         network ??
           new ProtocolNetworkAdapter(CKBTC_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, CKBTC_MAINNET_PROTOCOL_NETWORK.rpcUrl)
+      )
+    case MainProtocolSymbols.COREUM:
+      return new ProtocolOptionsAdapter(
+        network ?? new ProtocolNetworkAdapter(COREUM_PROTOCOL_NETWORK.name, NetworkType.TESTNET, COREUM_PROTOCOL_NETWORK.rpcUrl)
       )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())

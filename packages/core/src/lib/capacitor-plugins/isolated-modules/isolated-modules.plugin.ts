@@ -7,6 +7,7 @@ import { CosmosModule } from '@airgap/cosmos/v1'
 import { EthereumModule } from '@airgap/ethereum/v1'
 import { GroestlcoinModule } from '@airgap/groestlcoin/v1'
 import { ICPModule } from '@airgap/icp/v1'
+import { CoreumModule } from '@airgap/coreum'
 import {
   AirGapAnyProtocol,
   AirGapBlockExplorer,
@@ -65,7 +66,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new GroestlcoinModule(),
       new MoonbeamModule(),
       new AstarModule(),
-      new ICPModule()
+      new ICPModule(),
     ]
   ) {
     super()
