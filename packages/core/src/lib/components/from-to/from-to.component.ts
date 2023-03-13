@@ -23,6 +23,9 @@ export class FromToComponent {
   @Input()
   public hideNetwork: boolean = false
 
+  public fromTransactions: { name?: string; address: string }[] = []
+  public toTransactions: { name?: string; address: string }[] = []
+
   public get type(): string | undefined {
     return this.transaction?.transactionDetails?.parameters?.entrypoint ?? this.transaction?.extra?.type
   }
@@ -35,7 +38,26 @@ export class FromToComponent {
     return result
   }
 
-  constructor(private readonly clipboardService: ClipboardService) { }
+  constructor(private readonly clipboardService: ClipboardService) {}
+
+  ngOnChanges(): void {
+    if (this.transaction) {
+      this.fromTransactions = []
+      for (let i = 0; i < this.transaction.from.length; i++) {
+        const from = this.transaction.from[i]
+        if (this.transaction.extra?.names && this.transaction.extra?.names?.[from]) {
+          this.fromTransactions.push({ name: this.transaction.extra.names[from], address: from })
+        } else this.fromTransactions.push({ address: from })
+      }
+      this.toTransactions = []
+      for (let i = 0; i < this.transaction.to.length; i++) {
+        const to = this.transaction.to[i]
+        if (this.transaction.extra?.names && this.transaction.extra?.names?.[to]) {
+          this.toTransactions.push({ name: this.transaction.extra.names[to], address: to })
+        } else this.toTransactions.push({ address: to })
+      }
+    }
+  }
 
   public toggleDisplayRawData(): void {
     this.displayRawData = !this.displayRawData
