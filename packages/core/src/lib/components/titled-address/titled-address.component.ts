@@ -11,6 +11,9 @@ export class TitledAddressComponent {
   public title: string | undefined
 
   @Input()
+  public name: string | undefined
+
+  @Input()
   public address: string | undefined
 
   @Input()

@@ -10,6 +10,9 @@ export class TitledTextComponent {
   public title: string | undefined | null
 
   @Input()
+  public subTitle: string | undefined | null
+
+  @Input()
   public text: string | undefined | null
 
   @Input()
