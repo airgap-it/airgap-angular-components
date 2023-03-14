@@ -1,17 +1,20 @@
-import { Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
 import {
   ICoinProtocol,
   ICoinSubProtocol,
   ProtocolNetwork,
   ProtocolSymbols,
   SubProtocolSymbols,
-  MainProtocolSymbols,
+  MainProtocolSymbols
 } from '@airgap/coinlib-core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 import { Token } from '../../types/Token'
+import { getProtocolOptionsByIdentifier } from '../../utils/protocol/protocol-options'
+import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
+import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -21,7 +24,6 @@ import {
   getDefaultActiveSubProtocols
 } from './defaults'
 import { ethTokens } from './tokens'
-import { getProtocolOptionsByIdentifier } from '../../utils/protocol/protocol-options'
 
 export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
@@ -38,7 +40,11 @@ export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
   private knownProtocolSymbols: Set<string> | undefined
 
-  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
+  constructor(
+    private readonly mainProtocolStore: MainProtocolStoreService,
+    private readonly subProtocolStore: SubProtocolStoreService,
+    @Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin
+  ) {}
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
@@ -251,7 +257,8 @@ export class ProtocolService {
     await this.waitReady()
 
     const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
-    const targetNetwork: ProtocolNetwork | string = network ?? getProtocolOptionsByIdentifier(mainIdentifier).network
+    const targetNetwork: ProtocolNetwork | string =
+      network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, mainIdentifier)).network
     const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
@@ -346,7 +353,7 @@ export class ProtocolService {
     const targetNetwork: ProtocolNetwork =
       typeof protocolOrIdentifier !== 'string'
         ? (await protocolOrIdentifier.getOptions()).network
-        : network ?? getProtocolOptionsByIdentifier(identifier).network
+        : network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, identifier)).network
 
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
       .then(

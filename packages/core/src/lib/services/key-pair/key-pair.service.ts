@@ -1,7 +1,7 @@
 import { AirGapWallet, ICoinProtocol, MainProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
 import { MessageSignRequest } from '@airgap/serializer'
 import { Injectable } from '@angular/core'
-import { ICoinProtocolAdapter } from '../../protocol/protocol-v0-adapter'
+import { ICoinProtocolAdapter } from '../../protocol/adapter/protocol-v0-adapter'
 
 type Unsigned = UnsignedTransaction | MessageSignRequest
 

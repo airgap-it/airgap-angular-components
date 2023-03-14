@@ -38,7 +38,11 @@ export * from './lib/pipes/fee-converter/fee-converter.pipe'
 export * from './lib/pipes/wallet-filter/wallet-filter.pipe'
 
 // Protocol
-export * from './lib/protocol/protocol-v0-adapter'
+export * from './lib/protocol/isolated/block-explorer-isolated'
+export * from './lib/protocol/isolated/protocol-offline-isolated'
+export * from './lib/protocol/isolated/protocol-online-isolated'
+export * from './lib/protocol/isolated/v3-serializer-companion-isolated'
+export * from './lib/protocol/adapter/protocol-v0-adapter'
 
 // Services
 export * from './lib/services/address/address.service'
@@ -48,6 +52,7 @@ export * from './lib/services/filesystem/filesystem.service'
 export * from './lib/services/iac/base.iac.service'
 export * from './lib/services/iac/message-handler'
 export * from './lib/services/iac/message-handler-single'
+export * from './lib/services/isolated-modules/isolated-modules.service'
 export * from './lib/services/key-pair/key-pair.service'
 export * from './lib/services/language/language.service'
 export * from './lib/services/permissions/permissions.service'
@@ -65,6 +70,9 @@ export * from './lib/services/ui-event-elements/ui-event-elements.service'
 export * from './lib/services/uri/uri.service'
 
 // Types
+export * from './lib/types/isolated-modules/IsolatedModule'
+export * from './lib/types/isolated-modules/IsolatedModuleManifest'
+export * from './lib/types/isolated-modules/IsolatedModuleMetadata'
 export * from './lib/types/ui/UIAction'
 export * from './lib/types/ui/UIResource'
 export * from './lib/types/Either'
@@ -73,6 +81,8 @@ export * from './lib/types/SupportedLanguage'
 export * from './lib/types/Token'
 
 // Utils
+export * from './lib/utils/isolated-modules/isolated-modules-metadata'
+export * from './lib/utils/protocol/delegation'
 export * from './lib/utils/protocol/protocol-identifier'
 export * from './lib/utils/protocol/protocol-network-identifier'
 export * from './lib/utils/airgap-transaction'
@@ -84,3 +94,4 @@ export * from './lib/utils/utils'
 // Capacitor
 export * from './lib/capacitor-plugins/definitions'
 export * from './lib/capacitor-plugins/injection-tokens'
+export { IsolatedModules as WebIsolatedModules } from './lib/capacitor-plugins/isolated-modules/isolated-modules.plugin'

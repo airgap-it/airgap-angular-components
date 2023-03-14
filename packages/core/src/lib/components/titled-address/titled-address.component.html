@@ -4,10 +4,15 @@
       <ion-avatar>
         <airgap-identicon [address]="address"></airgap-identicon>
       </ion-avatar>
-      <airgap-currency-symbol [symbol]="symbol" [protocolIdentifier]="protocolIdentifier" *ngIf="hasSymbol" class="symbol--icon"></airgap-currency-symbol>
+      <airgap-currency-symbol
+        [symbol]="symbol"
+        [protocolIdentifier]="protocolIdentifier"
+        *ngIf="hasSymbol"
+        class="symbol--icon"
+      ></airgap-currency-symbol>
     </ion-row>
   </ion-col>
   <ion-col size="9">
-    <airgap-titled-text [title]="title" [text]="address" [selectable]="true"></airgap-titled-text>
+    <airgap-titled-text [title]="title" [subTitle]="name" [text]="address" [selectable]="true"></airgap-titled-text>
   </ion-col>
 </ion-row>

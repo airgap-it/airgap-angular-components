@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing'
 
-import { MainProtocolSymbols, NetworkType, ProtocolNetwork } from '@airgap/coinlib-core'
+import { MainProtocolSymbols, NetworkType, ProtocolNetwork, SubProtocolSymbols } from '@airgap/coinlib-core'
 import { AeternityProtocol } from '@airgap/aeternity'
 import { BitcoinProtocolNetwork, BitcoinProtocol, BitcoinProtocolOptions } from '@airgap/bitcoin'
 import { CosmosProtocolNetwork, CosmosProtocol, CosmosProtocolOptions } from '@airgap/cosmos'
 import { TezosProtocolNetwork, TezosProtocol, TezosProtocolOptions } from '@airgap/tezos'
 import { getIdentifiers } from '../../utils/test'
+import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
+import { IsolatedModules } from '../../../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { MainProtocolStoreService, MainProtocolStoreConfig } from './main-protocol-store.service'
 
 describe('MainProtocolStoreService', () => {
@@ -24,7 +26,9 @@ describe('MainProtocolStoreService', () => {
   })
 
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({
+      providers: [{ provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }]
+    })
     service = TestBed.inject(MainProtocolStoreService)
   })
 
@@ -246,10 +250,11 @@ describe('MainProtocolStoreService', () => {
       MainProtocolSymbols.GRS,
       MainProtocolSymbols.KUSAMA,
       MainProtocolSymbols.POLKADOT,
-      MainProtocolSymbols.XTZ
+      MainProtocolSymbols.XTZ,
+      'side_loaded_protocol'
     ]
 
-    const invalidIdentifiers: string[] = ['qwerty', 'abcde', 'aeternity', 'bitcoin', 'ethereum', 'tezos', 'ksm', 'dot', 'atom']
+    const invalidIdentifiers: string[] = [SubProtocolSymbols.ETH_ERC20, SubProtocolSymbols.XTZ_BTC, 'invalid-identifier']
 
     it('should check if the identifier is valid', async () => {
       await service.init({
