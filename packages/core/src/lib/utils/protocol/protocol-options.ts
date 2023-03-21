@@ -67,7 +67,7 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
       )
     case MainProtocolSymbols.COREUM:
       return new ProtocolOptionsAdapter(
-        network ?? new ProtocolNetworkAdapter(COREUM_PROTOCOL_NETWORK.name, NetworkType.TESTNET, COREUM_PROTOCOL_NETWORK.rpcUrl)
+        network ?? new ProtocolNetworkAdapter(COREUM_PROTOCOL_NETWORK.name, NetworkType.MAINNET, COREUM_PROTOCOL_NETWORK.rpcUrl)
       )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
