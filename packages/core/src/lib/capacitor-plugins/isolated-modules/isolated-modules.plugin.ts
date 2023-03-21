@@ -67,6 +67,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new MoonbeamModule(),
       new AstarModule(),
       new ICPModule(),
+      new CoreumModule(),
     ]
   ) {
     super()
