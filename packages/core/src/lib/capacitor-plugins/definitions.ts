@@ -33,26 +33,30 @@ export const Zip: ZipPlugin = registerPlugin('Zip')
 
 /**************** IsolatedModulesPlugin ****************/
 
-export interface PreviewModuleOptions {
+export interface PreviewDynamicModuleOptions {
   path: string
   directory: Directory
 }
 
-export interface PreviewModuleResult {
+export interface PreviewDynamicModuleResult {
   module: IsolatedModule
   manifest: IsolatedModuleManifest
 }
 
-export interface RegisterModuleOptions {
+export interface RegisterDynamicModuleOptions {
   identifier: string
   protocolIdentifiers: string[]
 }
 
-export interface LoadModulesOptions {
+export interface RemoveDynamicModulesOptions {
+  identifiers?: string[]
+}
+
+export interface LoadAllModulesOptions {
   protocolType?: ProtocolConfiguration['type']
 }
 
-export interface LoadModulesResult {
+export interface LoadAllModulesResult {
   modules: IsolatedModule[]
 }
 
@@ -92,9 +96,12 @@ export interface CallMethodResult {
 }
 
 export interface IsolatedModulesPlugin {
-  previewModule(options: PreviewModuleOptions): Promise<PreviewModuleResult>
-  registerModule(options: RegisterModuleOptions): Promise<void>
-  loadModules(options?: LoadModulesOptions): Promise<LoadModulesResult>
+  previewDynamicModule(options: PreviewDynamicModuleOptions): Promise<PreviewDynamicModuleResult>
+  registerDynamicModule(options: RegisterDynamicModuleOptions): Promise<void>
+
+  removeDynamicModules(options?: RemoveDynamicModulesOptions): Promise<void>
+
+  loadAllModules(options?: LoadAllModulesOptions): Promise<LoadAllModulesResult>
 
   callMethod<T = unknown>(options: CallMethodOptions<T>): Promise<CallMethodResult>
 }

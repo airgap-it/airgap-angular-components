@@ -158,6 +158,30 @@ describe('MainProtocolStoreService', () => {
     })
   })
 
+  describe('Remove Protocols', () => {
+    it('should remove protocols by identifiers', async () => {
+      await service.init({
+        activeProtocols: [new AeternityProtocol(), new TezosProtocol()],
+        passiveProtocols: [new BitcoinProtocol(), new CosmosProtocol()]
+      })
+
+      await service.removeProtocols([MainProtocolSymbols.AE, MainProtocolSymbols.COSMOS])
+
+      const supportedIdentifiers = await getIdentifiers(await service.supportedProtocols)
+
+      const activeIdentifiers = await getIdentifiers(service.activeProtocols)
+      const passiveIdentifiers = await getIdentifiers(service.passiveProtocols)
+
+      const expectedActiveIdentifiers = [MainProtocolSymbols.XTZ]
+      const expectedPassiveIdentifiers = [MainProtocolSymbols.BTC]
+
+      expect(supportedIdentifiers.sort()).toEqual(expectedActiveIdentifiers.concat(expectedPassiveIdentifiers).sort())
+
+      expect(activeIdentifiers.sort()).toEqual(expectedActiveIdentifiers.sort())
+      expect(passiveIdentifiers.sort()).toEqual(expectedPassiveIdentifiers.sort())
+    })
+  })
+
   describe('Find Protocols', () => {
     it('should find a main protocol by an identifier', async () => {
       await service.init({
