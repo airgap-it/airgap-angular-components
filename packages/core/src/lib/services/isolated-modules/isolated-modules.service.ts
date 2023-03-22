@@ -18,7 +18,7 @@ import {
   TransactionValidatorAdapter
 } from '../../protocol/adapter/protocol-v0-adapter'
 import { FILESYSTEM_PLUGIN, ISOLATED_MODULES_PLUGIN, ZIP_PLUGIN } from '../../capacitor-plugins/injection-tokens'
-import { IsolatedModulesPlugin, LoadModulesResult, PreviewModuleResult, ZipPlugin } from '../../capacitor-plugins/definitions'
+import { IsolatedModulesPlugin, LoadAllModulesResult, PreviewDynamicModuleResult, ZipPlugin } from '../../capacitor-plugins/definitions'
 import { IsolatedModule, IsolatedProtocol } from '../../types/isolated-modules/IsolatedModule'
 import { IsolatedAirGapV3SerializerCompanion } from '../../protocol/isolated/v3-serializer-companion-isolated'
 import { flattened } from '../../utils/array'
@@ -57,6 +57,9 @@ const MANIFEST_FILENAME = 'manifest.json'
   providedIn: 'root'
 })
 export class IsolatedModulesService {
+  private readonly staticModules: Map<string, IsolatedModule> = new Map()
+  private readonly dynamicModules: Map<string, IsolatedModule> = new Map()
+
   constructor(
     @Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin,
     @Inject(FILESYSTEM_PLUGIN) private readonly filesystem: FilesystemPlugin,
@@ -65,7 +68,15 @@ export class IsolatedModulesService {
   ) {}
 
   public async loadProtocols(type?: ProtocolConfiguration['type'], ignore: string[] = []): Promise<Protocols> {
-    const { modules }: LoadModulesResult = await this.isolatedModules.loadModules({ protocolType: type })
+    const { modules }: LoadAllModulesResult = await this.isolatedModules.loadAllModules({ protocolType: type })
+    modules.forEach((module: IsolatedModule) => {
+      if (module.type === 'static') {
+        this.staticModules.set(module.identifier, module)
+      } else {
+        this.dynamicModules.set(module.identifier, module)
+      }
+    })
+
     const loadedProtocols: LoadedProtocol[] = await this.loadFromModules(modules, type, new Set(ignore))
 
     return this.processLoadedProtocols(loadedProtocols)
@@ -229,7 +240,7 @@ export class IsolatedModulesService {
         throw new Error('Invalid protocol module structure, manifest not found')
       }
 
-      const preview: PreviewModuleResult = await this.isolatedModules.previewModule({
+      const preview: PreviewDynamicModuleResult = await this.isolatedModules.previewDynamicModule({
         path: `${tempDir.path}/${root}`.replace(/\/+$/, ''),
         directory: tempDir.directory
       })
@@ -309,10 +320,12 @@ export class IsolatedModulesService {
           toDirectory: newDirectory
         })
 
-        await this.isolatedModules.registerModule({
+        await this.isolatedModules.registerDynamicModule({
           identifier: newIdentifier,
           protocolIdentifiers: metadata.module.protocols.map((protocol) => protocol.identifier)
         })
+
+        this.dynamicModules.set(newIdentifier, metadata.module)
       }
 
       const loadedProtocols = await this.loadFromModules([metadata.module])
@@ -330,6 +343,33 @@ export class IsolatedModulesService {
         /* no action */
       })
     }
+  }
+
+  public async removeInstalledModules(identifiers: string[]): Promise<void> {
+    await this.isolatedModules.removeDynamicModules({ identifiers })
+    const protocolIdentifiers: string[] = flattened(
+      identifiers.map(
+        (identifier: string) =>
+          this.dynamicModules.get(identifier)?.protocols.map((protocol: IsolatedProtocol) => protocol.identifier) ?? []
+      )
+    )
+
+    await this.protocolService.removeProtocols(protocolIdentifiers as ProtocolSymbols[])
+    identifiers.forEach((identifier: string) => {
+      this.dynamicModules.delete(identifier)
+    })
+  }
+
+  public async removeAllInstalledModules(): Promise<void> {
+    await this.isolatedModules.removeDynamicModules()
+    const protocolIdentifiers: string[] = flattened(
+      Array.from(this.dynamicModules.values()).map((module: IsolatedModule) =>
+        module.protocols.map((protocol: IsolatedProtocol) => protocol.identifier)
+      )
+    )
+
+    await this.protocolService.removeProtocols(protocolIdentifiers as ProtocolSymbols[])
+    this.dynamicModules.clear()
   }
 
   private async createTempProtocolModuleDir(moduleName: string): Promise<{ path: string; directory: Directory }> {

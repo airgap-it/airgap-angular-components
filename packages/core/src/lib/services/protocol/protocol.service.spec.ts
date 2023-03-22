@@ -26,8 +26,18 @@ import {
   TezosBTCProtocolConfig,
   TezosUSDProtocolConfig,
   TezosETH,
-  TezosUUSD
+  TezosUUSD,
+  TezosQUIPU,
+  TezosQUIPUProtocolConfig,
+  TezosFA2ProtocolOptions
 } from '@airgap/tezos'
+import {
+  EthereumERC20ProtocolConfig,
+  EthereumERC20ProtocolOptions,
+  EthereumProtocol,
+  EthereumProtocolNetwork,
+  GenericERC20
+} from '@airgap/ethereum'
 import { duplicatesRemoved } from '../../utils/array'
 import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
@@ -813,6 +823,86 @@ describe('ProtocolService', () => {
         const found = await service.getProtocol(await protocol.getIdentifier(), (await protocol.getOptions()).network.identifier)
         expect(found).toBe(protocol)
       }
+    })
+  })
+
+  /**************** Remove Protocols ****************/
+
+  describe('Remove Protocols', () => {
+    it('should remove protocols by identifiers', async () => {
+      const tezosProtocol = new TezosProtocol()
+      const tezosTestnetProtocol = new TezosProtocol(new TezosProtocolOptions(tezosTestnet))
+
+      const ethereumProtocol = new EthereumProtocol()
+
+      await service.init({
+        activeProtocols: [tezosProtocol, tezosTestnetProtocol, ethereumProtocol],
+        passiveProtocols: [new BitcoinProtocol(), new CosmosProtocol()],
+        activeSubProtocols: [
+          [tezosProtocol, new TezosBTC()],
+          [tezosTestnetProtocol, new TezosBTC(new TezosFAProtocolOptions(tezosTestnet, new TezosBTCProtocolConfig()))],
+          [tezosProtocol, new TezosStaker()],
+          [
+            ethereumProtocol,
+            new GenericERC20(
+              new EthereumERC20ProtocolOptions(
+                new EthereumProtocolNetwork(),
+                new EthereumERC20ProtocolConfig('ERC20_1', 'ERC20_1', 'ERC20_1', 'eth-erc20_1' as SubProtocolSymbols, '', 18)
+              )
+            )
+          ]
+        ],
+        passiveSubProtocols: [
+          [tezosProtocol, new TezosUSD()],
+          [tezosTestnetProtocol, new TezosQUIPU(new TezosFA2ProtocolOptions(tezosTestnet, new TezosQUIPUProtocolConfig()))],
+          [
+            ethereumProtocol,
+            new GenericERC20(
+              new EthereumERC20ProtocolOptions(
+                new EthereumProtocolNetwork(),
+                new EthereumERC20ProtocolConfig('ERC20_2', 'ERC20_2', 'ERC20_2', 'eth-erc20_2' as SubProtocolSymbols, '', 18)
+              )
+            )
+          ],
+          [
+            ethereumProtocol,
+            new GenericERC20(
+              new EthereumERC20ProtocolOptions(
+                new EthereumProtocolNetwork(),
+                new EthereumERC20ProtocolConfig('ERC20_3', 'ERC20_3', 'ERC20_3', 'eth-erc20_3' as SubProtocolSymbols, '', 18)
+              )
+            )
+          ]
+        ]
+      })
+
+      await service.removeProtocols([MainProtocolSymbols.XTZ, MainProtocolSymbols.COSMOS, 'eth-erc20_2' as SubProtocolSymbols])
+
+      const supportedIdentifiers = await getIdentifiers(await service.getSupportedProtocols())
+
+      const activeIdentifiers = await getIdentifiers(await service.getActiveProtocols())
+      const passiveIdentifiers = await getIdentifiers(await service.getPassiveProtocols())
+
+      const supportedSubIdentifiers = await getSubIdentifiers(await service.getSupportedSubProtocols())
+
+      const activeSubIdentifiers = await getSubIdentifiers(await service.getActiveSubProtocols())
+      const passiveSubIdentifiers = await getSubIdentifiers(await service.getPassiveSubProtocols())
+
+      const expectedActiveIdentifiers = [MainProtocolSymbols.ETH]
+      const expectedPassiveIdentifiers = [MainProtocolSymbols.BTC]
+
+      const expectedActiveSubIdentifiers = ['eth-erc20_1' as SubProtocolSymbols]
+      const expectedPassiveSubIdentifiers = ['eth-erc20_3' as SubProtocolSymbols]
+
+      expect(supportedIdentifiers.sort()).toEqual(expectedActiveIdentifiers.concat(expectedPassiveIdentifiers).sort())
+
+      expect(activeIdentifiers.sort()).toEqual(expectedActiveIdentifiers.sort())
+      expect(passiveIdentifiers.sort()).toEqual(expectedPassiveIdentifiers.sort())
+
+      expect(supportedSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.concat(expectedPassiveSubIdentifiers).sort())
+
+      expect(activeSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.sort())
+      expect(passiveSubIdentifiers.sort()).toEqual(expectedPassiveSubIdentifiers.sort())
     })
   })
 

@@ -34,13 +34,14 @@ import {
   CallMethodOptions,
   CallMethodResult,
   IsolatedModulesPlugin,
-  LoadModulesOptions,
-  LoadModulesResult,
+  LoadAllModulesOptions,
+  LoadAllModulesResult,
   OfflineProtocolCallMethodOptions,
   OnlineProtocolCallMethodOptions,
-  PreviewModuleOptions,
-  PreviewModuleResult,
-  RegisterModuleOptions,
+  PreviewDynamicModuleOptions,
+  PreviewDynamicModuleResult,
+  RegisterDynamicModuleOptions,
+  RemoveDynamicModulesOptions,
   V3SerializerCompanionCallMethodOptions
 } from '../definitions'
 import { flattened } from '../../utils/array'
@@ -73,15 +74,19 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     super()
   }
 
-  public async previewModule(_options: PreviewModuleOptions): Promise<PreviewModuleResult> {
-    throw new Error('Isolated module preview not supported in a browser')
+  public async previewDynamicModule(_options: PreviewDynamicModuleOptions): Promise<PreviewDynamicModuleResult> {
+    throw new Error('Dynamic isolated module preview not supported in a browser')
   }
 
-  public async registerModule(_options: RegisterModuleOptions): Promise<void> {
-    throw new Error('Isolated module registration not supported in a browser')
+  public async registerDynamicModule(_options: RegisterDynamicModuleOptions): Promise<void> {
+    throw new Error('Dynamic isolated module registration not supported in a browser')
   }
 
-  public async loadModules(options: LoadModulesOptions = {}): Promise<LoadModulesResult> {
+  public async removeDynamicModules(_options: RemoveDynamicModulesOptions): Promise<void> {
+    throw new Error('Dynamic isolated module removal not supported in a browser')
+  }
+
+  public async loadAllModules(options: LoadAllModulesOptions = {}): Promise<LoadAllModulesResult> {
     const modules: IsolatedModule[] = await Promise.all(
       this.modules.map((module: AirGapModule, index: number) => this.loadModule(module, index, options.protocolType))
     )

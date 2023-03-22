@@ -67,6 +67,8 @@ export abstract class BaseProtocolStoreService<
     await this.removeProtocolDuplicates()
   }
 
+  public abstract removeProtocols(identifiers: SymbolType[]): Promise<void>
+
   public abstract isIdentifierValid(identifier: string): boolean
 
   public abstract getProtocolByIdentifier(
