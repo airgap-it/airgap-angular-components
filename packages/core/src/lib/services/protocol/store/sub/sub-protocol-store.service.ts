@@ -10,7 +10,7 @@ import {
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
-import { ethTokens } from '../../tokens'
+import { ethTokens, rskTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
@@ -36,6 +36,7 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
   SubProtocolsMap,
   SubProtocolStoreConfig
 > {
+  private _rskTokenIdentifers: Set<string> | undefined
   private _ethTokenIdentifers: Set<string> | undefined
 
   constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
@@ -50,12 +51,20 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     return this._ethTokenIdentifers
   }
 
+  private get rskTokenIdentifiers(): Set<string> {
+    if (this._rskTokenIdentifers === undefined) {
+      this._rskTokenIdentifers = new Set(rskTokens.map((rskToken: Token) => rskToken.identifier))
+    }
+
+    return this._rskTokenIdentifers
+  }
+
   public isIdentifierValid(identifier: string): boolean {
     const mainIdentifier = getMainIdentifier(identifier as SubProtocolSymbols)
 
     return (
       Object.values(SubProtocolSymbols).includes(identifier as SubProtocolSymbols) ||
-      this.ethTokenIdentifiers.has(identifier) ||
+      this.ethTokenIdentifiers.has(identifier) ||  this.rskTokenIdentifiers.has(identifier) ||
       (Object.values(MainProtocolSymbols).includes(mainIdentifier) && identifier !== mainIdentifier) ||
       identifier.includes('-')
     )
