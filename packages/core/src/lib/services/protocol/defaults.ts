@@ -10,6 +10,7 @@ import {
   EthereumProtocolNetwork,
   EthereumERC20ProtocolConfig
 } from '@airgap/ethereum'
+import { RskProtocol, GenericRskERC20,   RskERC20ProtocolOptions, RskProtocolNetwork, RskERC20ProtocolConfig, } from '@airgap/rsk'
 import { GroestlcoinProtocol } from '@airgap/groestlcoin'
 import { MoonriverProtocol, MoonbeamProtocol } from '@airgap/moonbeam'
 import { PolkadotProtocol, KusamaProtocol } from '@airgap/polkadot'
@@ -34,7 +35,7 @@ import {
   TezosKtProtocol
 } from '@airgap/tezos'
 import { Token } from '../../types/Token'
-import { ethTokens } from './tokens'
+import { ethTokens, rskTokens } from './tokens'
 
 export function getDefaultPassiveProtocols(): ICoinProtocol[] {
   return []
@@ -54,7 +55,9 @@ export function getDefaultActiveProtocols(): ICoinProtocol[] {
     new MoonbeamProtocol(),
     new BitcoinProtocol(),
     new AstarProtocol(),
-    new ShidenProtocol()
+    new ShidenProtocol(),
+    new RskProtocol(),
+    new GroestlcoinProtocol(),
   ]
 }
 
@@ -65,6 +68,7 @@ export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtoco
 export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
   const tezosProtocol = new TezosProtocol()
   const ethereumProtocol = new EthereumProtocol()
+  const rskProtocol = new RskProtocol()
 
   return [
     [tezosProtocol, new TezosUUSD()],
@@ -102,6 +106,24 @@ export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol
             )
           )
         ] as [EthereumProtocol, GenericERC20]
-    )
+    ),
+    ...rskTokens.map(
+      (token: Token) =>
+        [
+          rskProtocol,
+          new GenericRskERC20(
+            new RskERC20ProtocolOptions(
+              new RskProtocolNetwork(),
+              new RskERC20ProtocolConfig(
+                token.symbol,
+                token.name,
+                token.marketSymbol,
+                token.identifier as SubProtocolSymbols,
+                token.contractAddress,
+                token.decimals
+              )
+            )
+          )
+        ] as [RskProtocol, GenericRskERC20]
   ]
 }
