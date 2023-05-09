@@ -35,26 +35,36 @@ export class FromToComponent {
     if (result && this.transaction?.to.includes(result)) {
       return undefined
     }
+
     return result
   }
 
+  public labeled: [string, string][] = []
+
   constructor(private readonly clipboardService: ClipboardService) {}
 
-  ngOnChanges(): void {
+  public ngOnChanges(): void {
     if (this.transaction) {
+      // eslint-disable-next-line no-underscore-dangle
+      this.labeled = this.transaction.extra?.labeled ? Object.entries(this.transaction.extra?.labeled) : []
+
       this.fromTransactions = []
       for (let i = 0; i < this.transaction.from.length; i++) {
         const from = this.transaction.from[i]
         if (this.transaction.extra?.names && this.transaction.extra?.names?.[from]) {
           this.fromTransactions.push({ name: this.transaction.extra.names[from], address: from })
-        } else this.fromTransactions.push({ address: from })
+        } else {
+          this.fromTransactions.push({ address: from })
+        }
       }
       this.toTransactions = []
       for (let i = 0; i < this.transaction.to.length; i++) {
         const to = this.transaction.to[i]
         if (this.transaction.extra?.names && this.transaction.extra?.names?.[to]) {
           this.toTransactions.push({ name: this.transaction.extra.names[to], address: to })
-        } else this.toTransactions.push({ address: to })
+        } else {
+          this.toTransactions.push({ address: to })
+        }
       }
     }
   }
