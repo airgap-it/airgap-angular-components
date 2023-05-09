@@ -999,7 +999,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return this.v3SerializerCompanion.fromTransactionSignRequest(identifier, transaction)
   }
 
-  private async convertV1UnsignedTransactionToV0(
+  protected async convertV1UnsignedTransactionToV0(
     transaction: UnsignedTransaction,
     publicKey: string,
     callbackUrl?: string
@@ -1009,13 +1009,13 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return this.v3SerializerCompanion.toTransactionSignRequest(identifier, transaction, publicKey, callbackUrl)
   }
 
-  private async convertV0SignedTransactionToV1(transaction: TransactionSignResponse): Promise<SignedTransaction> {
+  protected async convertV0SignedTransactionToV1(transaction: TransactionSignResponse): Promise<SignedTransaction> {
     const identifier: string = await this.getSerializerIdentifier()
 
     return this.v3SerializerCompanion.fromTransactionSignResponse(identifier, transaction)
   }
 
-  private async convertV1SignedTransactionToV0(
+  protected async convertV1SignedTransactionToV0(
     transaction: SignedTransaction,
     accountIdentifier: string
   ): Promise<TransactionSignResponse> {
@@ -1134,51 +1134,58 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
     return this.protocolV1.getDefaultDelegatee()
   }
 
-  public async getCurrentDelegateesForPublicKey(publicKey: string): Promise<string[]> {
-    return this.protocolV1.getCurrentDelegateesForPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  public async getCurrentDelegateesForPublicKey(publicKey: string, data?: any): Promise<string[]> {
+    return this.protocolV1.getCurrentDelegateesForPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
   }
 
-  public async getCurrentDelegateesForAddress(address: string): Promise<string[]> {
-    return this.protocolV1.getCurrentDelegateesForAddress(address)
+  public async getCurrentDelegateesForAddress(address: string, data?: any): Promise<string[]> {
+    return this.protocolV1.getCurrentDelegateesForAddress(address, data)
   }
 
-  public async getDelegateeDetails(address: string): Promise<DelegateeDetails> {
-    return this.protocolV1.getDelegateeDetails(address)
+  public async getDelegateeDetails(address: string, data?: any): Promise<DelegateeDetails> {
+    return this.protocolV1.getDelegateeDetails(address, data)
   }
 
-  public async isPublicKeyDelegating(publicKey: string): Promise<boolean> {
-    return this.protocolV1.isPublicKeyDelegating({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  public async isPublicKeyDelegating(publicKey: string, data?: any): Promise<boolean> {
+    return this.protocolV1.isPublicKeyDelegating({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
   }
 
-  public async isAddressDelegating(address: string): Promise<boolean> {
-    return this.protocolV1.isAddressDelegating(address)
+  public async isAddressDelegating(address: string, data?: any): Promise<boolean> {
+    return this.protocolV1.isAddressDelegating(address, data)
   }
 
-  public async getDelegatorDetailsFromPublicKey(publicKey: string): Promise<DelegatorDetails> {
-    return this.protocolV1.getDelegatorDetailsFromPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) })
+  public async getDelegatorDetailsFromPublicKey(publicKey: string, data?: any): Promise<DelegatorDetails> {
+    return this.protocolV1.getDelegatorDetailsFromPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
   }
 
-  public async getDelegatorDetailsFromAddress(address: string): Promise<DelegatorDetails> {
-    return this.protocolV1.getDelegatorDetailsFromAddress(address)
+  public async getDelegatorDetailsFromAddress(address: string, data?: any): Promise<DelegatorDetails> {
+    return this.protocolV1.getDelegatorDetailsFromAddress(address, data)
   }
 
-  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[]): Promise<DelegationDetails> {
+  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[], data?: any): Promise<DelegationDetails> {
     return this.protocolV1.getDelegationDetailsFromPublicKey(
       { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
-      delegatees
+      delegatees,
+      data
     )
   }
 
-  public async getDelegationDetailsFromAddress(address: string, delegatees: string[]): Promise<DelegationDetails> {
-    return this.protocolV1.getDelegationDetailsFromAddress(address, delegatees)
+  public async getDelegationDetailsFromAddress(address: string, delegatees: string[], data?: any): Promise<DelegationDetails> {
+    return this.protocolV1.getDelegationDetailsFromAddress(address, delegatees, data)
   }
 
   public async prepareDelegatorActionFromPublicKey(publicKey: string, type: any, data?: any): Promise<any[]> {
-    return this.protocolV1.prepareDelegatorActionFromPublicKey(
+    const transactions = await this.protocolV1.prepareDelegatorActionFromPublicKey(
       { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
       type,
       data
     )
+
+    const transactionsV0 = await Promise.all(
+      transactions.map((transaction) => this.convertV1UnsignedTransactionToV0(transaction, publicKey))
+    )
+
+    return transactionsV0.map((transaction) => transaction.transaction)
   }
 }
 
@@ -1268,40 +1275,40 @@ export class ICoinDelegateSubProtocolAdapter<
     return this.delegateProtocolAdapter.getDefaultDelegatee()
   }
 
-  public async getCurrentDelegateesForPublicKey(publicKey: string): Promise<string[]> {
-    return this.delegateProtocolAdapter.getCurrentDelegateesForPublicKey(publicKey)
+  public async getCurrentDelegateesForPublicKey(publicKey: string, data?: any): Promise<string[]> {
+    return this.delegateProtocolAdapter.getCurrentDelegateesForPublicKey(publicKey, data)
   }
 
-  public async getCurrentDelegateesForAddress(address: string): Promise<string[]> {
-    return this.delegateProtocolAdapter.getCurrentDelegateesForAddress(address)
+  public async getCurrentDelegateesForAddress(address: string, data?: any): Promise<string[]> {
+    return this.delegateProtocolAdapter.getCurrentDelegateesForAddress(address, data)
   }
 
-  public async getDelegateeDetails(address: string): Promise<DelegateeDetails> {
-    return this.delegateProtocolAdapter.getDelegateeDetails(address)
+  public async getDelegateeDetails(address: string, data?: any): Promise<DelegateeDetails> {
+    return this.delegateProtocolAdapter.getDelegateeDetails(address, data)
   }
 
-  public async isPublicKeyDelegating(publicKey: string): Promise<boolean> {
-    return this.delegateProtocolAdapter.isPublicKeyDelegating(publicKey)
+  public async isPublicKeyDelegating(publicKey: string, data?: any): Promise<boolean> {
+    return this.delegateProtocolAdapter.isPublicKeyDelegating(publicKey, data)
   }
 
-  public async isAddressDelegating(address: string): Promise<boolean> {
-    return this.delegateProtocolAdapter.isAddressDelegating(address)
+  public async isAddressDelegating(address: string, data?: any): Promise<boolean> {
+    return this.delegateProtocolAdapter.isAddressDelegating(address, data)
   }
 
-  public async getDelegatorDetailsFromPublicKey(publicKey: string): Promise<DelegatorDetails> {
-    return this.delegateProtocolAdapter.getDelegatorDetailsFromPublicKey(publicKey)
+  public async getDelegatorDetailsFromPublicKey(publicKey: string, data?: any): Promise<DelegatorDetails> {
+    return this.delegateProtocolAdapter.getDelegatorDetailsFromPublicKey(publicKey, data)
   }
 
-  public async getDelegatorDetailsFromAddress(address: string): Promise<DelegatorDetails> {
-    return this.delegateProtocolAdapter.getDelegatorDetailsFromAddress(address)
+  public async getDelegatorDetailsFromAddress(address: string, data?: any): Promise<DelegatorDetails> {
+    return this.delegateProtocolAdapter.getDelegatorDetailsFromAddress(address, data)
   }
 
-  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[]): Promise<DelegationDetails> {
-    return this.delegateProtocolAdapter.getDelegationDetailsFromPublicKey(publicKey, delegatees)
+  public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[], data?: any): Promise<DelegationDetails> {
+    return this.delegateProtocolAdapter.getDelegationDetailsFromPublicKey(publicKey, delegatees, data)
   }
 
-  public async getDelegationDetailsFromAddress(address: string, delegatees: string[]): Promise<DelegationDetails> {
-    return this.delegateProtocolAdapter.getDelegationDetailsFromAddress(address, delegatees)
+  public async getDelegationDetailsFromAddress(address: string, delegatees: string[], data?: any): Promise<DelegationDetails> {
+    return this.delegateProtocolAdapter.getDelegationDetailsFromAddress(address, delegatees, data)
   }
 
   public async prepareDelegatorActionFromPublicKey(publicKey: string, type: any, data?: any): Promise<any[]> {
