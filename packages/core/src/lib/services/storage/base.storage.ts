@@ -8,9 +8,9 @@ export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType exten
 
   public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
     await this.storage.ready()
-    const value: SettingsKeyReturnType[K] = (await this.storage.get(key)) || this.defaultValues[key]
-
-    return value
+    const value = await this.storage.get(key)
+    const result: SettingsKeyReturnType[K] = value !== null && value !== undefined ? value : this.defaultValues[key]
+    return result
   }
 
   public async set<K extends SettingsKey>(key: K, value: SettingsKeyReturnType[K]): Promise<void> {
