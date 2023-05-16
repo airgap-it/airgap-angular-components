@@ -53,19 +53,19 @@ export class ProtocolService {
   public async getSupportedProtocols(): Promise<ICoinProtocol[]> {
     await this.waitReady()
 
-    return this.mainProtocolStore.supportedProtocols
+    return Array.from((await this.mainProtocolStore.supportedProtocols).values())
   }
 
   public async getPassiveProtocols(): Promise<ICoinProtocol[]> {
     await this.waitReady()
 
-    return this.mainProtocolStore.passiveProtocols
+    return Array.from(this.mainProtocolStore.passiveProtocols.values())
   }
 
   public async getActiveProtocols(): Promise<ICoinProtocol[]> {
     await this.waitReady()
 
-    return this.mainProtocolStore.activeProtocols
+    return Array.from(this.mainProtocolStore.activeProtocols.values())
   }
 
   public async getSupportedSubProtocols(): Promise<SubProtocolsMap> {
@@ -196,9 +196,17 @@ export class ProtocolService {
         return this.mainProtocolStore.isIdentifierValid(protocolIdentifier) ? protocol : undefined
       })
     )
-    const validProtocols: ICoinProtocol[] = filtered.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+    const validProtocols: [string, ICoinProtocol][] = await Promise.all(
+      filtered
+        .filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+        .map(async (protocol: ICoinProtocol) => {
+          const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
 
-    await this.mainProtocolStore.addActiveProtocols(validProtocols)
+          return [protocolAndNetworkIdentifier, protocol] as [string, ICoinProtocol]
+        })
+    )
+
+    await this.mainProtocolStore.addActiveProtocols(new Map(validProtocols))
   }
 
   public async addActiveSubProtocols(protocolOrProtocols: ICoinProtocol | ICoinProtocol[]): Promise<void> {
@@ -237,6 +245,13 @@ export class ProtocolService {
         {}
       )
     )
+  }
+
+  public async removeProtocols(protocolIdentifiers: ProtocolSymbols[]): Promise<void> {
+    await Promise.all([
+      this.mainProtocolStore.removeProtocols(protocolIdentifiers as MainProtocolSymbols[]),
+      this.subProtocolStore.removeProtocols(protocolIdentifiers as SubProtocolSymbols[])
+    ])
   }
 
   public async isProtocolAvailable(protocolIdentifier: ProtocolSymbols, networkIdentifier: string): Promise<boolean> {

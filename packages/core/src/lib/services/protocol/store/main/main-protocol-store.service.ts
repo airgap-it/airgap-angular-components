@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@angular/core'
-import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
-import { ICoinProtocol, MainProtocolSymbols, ProtocolNetwork, ProtocolSymbols, isNetworkEqual } from '@airgap/coinlib-core'
-import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
+import { ICoinProtocol, MainProtocolSymbols, ProtocolNetwork } from '@airgap/coinlib-core'
+import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
 import { IsolatedModulesPlugin } from '../../../../capacitor-plugins/definitions'
+
+export type ProtocolsMap = Map<string, ICoinProtocol>
 
 export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
 
@@ -15,11 +16,28 @@ export type MainProtocolStoreConfig = BaseProtocolStoreConfig<ICoinProtocol[]>
 export class MainProtocolStoreService extends BaseProtocolStoreService<
   ICoinProtocol,
   MainProtocolSymbols,
-  ICoinProtocol[],
+  ProtocolsMap,
   MainProtocolStoreConfig
 > {
   constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
     super('MainProtocolService')
+  }
+
+  public async removeProtocols(identifiers: MainProtocolSymbols[]): Promise<void> {
+    const identifiersSet: Set<string> = new Set(identifiers)
+    const protocolKeys: string[] = Array.from((await this.supportedProtocols).keys()).filter((key: string) => {
+      const { protocol: protocolIdentifier } = splitProtocolNetworkIdentifier(key)
+
+      return identifiersSet.has(protocolIdentifier)
+    })
+
+    protocolKeys.forEach((key: string) => {
+      this._activeProtocols.delete(key)
+      this._passiveProtocols.delete(key)
+    })
+
+    // reset supported protocols
+    this._supportedProtocols = undefined
   }
 
   public isIdentifierValid(identifier: string): boolean {
@@ -35,22 +53,10 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     try {
       const targetNetwork: ProtocolNetwork | string =
         network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, identifier)).network
-      const protocols: ICoinProtocol[] = activeOnly ? this.activeProtocols : await this.supportedProtocols
-      const candidates: (ICoinProtocol | undefined)[] = await Promise.all(
-        protocols.map(async (protocol: ICoinProtocol) => {
-          const protocolIdentifier: ProtocolSymbols = await protocol.getIdentifier()
-          const protocolOptions: ProtocolOptions = await protocol.getOptions()
 
-          const identifiersMatch = protocolIdentifier === identifier
-          const networksMatch =
-            typeof targetNetwork === 'string'
-              ? protocolOptions.network.identifier === targetNetwork
-              : isNetworkEqual(protocolOptions.network, targetNetwork)
-
-          return identifiersMatch && networksMatch ? protocol : undefined
-        })
-      )
-      const found: ICoinProtocol | undefined = candidates.find((candidate: ICoinProtocol | undefined) => candidate !== undefined)
+      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(identifier, targetNetwork)
+      const protocols: ProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
+      const found: ICoinProtocol | undefined = protocols.get(protocolAndNetworkIdentifier)
 
       if (!found && retry) {
         return this.getProtocolByIdentifier(identifier, undefined, activeOnly, false)
@@ -66,50 +72,55 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   }
 
   public async getNetworksForProtocol(identifier: MainProtocolSymbols, activeOnly: boolean = true): Promise<ProtocolNetwork[]> {
-    const protocols: ICoinProtocol[] = activeOnly ? this.activeProtocols : await this.supportedProtocols
-    const networks: (ProtocolNetwork | undefined)[] = await Promise.all(
-      protocols.map(async (protocol: ICoinProtocol) => {
-        return (await protocol.getIdentifier()) === identifier ? (await protocol.getOptions()).network : undefined
+    const protocols: ProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
+    const keys: string[] = Array.from(protocols.keys()).filter((protocolAndNetworkIdentifier: string) => {
+      const { protocol: protocolIdentifier } = splitProtocolNetworkIdentifier(protocolAndNetworkIdentifier)
+
+      return protocolIdentifier === identifier
+    })
+
+    return Promise.all(
+      keys.map(async (key: string) => {
+        const protocol: ICoinProtocol | undefined = protocols.get(key)
+
+        return (await protocol.getOptions()).network
       })
     )
-
-    return networks.filter((network: ProtocolNetwork | undefined) => network !== undefined)
   }
 
-  protected async transformConfig(config: MainProtocolStoreConfig): Promise<BaseProtocolStoreConfig<ICoinProtocol[]>> {
-    // do nothing, `config` has already the desired interface
-    return config
+  protected async transformConfig(config: MainProtocolStoreConfig): Promise<BaseProtocolStoreConfig<ProtocolsMap>> {
+    const [passiveProtocols, activeProtocols]: ProtocolsMap[] = await Promise.all([
+      this.createProtocolMap(config.passiveProtocols),
+      this.createProtocolMap(config.activeProtocols)
+    ])
+
+    return { passiveProtocols, activeProtocols }
   }
 
-  protected async mergeProtocols(protocols1: ICoinProtocol[], protocols2: ICoinProtocol[] | undefined): Promise<ICoinProtocol[]> {
-    return protocols1.concat(protocols2 ?? [])
+  protected async mergeProtocols(protocols1: ProtocolsMap, protocols2: ProtocolsMap | undefined): Promise<ProtocolsMap> {
+    const entries1: [string, ICoinProtocol][] = Array.from(protocols1.entries())
+    const entries2: [string, ICoinProtocol][] = protocols2 !== undefined ? Array.from(protocols2.entries()) : []
+
+    return new Map(entries1.concat(entries2))
   }
 
   protected async removeProtocolDuplicates(): Promise<void> {
     // if a protocol has been set as passive and active, it's considered active
-    const presentIdentifiers: Set<string> = new Set()
-
-    // keep the last occurance
-    const activeProtocolsReversed = await this.filterProtocolsIfIdentifierRegistered(this.activeProtocols.reverse(), presentIdentifiers)
-    this._activeProtocols = activeProtocolsReversed.reverse()
-
-    const passiveProtocolsReversed = await this.filterProtocolsIfIdentifierRegistered(this.passiveProtocols.reverse(), presentIdentifiers)
-    this._passiveProtocols = passiveProtocolsReversed.reverse()
+    const activeIdentifiers: string[] = Array.from(this._activeProtocols.keys())
+    activeIdentifiers.forEach((identifier: string) => {
+      this._passiveProtocols.delete(identifier)
+    })
   }
 
-  private async filterProtocolsIfIdentifierRegistered(protocols: ICoinProtocol[], registry: Set<string>): Promise<ICoinProtocol[]> {
-    const filtered: (ICoinProtocol | undefined)[] = await Promise.all(
+  private async createProtocolMap(protocols: ICoinProtocol[]): Promise<ProtocolsMap> {
+    const protocolsWithIdentifiers: [string, ICoinProtocol][] = await Promise.all(
       protocols.map(async (protocol: ICoinProtocol) => {
         const protocolAndNetworkIdentifier = await getProtocolAndNetworkIdentifier(protocol)
-        const alreadyPresent: boolean = registry.has(protocolAndNetworkIdentifier)
-        if (!alreadyPresent) {
-          registry.add(protocolAndNetworkIdentifier)
-        }
 
-        return !alreadyPresent ? protocol : undefined
+        return [protocolAndNetworkIdentifier, protocol] as [string, ICoinProtocol]
       })
     )
 
-    return filtered.filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
+    return new Map(protocolsWithIdentifiers)
   }
 }

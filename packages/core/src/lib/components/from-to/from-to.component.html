@@ -31,6 +31,13 @@
         [text]="destination"
       ></airgap-titled-text>
 
+      <airgap-titled-text 
+        *ngFor="let labeledValue of labeled"
+        class="ion-padding-bottom"
+        [title]="labeledValue[0]"
+        [text]="labeledValue[1]"
+      ></airgap-titled-text>
+
       <airgap-titled-text
         *ngIf="transaction.amount"
         class="ion-padding-bottom"

@@ -126,6 +126,9 @@ export class BCURTypesGenerator extends IACQrGenerator {
       cryptoKeyPathComponents.push(new PathComponent({ index, hardened }))
     }
 
+    const parentFingerprint = Buffer.alloc(4)
+    parentFingerprint.writeUInt32BE(extendedPublicKey.parentFingerprint, 0)
+
     const cryptoAccount = new CryptoAccount(bufferFrom(account.masterFingerprint, 'hex'), [
       new CryptoOutput(
         [ScriptExpressions.WITNESS_PUBLIC_KEY_HASH],
@@ -134,7 +137,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
           key: extendedPublicKey.publicKey,
           chainCode: extendedPublicKey.chainCode,
           origin: new CryptoKeypath(cryptoKeyPathComponents, extendedPublicKey.fingerprint, extendedPublicKey.depth),
-          parentFingerprint: bufferFrom(new Int32Array([extendedPublicKey.parentFingerprint]).buffer, undefined),
+          parentFingerprint,
           name: account.groupLabel
         })
       )

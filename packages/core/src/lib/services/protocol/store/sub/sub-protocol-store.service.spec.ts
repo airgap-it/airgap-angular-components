@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { TestBed } from '@angular/core/testing'
 
 import { SubProtocolSymbols, NetworkType, ProtocolNetwork } from '@airgap/coinlib-core'
@@ -9,6 +10,7 @@ import {
   TezosProtocol,
   TezosProtocolNetwork,
   TezosProtocolOptions,
+  TezosQUIPU,
   TezosStaker,
   TezosStakerProtocolConfig,
   TezosUSD,
@@ -190,6 +192,36 @@ describe('SubProtocolStoreService', () => {
       const expectedActiveSubIdentifiers = [SubProtocolSymbols.XTZ_USD]
 
       expect(service.isInitialized).toBeTrue()
+
+      expect(supportedSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.concat(expectedPassiveSubIdentifiers).sort())
+
+      expect(activeSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.sort())
+      expect(passiveSubIdentifiers.sort()).toEqual(expectedPassiveSubIdentifiers.sort())
+    })
+  })
+
+  describe('Remove Protocols', () => {
+    it('should remove protocols by identifiers', async () => {
+      await service.init({
+        activeSubProtocols: [
+          [new TezosProtocol(), new TezosBTC()],
+          [new TezosProtocol(), new TezosStaker()]
+        ],
+        passiveSubProtocols: [
+          [new TezosProtocol(), new TezosUSD()],
+          [new TezosProtocol(), new TezosQUIPU()]
+        ]
+      })
+
+      await service.removeProtocols([SubProtocolSymbols.XTZ_STKR, SubProtocolSymbols.XTZ_QUIPU])
+
+      const supportedSubIdentifiers = await getSubIdentifiers(await service.supportedProtocols)
+
+      const activeSubIdentifiers = await getSubIdentifiers(service.activeProtocols)
+      const passiveSubIdentifiers = await getSubIdentifiers(service.passiveProtocols)
+
+      const expectedActiveSubIdentifiers = [SubProtocolSymbols.XTZ_BTC]
+      const expectedPassiveSubIdentifiers = [SubProtocolSymbols.XTZ_USD]
 
       expect(supportedSubIdentifiers.sort()).toEqual(expectedActiveSubIdentifiers.concat(expectedPassiveSubIdentifiers).sort())
 

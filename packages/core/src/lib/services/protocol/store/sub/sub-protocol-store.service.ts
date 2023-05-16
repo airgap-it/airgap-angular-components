@@ -8,7 +8,7 @@ import {
   isNetworkEqual
 } from '@airgap/coinlib-core'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
-import { getProtocolAndNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
+import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
 import { ethTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
@@ -48,6 +48,39 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     }
 
     return this._ethTokenIdentifers
+  }
+
+  public async removeProtocols(identifiers: SubProtocolSymbols[]): Promise<void> {
+    const identifiersSet: Set<string> = new Set(identifiers)
+    const mainIdentifiersSet: Set<string> = new Set(identifiers.map(getMainIdentifier))
+    const protocolKeys = Object.keys(await this.supportedProtocols)
+      .map((key: string): [string, 'fully' | 'partially'] | undefined => {
+        const { protocol: protocolIdentifier } = splitProtocolNetworkIdentifier(key)
+
+        return identifiersSet.has(protocolIdentifier)
+          ? [key, 'fully']
+          : mainIdentifiersSet.has(protocolIdentifier)
+          ? [key, 'partially']
+          : undefined
+      })
+      .filter((key) => key !== undefined)
+
+    protocolKeys.forEach(([key, mode]) => {
+      if (mode === 'fully') {
+        delete this._activeProtocols[key]
+        delete this._passiveProtocols[key]
+      } else {
+        identifiers.forEach((identifier: SubProtocolSymbols) => {
+          // eslint-disable-next-line no-unused-expressions
+          this._activeProtocols[key] && delete this._activeProtocols[key][identifier]
+          // eslint-disable-next-line no-unused-expressions
+          this._passiveProtocols[key] && delete this._passiveProtocols[key][identifier]
+        })
+      }
+    })
+
+    // reset supported protocols
+    this._supportedProtocols = undefined
   }
 
   public isIdentifierValid(identifier: string): boolean {
