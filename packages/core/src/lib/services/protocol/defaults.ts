@@ -1,107 +1,94 @@
-import { AeternityProtocol } from '@airgap/aeternity'
-import { AstarProtocol, ShidenProtocol } from '@airgap/astar'
-import { BitcoinSegwitProtocol, BitcoinProtocol } from '@airgap/bitcoin'
-import { ICoinProtocol, ICoinSubProtocol, SubProtocolSymbols } from '@airgap/coinlib-core'
-import { CosmosProtocol } from '@airgap/cosmos'
-import {
-  EthereumProtocol,
-  GenericERC20,
-  EthereumERC20ProtocolOptions,
-  EthereumProtocolNetwork,
-  EthereumERC20ProtocolConfig
-} from '@airgap/ethereum'
-import { GroestlcoinProtocol } from '@airgap/groestlcoin'
-import { MoonriverProtocol, MoonbeamProtocol } from '@airgap/moonbeam'
-import { PolkadotProtocol, KusamaProtocol } from '@airgap/polkadot'
-import {
-  TezosProtocol,
-  TezosUUSD,
-  TezosYOU,
-  TezosBTC,
-  TezosUSD,
-  TezosUDEFI,
-  TezosCTez,
-  TezosPlenty,
-  TezosWRAP,
-  TezosQUIPU,
-  TezosKolibriUSD,
-  TezosUBTC,
-  TezosDOGA,
-  TezosSIRS,
-  TezosBTCTez,
-  TezosETH,
-  TezosUSDT,
-  TezosKtProtocol
-} from '@airgap/tezos'
+/* eslint-disable @typescript-eslint/no-use-before-define */
+import { ICoinProtocol, ICoinSubProtocol } from '@airgap/coinlib-core'
+import { erc20Tokens } from '@airgap/ethereum'
 import { Token } from '../../types/Token'
-import { ethTokens } from './tokens'
+import {
+  createV0AeternityProtocol,
+  createV0AstarProtocol,
+  createV0BitcoinProtocol,
+  createV0BitcoinSegwitProtocol,
+  createV0CosmosProtocol,
+  createV0ERC20Token,
+  createV0EthereumProtocol,
+  createV0GroestlcoinProtocol,
+  createV0KusamaProtocol,
+  createV0MoonbeamProtocol,
+  createV0MoonriverProtocol,
+  createV0PolkadotProtocol,
+  createV0ShidenProtocol,
+  createV0TezosBTCTezProtocol,
+  createV0TezosCTezProtocol,
+  createV0TezosDogamiProtocol,
+  createV0TezosETHTezProtocol,
+  createV0TezosKolibriUSDProtocol,
+  createV0TezosKtProtocol,
+  createV0TezosPlentyProtocol,
+  createV0TezosProtocol,
+  createV0TezosQuipuswapProtocol,
+  createV0TezosSiriusProtocol,
+  createV0TezosTetherUSDProtocol,
+  createV0TezosTzBTCProtocol,
+  createV0TezosUBTCProtocol,
+  createV0TezosUDEFIProtocol,
+  createV0TezosUSDTezProtocol,
+  createV0TezosUUSDProtocol,
+  createV0TezosWrapProtocol,
+  createV0TezosYouProtocol
+} from '../../utils/protocol/protocol-v0-adapter'
 
-export function getDefaultPassiveProtocols(): ICoinProtocol[] {
+export async function getDefaultPassiveProtocols(): Promise<ICoinProtocol[]> {
   return []
 }
 
-export function getDefaultActiveProtocols(): ICoinProtocol[] {
-  return [
-    new BitcoinSegwitProtocol(),
-    new EthereumProtocol(),
-    new TezosProtocol(),
-    new PolkadotProtocol(),
-    new KusamaProtocol(),
-    new CosmosProtocol(),
-    new AeternityProtocol(),
-    new GroestlcoinProtocol(),
-    new MoonriverProtocol(),
-    new MoonbeamProtocol(),
-    new BitcoinProtocol(),
-    new AstarProtocol(),
-    new ShidenProtocol()
-  ]
+export async function getDefaultActiveProtocols(): Promise<ICoinProtocol[]> {
+  return Promise.all<ICoinProtocol>([
+    createV0BitcoinSegwitProtocol(),
+    createV0EthereumProtocol(),
+    createV0TezosProtocol(),
+    createV0PolkadotProtocol(),
+    createV0KusamaProtocol(),
+    createV0CosmosProtocol(),
+    createV0AeternityProtocol(),
+    createV0GroestlcoinProtocol(),
+    createV0MoonriverProtocol(),
+    createV0MoonbeamProtocol(),
+    createV0BitcoinProtocol(),
+    createV0AstarProtocol(),
+    createV0ShidenProtocol()
+  ])
 }
 
-export function getDefaultPassiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
+export async function getDefaultPassiveSubProtocols(): Promise<[ICoinProtocol, ICoinSubProtocol][]> {
   return []
 }
 
-export function getDefaultActiveSubProtocols(): [ICoinProtocol, ICoinSubProtocol][] {
-  const tezosProtocol = new TezosProtocol()
-  const ethereumProtocol = new EthereumProtocol()
+export async function getDefaultActiveSubProtocols(): Promise<[ICoinProtocol, ICoinSubProtocol][]> {
+  const [tezosProtocol, ethereumProtocol] = await Promise.all([createV0TezosProtocol(), createV0EthereumProtocol()])
 
-  return [
-    [tezosProtocol, new TezosUUSD()],
-    [tezosProtocol, new TezosYOU()],
-    [tezosProtocol, new TezosBTC()],
-    [tezosProtocol, new TezosUSD()],
-    [tezosProtocol, new TezosUDEFI()],
-    [tezosProtocol, new TezosCTez()],
-    [tezosProtocol, new TezosPlenty()],
-    [tezosProtocol, new TezosWRAP()],
-    [tezosProtocol, new TezosQUIPU()],
-    [tezosProtocol, new TezosKolibriUSD()],
-    [tezosProtocol, new TezosUBTC()],
-    [tezosProtocol, new TezosDOGA()],
-    [tezosProtocol, new TezosSIRS()],
-    [tezosProtocol, new TezosBTCTez()],
-    [tezosProtocol, new TezosETH()],
-    [tezosProtocol, new TezosUSDT()],
-    [tezosProtocol, new TezosKtProtocol()],
-    ...ethTokens.map(
-      (token: Token) =>
-        [
-          ethereumProtocol,
-          new GenericERC20(
-            new EthereumERC20ProtocolOptions(
-              new EthereumProtocolNetwork(),
-              new EthereumERC20ProtocolConfig(
-                token.symbol,
-                token.name,
-                token.marketSymbol,
-                token.identifier as SubProtocolSymbols,
-                token.contractAddress,
-                token.decimals
-              )
-            )
-          )
-        ] as [EthereumProtocol, GenericERC20]
-    )
-  ]
+  return Promise.all([
+    createV0TezosUUSDProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosYouProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosTzBTCProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosUSDTezProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosUDEFIProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosCTezProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosPlentyProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosWrapProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosQuipuswapProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosKolibriUSDProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosUBTCProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosDogamiProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosSiriusProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosBTCTezProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosETHTezProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosTetherUSDProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    createV0TezosKtProtocol().then(pairWithMainProtocol(tezosProtocol)),
+    ...Object.values(erc20Tokens).map((token: Token) => createV0ERC20Token(token).then(pairWithMainProtocol(ethereumProtocol)))
+  ])
+}
+
+function pairWithMainProtocol(mainProtocol: ICoinProtocol): (subProtocol: ICoinSubProtocol) => [ICoinProtocol, ICoinSubProtocol] {
+  return (subProtocol: ICoinSubProtocol): [ICoinProtocol, ICoinSubProtocol] => {
+    return [mainProtocol, subProtocol] as [ICoinProtocol, ICoinSubProtocol]
+  }
 }

@@ -1,18 +1,17 @@
-import { TestBed } from '@angular/core/testing'
-import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
-import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
+import { TestBed, waitForAsync } from '@angular/core/testing'
+import { TestBedUtils } from '../../../../test/utils/test-bed'
 
 import { AddressService } from './address.service'
 
 describe('AddressService', () => {
   let service: AddressService
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }]
-    })
+  let testBedUtils: TestBedUtils
+  beforeEach(waitForAsync(async () => {
+    testBedUtils = new TestBedUtils()
+    await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
     service = TestBed.inject(AddressService)
-  })
+  }))
 
   it('should be created', () => {
     expect(service).toBeTruthy()

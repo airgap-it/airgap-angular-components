@@ -1,30 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
-import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
-import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
+import { TestBed, waitForAsync } from '@angular/core/testing'
+import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { ProtocolService } from '../../services/protocol/protocol.service'
-import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'
-import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
 import { FeeConverterPipe } from './fee-converter.pipe'
 
 describe('FeeConverter Pipe', () => {
   let feeConverterPipe: FeeConverterPipe
   let protocolService: ProtocolService
-  let isolatedModules: IsolatedModulesPlugin
 
-  beforeAll(() => {
-    isolatedModules = new IsolatedModules()
-    protocolService = new ProtocolService(
-      new MainProtocolStoreService(isolatedModules),
-      new SubProtocolStoreService(isolatedModules),
-      isolatedModules
-    )
-    protocolService.init()
-  })
+  let testBedUtils: TestBedUtils
 
-  beforeEach(() => {
+  beforeEach(waitForAsync(async () => {
+    testBedUtils = new TestBedUtils()
+    await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+
+    protocolService = TestBed.inject(ProtocolService)
+    await protocolService.init()
+
     feeConverterPipe = new FeeConverterPipe(protocolService)
-  })
+  }))
 
   it('should display very small ETH number to a non-scientific string representation', async () => {
     expect(await feeConverterPipe.transform('1', { protocol: MainProtocolSymbols.ETH })).toEqual('0.000000000000000001 ETH')

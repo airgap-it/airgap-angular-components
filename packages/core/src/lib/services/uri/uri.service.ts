@@ -16,9 +16,6 @@ const EXTENSION = {
   providedIn: 'root'
 })
 export class UriService {
-
-  constructor() { }
-
   public resolveUriType(uri: string): UriType {
     if (uri.startsWith(SCHEME.data)) {
       return 'data'
@@ -29,7 +26,7 @@ export class UriService {
     }
   }
 
-  public splitDataUri(uri: string): { mediaType?: string, isBinary: boolean, data: string } | undefined {
+  public splitDataUri(uri: string): { mediaType?: string; isBinary: boolean; data: string } | undefined {
     if (!uri.startsWith(SCHEME.data)) {
       return undefined
     }
@@ -38,15 +35,15 @@ export class UriService {
     const extensionSeparatorIndex: number = uri.indexOf(';')
 
     const mediaType: string = uri.slice(
-      `${SCHEME.data}:`.length, 
+      `${SCHEME.data}:`.length,
       extensionSeparatorIndex !== -1 ? extensionSeparatorIndex : dataSeparatorIndex
     )
 
     const isBinary: boolean = uri.includes(EXTENSION.base64)
     const data: string = uri.slice(dataSeparatorIndex + 1)
 
-    return { 
-      mediaType: mediaType.length > 0 ? mediaType : undefined, 
+    return {
+      mediaType: mediaType.length > 0 ? mediaType : undefined,
       isBinary,
       data
     }
@@ -54,6 +51,7 @@ export class UriService {
 
   public data(data: string, mediaType: string = '', isBinary: boolean = false): string {
     const extension: string = isBinary ? `;${EXTENSION.base64}` : ''
+
     return `${SCHEME.data}:${mediaType}${extension},${data}`
   }
 }

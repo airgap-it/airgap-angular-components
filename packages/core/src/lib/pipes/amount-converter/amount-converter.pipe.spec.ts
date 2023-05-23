@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BigNumber from 'bignumber.js'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
+import { TestBed, waitForAsync } from '@angular/core/testing'
 import { ProtocolService } from '../../services/protocol/protocol.service'
-import { SubProtocolStoreService } from '../../services/protocol/store/sub/sub-protocol-store.service'
-import { MainProtocolStoreService } from '../../services/protocol/store/main/main-protocol-store.service'
-import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
-import { IsolatedModules } from '../../capacitor-plugins/isolated-modules/isolated-modules.plugin'
+import { TestBedUtils } from '../../../../test/utils/test-bed'
 import { AmountConverterPipe } from './amount-converter.pipe'
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -14,21 +12,18 @@ const BN = BigNumber.clone({ FORMAT: AmountConverterPipe.numberFormat })
 describe('AmountConverter Pipe', () => {
   let protocolService: ProtocolService
   let amountConverterPipe: AmountConverterPipe
-  let isolatedModules: IsolatedModulesPlugin
 
-  beforeAll(() => {
-    isolatedModules = new IsolatedModules()
-    protocolService = new ProtocolService(
-      new MainProtocolStoreService(isolatedModules),
-      new SubProtocolStoreService(isolatedModules),
-      isolatedModules
-    )
-    protocolService.init()
-  })
+  let testBedUtils: TestBedUtils
 
-  beforeEach(() => {
+  beforeEach(waitForAsync(async () => {
+    testBedUtils = new TestBedUtils()
+    await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+
+    protocolService = TestBed.inject(ProtocolService)
+    await protocolService.init()
+
     amountConverterPipe = new AmountConverterPipe(protocolService)
-  })
+  }))
 
   describe('format number with commas', () => {
     it('should format short number', () => {

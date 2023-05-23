@@ -11,14 +11,14 @@ describe('FromToComponent', () => {
 
   let testBedUtils: TestBedUtils
 
-  beforeEach(
-    waitForAsync(async () => {
-      testBedUtils = new TestBedUtils()
-      await TestBed.configureTestingModule(testBedUtils.moduleDef({
+  beforeEach(waitForAsync(async () => {
+    testBedUtils = new TestBedUtils()
+    await TestBed.configureTestingModule(
+      testBedUtils.moduleDef({
         providers: [{ provide: CLIPBOARD_PLUGIN, useValue: new ClipboardMock() }]
-      })).compileComponents()
-    })
-  )
+      })
+    ).compileComponents()
+  }))
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FromToComponent)

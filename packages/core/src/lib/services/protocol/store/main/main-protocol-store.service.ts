@@ -1,10 +1,9 @@
-import { Inject, Injectable } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { ICoinProtocol, MainProtocolSymbols, ProtocolNetwork } from '@airgap/coinlib-core'
 import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
-import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
-import { IsolatedModulesPlugin } from '../../../../capacitor-plugins/definitions'
+import { ModulesController } from '../../../modules/controller/modules.controller'
 
 export type ProtocolsMap = Map<string, ICoinProtocol>
 
@@ -19,7 +18,7 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   ProtocolsMap,
   MainProtocolStoreConfig
 > {
-  constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
+  constructor(private readonly modulesController: ModulesController) {
     super('MainProtocolService')
   }
 
@@ -52,7 +51,7 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   ): Promise<ICoinProtocol | undefined> {
     try {
       const targetNetwork: ProtocolNetwork | string =
-        network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, identifier)).network
+        network ?? (await getProtocolOptionsByIdentifier(this.modulesController, identifier)).network
 
       const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(identifier, targetNetwork)
       const protocols: ProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols

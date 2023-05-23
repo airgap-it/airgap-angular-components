@@ -12,7 +12,7 @@ import {
   PathComponent,
   CryptoPSBT
 } from '@keystonehq/bc-ur-registry'
-import { SignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { BitcoinSegwitTransactionSignResponse } from '@airgap/bitcoin'
 import { bufferFrom, MainProtocolSymbols } from '@airgap/coinlib-core'
 import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 
@@ -147,7 +147,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
   }
 
   private async generatePSBTMessage(data: IACMessageDefinitionObjectV3): Promise<CryptoPSBT> {
-    const transaction = data.payload as SignedBitcoinSegwitTransaction
+    const transaction = data.payload as BitcoinSegwitTransactionSignResponse
 
     const psbt = bufferFrom(transaction.transaction, 'hex')
 

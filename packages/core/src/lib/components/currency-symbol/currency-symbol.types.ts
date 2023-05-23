@@ -25,8 +25,16 @@ export interface LazySymbolValue extends BaseSymbolValue<'lazy'>, LazySymbolType
   url?: string
 }
 
-export type SymbolType = DefaultSymbolType | AssetSymbolType | LazySymbolType
-export type SymbolValue = DefaultSymbolValue | AssetSymbolValue | LazySymbolValue
+export interface IsolatedSymbolType extends BaseSymbolType<'isolated'> {
+  symbolInput: SymbolInput
+}
+
+export interface IsolatedSymbolValue extends BaseSymbolValue<'isolated'>, IsolatedSymbolType {
+  url?: string
+}
+
+export type SymbolType = DefaultSymbolType | AssetSymbolType | IsolatedSymbolType | LazySymbolType
+export type SymbolValue = DefaultSymbolValue | AssetSymbolValue | IsolatedSymbolValue | LazySymbolValue
 
 export interface SymbolSrc {
   value: SymbolValue

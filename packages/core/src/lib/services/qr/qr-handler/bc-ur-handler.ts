@@ -1,4 +1,4 @@
-import { UnsignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { BitcoinSegwitTransactionSignRequest } from '@airgap/bitcoin'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACMessageDefinitionObjectV3, generateId, IACMessageType } from '@airgap/serializer'
 import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
@@ -188,7 +188,7 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
   // }
 
   private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
-    const payload: UnsignedBitcoinSegwitTransaction = {
+    const payload: BitcoinSegwitTransactionSignRequest = {
       transaction: { psbt },
       publicKey: ''
     }

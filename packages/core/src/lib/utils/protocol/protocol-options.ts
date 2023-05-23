@@ -1,12 +1,12 @@
 /* eslint-disable complexity */
-import { AeternityProtocolNetwork, AeternityProtocolOptions } from '@airgap/aeternity'
-import { BitcoinProtocolNetwork, BitcoinProtocolOptions } from '@airgap/bitcoin'
-import { CosmosProtocolNetwork, CosmosProtocolOptions } from '@airgap/cosmos'
-import { EthereumProtocolNetwork, EthereumProtocolOptions } from '@airgap/ethereum'
-import { GroestlcoinProtocolNetwork, GroestlcoinProtocolOptions } from '@airgap/groestlcoin'
-import { KusamaProtocolNetwork, KusamaProtocolOptions, PolkadotProtocolNetwork, PolkadotProtocolOptions } from '@airgap/polkadot'
-import { MoonbaseProtocolNetwork, MoonbaseProtocolOptions, MoonriverProtocolNetwork, MoonriverProtocolOptions } from '@airgap/moonbeam'
-import { AstarProtocolNetwork, AstarProtocolOptions, ShidenProtocolNetwork, ShidenProtocolOptions } from '@airgap/astar'
+import { AeternityProtocolNetwork, AeternityProtocolOptions } from '@airgap/aeternity/v0'
+import { BitcoinProtocolNetwork, BitcoinProtocolOptions } from '@airgap/bitcoin/v0'
+import { CosmosProtocolNetwork, CosmosProtocolOptions } from '@airgap/cosmos/v0'
+import { EthereumProtocolNetwork, EthereumProtocolOptions } from '@airgap/ethereum/v0'
+import { GroestlcoinProtocolNetwork, GroestlcoinProtocolOptions } from '@airgap/groestlcoin/v0'
+import { KusamaProtocolNetwork, KusamaProtocolOptions, PolkadotProtocolNetwork, PolkadotProtocolOptions } from '@airgap/polkadot/v0'
+import { MoonbaseProtocolNetwork, MoonbaseProtocolOptions, MoonriverProtocolNetwork, MoonriverProtocolOptions } from '@airgap/moonbeam/v0'
+import { AstarProtocolNetwork, AstarProtocolOptions, ShidenProtocolNetwork, ShidenProtocolOptions } from '@airgap/astar/v0'
 import {
   TezosBTCProtocolConfig,
   TezosBTCTezProtocolConfig,
@@ -30,26 +30,20 @@ import {
   TezosWrappedProtocolConfig,
   TezosWRAPProtocolConfig,
   TezosYOUProtocolConfig
-} from '@airgap/tezos'
-import {
-  ProtocolSymbols,
-  ProtocolNetwork,
-  MainProtocolSymbols,
-  SubProtocolSymbols,
-  assertNever,
-  Domain,
-  NetworkType
-} from '@airgap/coinlib-core'
+} from '@airgap/tezos/v0'
+import { ProtocolSymbols, ProtocolNetwork, MainProtocolSymbols, SubProtocolSymbols, assertNever, Domain } from '@airgap/coinlib-core'
 import { NotFoundError } from '@airgap/coinlib-core/errors'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
 import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
 import { COREUM_PROTOCOL_NETWORK } from '@airgap/coreum/v1/protocol/CoreumProtocol'
-import { ProtocolNetwork as ProtocolNetworkV1 } from '@airgap/module-kit'
 import { CKBTC_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/icrc/CkBTCProtocol'
-import { ProtocolNetworkAdapter, ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
-import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
+import { ICPBlockExplorer } from '@airgap/icp'
+import { CoreumBlockExplorer } from '@airgap/coreum'
+import { ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
+import { ModulesController } from '../../services/modules/controller/modules.controller'
+import { convertNetworkV1ToV0 } from './protocol-v0-adapter'
 
 export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
@@ -58,16 +52,16 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
   switch (identifier) {
     case MainProtocolSymbols.ICP:
       return new ProtocolOptionsAdapter(
-        network ?? new ProtocolNetworkAdapter(ICP_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, ICP_MAINNET_PROTOCOL_NETWORK.rpcUrl)
+        network ?? convertNetworkV1ToV0(ICP_MAINNET_PROTOCOL_NETWORK, new ICPBlockExplorer(ICP_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl))
       )
     case MainProtocolSymbols.ICP_CKBTC:
       return new ProtocolOptionsAdapter(
         network ??
-          new ProtocolNetworkAdapter(CKBTC_MAINNET_PROTOCOL_NETWORK.name, NetworkType.MAINNET, CKBTC_MAINNET_PROTOCOL_NETWORK.rpcUrl)
+          convertNetworkV1ToV0(CKBTC_MAINNET_PROTOCOL_NETWORK, new ICPBlockExplorer(CKBTC_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl))
       )
     case MainProtocolSymbols.COREUM:
       return new ProtocolOptionsAdapter(
-        network ?? new ProtocolNetworkAdapter(COREUM_PROTOCOL_NETWORK.name, NetworkType.MAINNET, COREUM_PROTOCOL_NETWORK.rpcUrl)
+        network ?? convertNetworkV1ToV0(COREUM_PROTOCOL_NETWORK, new CoreumBlockExplorer(COREUM_PROTOCOL_NETWORK.blockExplorerUrl))
       )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
@@ -205,11 +199,11 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
 
 const cache: Record<string, ProtocolOptions> = {}
 export const getProtocolOptionsByIdentifier: (
-  isolatedModules: IsolatedModulesPlugin,
+  modulesController: ModulesController,
   identifier: ProtocolSymbols,
   network?: ProtocolNetwork
 ) => Promise<ProtocolOptions> = async (
-  isolatedModules: IsolatedModulesPlugin,
+  modulesController: ModulesController,
   identifier: ProtocolSymbols,
   network?: ProtocolNetwork
 ): Promise<ProtocolOptions> => {
@@ -221,16 +215,11 @@ export const getProtocolOptionsByIdentifier: (
     }
 
     if (!cache[identifier]) {
-      const defaultNetwork = (
-        await isolatedModules.callMethod({
-          target: 'onlineProtocol',
-          method: 'getNetwork',
-          protocolIdentifier: identifier
-        })
-      ).value as ProtocolNetworkV1
+      const defaultNetwork = await modulesController.getProtocolNetwork(identifier)
+      const blockExplorer = defaultNetwork ? await modulesController.getProtocolBlockExplorer(identifier, defaultNetwork) : undefined
 
       cache[identifier] = new ProtocolOptionsAdapter(
-        new ProtocolNetworkAdapter(defaultNetwork?.name ?? 'Mainnet', defaultNetwork?.type ?? 'mainnet', defaultNetwork?.rpcUrl ?? '')
+        convertNetworkV1ToV0(defaultNetwork ?? { name: 'Mainnet', type: 'mainnet', rpcUrl: '', blockExplorerUrl: '' }, blockExplorer)
       )
     }
 
