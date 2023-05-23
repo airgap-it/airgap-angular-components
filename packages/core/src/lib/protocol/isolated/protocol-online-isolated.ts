@@ -11,10 +11,11 @@ import {
   protocolNetworkIdentifier,
   PublicKey,
   SignedTransaction,
-  TransactionConfiguration,
+  TransactionFullConfiguration,
   TransactionCursor,
   TransactionDetails,
-  UnsignedTransaction
+  UnsignedTransaction,
+  TransactionSimpleConfiguration
 } from '@airgap/module-kit'
 import { CallMethodOptions, IsolatedModulesPlugin, OnlineProtocolCallMethodOptions } from '../../capacitor-plugins/definitions'
 import { IsolatedProtocol } from '../../types/isolated-modules/IsolatedModule'
@@ -22,7 +23,7 @@ import { IsolatedBase } from './base-isolated'
 
 export class IsolatedAirGapOnlineProtocol extends IsolatedBase<AirGapOnlineProtocol> implements AirGapOnlineProtocol {
   constructor(isolatedModulesPlugin: IsolatedModulesPlugin, private readonly isolatedProtocol: IsolatedProtocol) {
-    super(isolatedModulesPlugin, isolatedProtocol.methods)
+    super(isolatedModulesPlugin, isolatedProtocol.methods, isolatedProtocol.cachedValues)
   }
 
   public async getMetadata(): Promise<ProtocolMetadata> {
@@ -40,8 +41,13 @@ export class IsolatedAirGapOnlineProtocol extends IsolatedBase<AirGapOnlineProto
     return this.callMethod('getDetailsFromTransaction', [transaction, publicKey])
   }
 
+  private network: ProtocolNetwork | null = this.isolatedProtocol.network
   public async getNetwork(): Promise<ProtocolNetwork> {
-    return this.isolatedProtocol.network ?? this.callMethod('getNetwork')
+    if (this.network === null) {
+      this.network = await this.callMethod('getNetwork')
+    }
+
+    return this.network
   }
 
   public async getTransactionsForPublicKey(
@@ -59,19 +65,23 @@ export class IsolatedAirGapOnlineProtocol extends IsolatedBase<AirGapOnlineProto
   public async getTransactionMaxAmountWithPublicKey(
     publicKey: PublicKey,
     to: string[],
-    configuration?: TransactionConfiguration
+    configuration?: TransactionFullConfiguration
   ): Promise<Amount> {
     return this.callMethod('getTransactionMaxAmountWithPublicKey', [publicKey, to, configuration])
   }
 
-  public async getTransactionFeeWithPublicKey(publicKey: PublicKey, details: TransactionDetails[]): Promise<FeeEstimation> {
-    return this.callMethod('getTransactionFeeWithPublicKey', [publicKey, details])
+  public async getTransactionFeeWithPublicKey(
+    publicKey: PublicKey,
+    details: TransactionDetails[],
+    configuration?: TransactionSimpleConfiguration
+  ): Promise<FeeEstimation> {
+    return this.callMethod('getTransactionFeeWithPublicKey', [publicKey, details, configuration])
   }
 
   public async prepareTransactionWithPublicKey(
     publicKey: PublicKey,
     details: TransactionDetails[],
-    configuration?: TransactionConfiguration
+    configuration?: TransactionFullConfiguration
   ): Promise<UnsignedTransaction> {
     return this.callMethod('prepareTransactionWithPublicKey', [publicKey, details, configuration])
   }

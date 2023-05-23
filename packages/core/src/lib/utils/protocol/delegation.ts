@@ -2,7 +2,7 @@
 import { ICoinDelegateProtocol, ICoinProtocol, MainProtocolSymbols, SubProtocolSymbols } from '@airgap/coinlib-core'
 import { AirGapAnyProtocol } from '@airgap/module-kit'
 import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
-import { TezosProtocol } from '@airgap/tezos'
+import { TezosProtocol } from '@airgap/tezos/v0'
 
 export function supportsV0Delegation(protocol: ICoinProtocol): protocol is ICoinDelegateProtocol {
   const delegateProtocol = protocol as ICoinDelegateProtocol

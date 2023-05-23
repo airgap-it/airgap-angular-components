@@ -1,13 +1,21 @@
-import { AeternityProtocol } from '@airgap/aeternity'
-import { BitcoinSegwitProtocol, BitcoinProtocol } from '@airgap/bitcoin'
 import { ICoinProtocol, SubProtocolSymbols } from '@airgap/coinlib-core'
-import { CosmosProtocol } from '@airgap/cosmos'
-import { EthereumProtocol, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, GenericERC20 } from '@airgap/ethereum'
-import { GroestlcoinProtocol } from '@airgap/groestlcoin'
-import { MoonriverProtocol, MoonbeamProtocol } from '@airgap/moonbeam'
-import { PolkadotProtocol, KusamaProtocol } from '@airgap/polkadot'
-import { TezosProtocol, TezosShieldedTezProtocol } from '@airgap/tezos'
 import { TestBed } from '@angular/core/testing'
+import { Token } from '../../types/Token'
+import {
+  createV0AeternityProtocol,
+  createV0BitcoinProtocol,
+  createV0BitcoinSegwitProtocol,
+  createV0CosmosProtocol,
+  createV0ERC20Token,
+  createV0EthereumProtocol,
+  createV0GroestlcoinProtocol,
+  createV0KusamaProtocol,
+  createV0MoonbeamProtocol,
+  createV0MoonriverProtocol,
+  createV0PolkadotProtocol,
+  createV0TezosProtocol,
+  createV0TezosShieldedTezProtocol
+} from '../../utils/protocol/protocol-v0-adapter'
 
 import { KeyPairService } from './key-pair.service'
 
@@ -48,25 +56,25 @@ describe('KeypairService', () => {
   })
 
   it('should correctly verify validity of BIP-39 passphrase for protocols without `getPublicKeyFromMnemonic()`', async () => {
-    const protocols = [
-      new BitcoinSegwitProtocol(),
-      new TezosProtocol(),
-      new PolkadotProtocol(),
-      new KusamaProtocol(),
-      new CosmosProtocol(),
-      new AeternityProtocol(),
-      new GroestlcoinProtocol(),
-      new MoonriverProtocol(),
-      new MoonbeamProtocol(),
-      new BitcoinProtocol(),
-      new TezosShieldedTezProtocol()
-    ]
+    const protocols = await Promise.all<ICoinProtocol>([
+      createV0BitcoinSegwitProtocol(),
+      createV0TezosProtocol(),
+      createV0PolkadotProtocol(),
+      createV0KusamaProtocol(),
+      createV0CosmosProtocol(),
+      createV0AeternityProtocol(),
+      createV0GroestlcoinProtocol(),
+      createV0MoonriverProtocol(),
+      createV0MoonbeamProtocol(),
+      createV0BitcoinProtocol(),
+      createV0TezosShieldedTezProtocol()
+    ])
 
     await checkPassword(protocols)
   })
 
   it('should correctly verify validity of BIP-39 passphrase for protocols supporting `getExtendedPublicKeyFromMnemonic()`', async () => {
-    const configs = [
+    const configs: Token[] = [
       {
         symbol: 'XCHF',
         name: 'CryptoFranc',
@@ -85,13 +93,9 @@ describe('KeypairService', () => {
       }
     ]
 
-    const erc20Protocols: ICoinProtocol[] = configs.map((config) => {
-      const options = new EthereumERC20ProtocolOptions(new EthereumProtocolNetwork(), config)
+    const erc20Protocols: ICoinProtocol[] = await Promise.all(configs.map((config) => createV0ERC20Token(config)))
 
-      return new GenericERC20(options)
-    })
-
-    const protocols: ICoinProtocol[] = [new EthereumProtocol(), ...erc20Protocols]
+    const protocols: ICoinProtocol[] = [await createV0EthereumProtocol(), ...erc20Protocols]
 
     await checkPassword(protocols)
   })

@@ -17,7 +17,7 @@ import { IsolatedBase } from './base-isolated'
 
 export class IsolatedAirGapOfflineProtocol extends IsolatedBase<AirGapOfflineProtocol> implements AirGapOfflineProtocol {
   constructor(isolatedModulesPlugin: IsolatedModulesPlugin, private readonly isolatedProtocol: IsolatedProtocol) {
-    super(isolatedModulesPlugin, isolatedProtocol.methods)
+    super(isolatedModulesPlugin, isolatedProtocol.methods, isolatedProtocol.cachedValues)
   }
 
   public async getMetadata(): Promise<ProtocolMetadata> {
@@ -35,7 +35,7 @@ export class IsolatedAirGapOfflineProtocol extends IsolatedBase<AirGapOfflinePro
     return this.callMethod('getDetailsFromTransaction', [transaction, publicKey])
   }
 
-  private cryptoConfiguration: CryptoConfiguration | undefined = this.isolatedProtocol.crypto
+  private cryptoConfiguration: CryptoConfiguration | undefined
   public async getCryptoConfiguration(): Promise<CryptoConfiguration> {
     if (this.cryptoConfiguration === undefined) {
       this.cryptoConfiguration = await this.callMethod('getCryptoConfiguration')

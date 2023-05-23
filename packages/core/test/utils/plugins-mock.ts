@@ -37,6 +37,10 @@ export class FilesystemPluginMock {
   public readdir: jasmine.Spy = newSpy('readdir', Promise.resolve({ files: [] }))
 }
 
+export class ZipPluginMock {
+  public unzip: jasmine.Spy = newSpy('unzip', Promise.resolve())
+}
+
 export class InternalStorageServiceMock {
   public set: jasmine.Spy = newSpy('set', Promise.resolve({}))
 }

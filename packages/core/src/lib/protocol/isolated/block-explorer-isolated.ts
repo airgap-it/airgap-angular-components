@@ -7,13 +7,20 @@ export class IsolatedAirGapBlockExplorer extends IsolatedBase<AirGapBlockExplore
     isolatedModulesPlugin: IsolatedModulesPlugin,
     private readonly protocolIdentifier: string,
     private readonly network: ProtocolNetwork,
-    private readonly metadata?: BlockExplorerMetadata
+    metadata?: BlockExplorerMetadata
   ) {
     super(isolatedModulesPlugin)
+
+    this.metadata = metadata
   }
 
+  private metadata: BlockExplorerMetadata | undefined
   public async getMetadata(): Promise<BlockExplorerMetadata> {
-    return this.metadata ?? this.callMethod('getMetadata')
+    if (this.metadata === undefined) {
+      this.metadata = await this.callMethod('getMetadata')
+    }
+
+    return this.metadata
   }
 
   public async createAddressUrl(address: string): Promise<string> {

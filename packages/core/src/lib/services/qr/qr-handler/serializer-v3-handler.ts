@@ -3,7 +3,7 @@ import * as bs58check from 'bs58check'
 import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
-import { UnsignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { BitcoinSegwitTransactionSignRequest } from '@airgap/bitcoin'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
@@ -149,7 +149,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
-    const payload: UnsignedBitcoinSegwitTransaction = {
+    const payload: BitcoinSegwitTransactionSignRequest = {
       transaction: { psbt },
       publicKey: ''
     }

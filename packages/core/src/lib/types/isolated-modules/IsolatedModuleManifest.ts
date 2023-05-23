@@ -2,12 +2,18 @@ export interface IsolatedModuleManifest {
   name: string
   version: string
   author: string
-  signature: string
+  url?: string
+  email?: string
+  repository?: string
+  publicKey: string
+  description: string
   src?: {
     namespace?: string
   }
   res?: {
-    symbol?: string
+    symbol?: {
+      [key: string]: string
+    }
   }
   include: string[]
   jsenv?: {

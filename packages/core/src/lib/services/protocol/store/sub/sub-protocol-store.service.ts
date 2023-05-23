@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core'
+import { Injectable } from '@angular/core'
 import {
   ICoinProtocol,
   ICoinSubProtocol,
@@ -7,14 +7,13 @@ import {
   MainProtocolSymbols,
   isNetworkEqual
 } from '@airgap/coinlib-core'
+import { erc20Tokens } from '@airgap/ethereum'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
 import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
-import { ethTokens } from '../../tokens'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
-import { ISOLATED_MODULES_PLUGIN } from '../../../../capacitor-plugins/injection-tokens'
-import { IsolatedModulesPlugin } from '../../../../capacitor-plugins/definitions'
+import { ModulesController } from '../../../modules/controller/modules.controller'
 
 export interface SubProtocolsMap {
   [key: string]: {
@@ -38,13 +37,13 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
-  constructor(@Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin) {
+  constructor(private readonly modulesController: ModulesController) {
     super('SubProtocolService')
   }
 
   private get ethTokenIdentifiers(): Set<string> {
     if (this._ethTokenIdentifers === undefined) {
-      this._ethTokenIdentifers = new Set(ethTokens.map((token: Token) => token.identifier))
+      this._ethTokenIdentifers = new Set(Object.values(erc20Tokens).map((token: Token) => token.identifier))
     }
 
     return this._ethTokenIdentifers
@@ -103,7 +102,7 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
       const targetNetwork: ProtocolNetwork | string =
-        network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, mainIdentifier)).network
+        network ?? (await getProtocolOptionsByIdentifier(this.modulesController, mainIdentifier)).network
       const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
       const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols

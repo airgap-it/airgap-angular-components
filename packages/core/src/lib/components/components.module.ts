@@ -17,6 +17,9 @@ import { AccountSelectionComponent } from './account-selection/account-selection
 import { QrComponent } from './qr/qr.component'
 import { QrSettingsComponent } from './qr-settings/qr-settings.component'
 import { IACQrComponent } from './iac-qr/iac-qr.component'
+import { IsolatedModulesListComponent } from './isolated-modules-list/isolated-modules-list.component'
+import { IsolatedModulesOnboardingComponent } from './isolated-modules-onboarding/isolated-modules-onboarding.component'
+import { IsolatedModulesDetailsComponent } from './isolated-modules-details/isolated-modules-details.component'
 
 @NgModule({
   declarations: [
@@ -31,6 +34,9 @@ import { IACQrComponent } from './iac-qr/iac-qr.component'
     AccountItemComponent,
     AccountSelectionComponent,
     QrSettingsComponent,
+    IsolatedModulesDetailsComponent,
+    IsolatedModulesListComponent,
+    IsolatedModulesOnboardingComponent
   ],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule, FormsModule],
   exports: [
@@ -45,6 +51,9 @@ import { IACQrComponent } from './iac-qr/iac-qr.component'
     QrComponent,
     IACQrComponent,
     QrSettingsComponent,
+    IsolatedModulesDetailsComponent,
+    IsolatedModulesListComponent,
+    IsolatedModulesOnboardingComponent
   ]
 })
 export class ComponentsModule {}

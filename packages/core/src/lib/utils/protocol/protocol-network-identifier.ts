@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint-disable @typescript-eslint/unified-signatures */
 import { ICoinProtocol, ProtocolNetwork, ProtocolSymbols } from '@airgap/coinlib-core'
 
@@ -21,7 +22,7 @@ export async function getProtocolAndNetworkIdentifier(
   return networkIdentifier !== undefined ? `${protocolIdentifier}:${networkIdentifier}` : protocolIdentifier
 }
 
-export function splitProtocolNetworkIdentifier(protocolAndNetworkIdentifier: string): { protocol: ProtocolSymbols, network?: string } {
+export function splitProtocolNetworkIdentifier(protocolAndNetworkIdentifier: string): { protocol: ProtocolSymbols; network?: string } {
   const [protocol, network]: string[] = protocolAndNetworkIdentifier.split(':', 2)
 
   return { protocol: protocol as ProtocolSymbols, network }

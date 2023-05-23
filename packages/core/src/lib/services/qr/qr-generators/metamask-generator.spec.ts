@@ -1,5 +1,5 @@
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
-import { SignedEthereumTransaction } from '@airgap/ethereum'
+import { EthereumTransactionSignResponse } from '@airgap/ethereum'
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { MetamaskGenerator } from './metamask-generator'
 
@@ -39,7 +39,7 @@ describe('MetamaskGenerator', () => {
   })
 
   it('should generate a signed ETH message', async () => {
-    const payload: SignedEthereumTransaction = {
+    const payload: EthereumTransactionSignResponse = {
       transaction:
         'f86c808504a817c800825208944a1e1d37462a422873bfccb1e705b05cc4bd922e880de0b6b3a76400008026a00678aaa8f8fd478952bf46044589f5489e809c5ae5717dfe6893490b1f98b441a06a82b82dad7c3232968ec3aa2bba32879b3ecdb877934915d7e65e095fe53d5d',
       accountIdentifier: '000000'
