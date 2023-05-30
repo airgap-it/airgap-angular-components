@@ -6,7 +6,7 @@ import {
   createV0BitcoinProtocol,
   createV0BitcoinSegwitProtocol,
   createV0CosmosProtocol,
-  createV0ERC20Token,
+  createV0EthereumERC20Token,
   createV0EthereumProtocol,
   createV0GroestlcoinProtocol,
   createV0KusamaProtocol,
@@ -93,7 +93,7 @@ describe('KeypairService', () => {
       }
     ]
 
-    const erc20Protocols: ICoinProtocol[] = await Promise.all(configs.map((config) => createV0ERC20Token(config)))
+    const erc20Protocols: ICoinProtocol[] = await Promise.all(configs.map((config) => createV0EthereumERC20Token(config)))
 
     const protocols: ICoinProtocol[] = [await createV0EthereumProtocol(), ...erc20Protocols]
 

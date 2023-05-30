@@ -9,7 +9,13 @@ import {
   IAirGapTransaction as AirGapTransactionV0,
   ProtocolSymbols
 } from '@airgap/coinlib-core'
-import { createERC20Token, createEthereumProtocol, ERC20Token, EthereumModule, EthereumProtocol } from '@airgap/ethereum'
+import {
+  createERC20Token as createEthereumERC20Token,
+  createEthereumProtocol,
+  ERC20Token as EthereumERC20Token,
+  EthereumModule,
+  EthereumProtocol
+} from '@airgap/ethereum'
 import {
   AirGapAnyProtocol,
   AirGapBlockExplorer as ProtocolBlockExplorerV1,
@@ -46,6 +52,13 @@ import {
   MoonbeamProtocol,
   MoonriverProtocol
 } from '@airgap/moonbeam'
+import {
+  createERC20Token as createOptimismERC20Token,
+  createOptimismProtocol,
+  ERC20Token as OptimismERC20Token,
+  OptimismModule,
+  OptimismProtocol
+} from '@airgap/optimism'
 import { createKusamaProtocol, createPolkadotProtocol, KusamaProtocol, PolkadotModule, PolkadotProtocol } from '@airgap/polkadot'
 import {
   BTCTezProtocol,
@@ -106,6 +119,7 @@ import {
   AirGapTransactionWarningType
 } from '@airgap/coinlib-core/interfaces/IAirGapTransaction'
 import { isHex } from '@airgap/coinlib-core/utils/hex'
+
 import {
   createICoinProtocolAdapter,
   createICoinSubProtocolAdapter,
@@ -195,6 +209,26 @@ export async function createV0SubProtocol<T extends AirGapAnyProtocol & SubProto
   return createICoinSubProtocolAdapter(protocol, blockExplorer, v3SerializerCompanion, { type })
 }
 
+export async function createV0ERC20Token<T extends AirGapAnyProtocol & SubProtocol>(
+  erc20Token: T,
+  protocol: AirGapAnyProtocol,
+  module: AirGapModule,
+  type: ProtocolConfiguration['type'] = 'full'
+): Promise<ICoinSubProtocolAdapter<T>> {
+  const [metadata, network]: [ProtocolMetadata, ProtocolNetworkV1 | undefined] = await Promise.all([
+    protocol.getMetadata(),
+    isOnlineProtocol(erc20Token) ? erc20Token.getNetwork() : Promise.resolve(undefined)
+  ])
+
+  const [blockExplorer, v3SerializerCompanion] = await createAdapterSupplementsFromIdentifierAndNetwork(
+    module,
+    metadata.identifier,
+    network
+  )
+
+  return createICoinSubProtocolAdapter(erc20Token, blockExplorer, v3SerializerCompanion, { type })
+}
+
 export async function createV0AeternityProtocol(
   ...args: Parameters<typeof createAeternityProtocol>
 ): Promise<ICoinProtocolAdapter<AeternityProtocol>> {
@@ -265,23 +299,14 @@ export async function createV0EthereumProtocol(
   return createV0Protocol(protocol, module)
 }
 
-export async function createV0ERC20Token(...args: Parameters<typeof createERC20Token>): Promise<ICoinSubProtocolAdapter<ERC20Token>> {
-  const erc20Token: ERC20Token = createERC20Token(...args)
+export async function createV0EthereumERC20Token(
+  ...args: Parameters<typeof createEthereumERC20Token>
+): Promise<ICoinSubProtocolAdapter<EthereumERC20Token>> {
+  const erc20Token: EthereumERC20Token = createEthereumERC20Token(...args)
   const ethereumProtocol: EthereumProtocol = createEthereumProtocol(args[1])
   const module: EthereumModule = new EthereumModule()
 
-  const [metadata, network]: [ProtocolMetadata, ProtocolNetworkV1 | undefined] = await Promise.all([
-    ethereumProtocol.getMetadata(),
-    isOnlineProtocol(erc20Token) ? erc20Token.getNetwork() : Promise.resolve(undefined)
-  ])
-
-  const [blockExplorer, v3SerializerCompanion] = await createAdapterSupplementsFromIdentifierAndNetwork(
-    module,
-    metadata.identifier,
-    network
-  )
-
-  return createICoinSubProtocolAdapter(erc20Token, blockExplorer, v3SerializerCompanion, { type: 'full' })
+  return createV0ERC20Token(erc20Token, ethereumProtocol, module)
 }
 
 export async function createV0GroestlcoinProtocol(
@@ -325,6 +350,25 @@ export async function createV0MoonbaseProtocol(
   const module: MoonbeamModule = new MoonbeamModule()
 
   return createV0Protocol(protocol, module)
+}
+
+export async function createV0OptimismProtocol(
+  ...args: Parameters<typeof createOptimismProtocol>
+): Promise<ICoinProtocolAdapter<OptimismProtocol>> {
+  const protocol: OptimismProtocol = createOptimismProtocol(...args)
+  const module: OptimismModule = new OptimismModule()
+
+  return createV0Protocol(protocol, module)
+}
+
+export async function createV0OptimismERC20Token(
+  ...args: Parameters<typeof createOptimismERC20Token>
+): Promise<ICoinSubProtocolAdapter<OptimismERC20Token>> {
+  const erc20Token: OptimismERC20Token = createOptimismERC20Token(...args)
+  const optimismProtocol: OptimismProtocol = createOptimismProtocol(args[1])
+  const module: OptimismModule = new OptimismModule()
+
+  return createV0ERC20Token(erc20Token, optimismProtocol, module)
 }
 
 export async function createV0PolkadotProtocol(

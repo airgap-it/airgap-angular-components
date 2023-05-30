@@ -86,7 +86,7 @@ export class IsolatedModulesController implements BaseModulesController {
 
         this.supportedProtocols.add(protocol.identifier)
 
-        return { protocol: wrappedProtocol, blockExplorer: wrappedBlockExplorer }
+        return { identifier: protocol.identifier, protocol: wrappedProtocol, blockExplorer: wrappedBlockExplorer }
       })
 
     if (protocols.length === 0) {

@@ -38,9 +38,11 @@ import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbe
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
 import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
 import { COREUM_PROTOCOL_NETWORK } from '@airgap/coreum/v1/protocol/CoreumProtocol'
+import { OPTIMISM_MAINNET_PROTOCOL_NETWORK } from '@airgap/optimism/v1/protocol/OptimismProtocol'
 import { CKBTC_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/icrc/CkBTCProtocol'
 import { ICPBlockExplorer } from '@airgap/icp'
 import { CoreumBlockExplorer } from '@airgap/coreum'
+import { EtherscanBlockExplorer } from '@airgap/ethereum'
 import { ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
 import { ModulesController } from '../../services/modules/controller/modules.controller'
 import { convertNetworkV1ToV0 } from './protocol-v0-adapter'
@@ -62,6 +64,15 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
     case MainProtocolSymbols.COREUM:
       return new ProtocolOptionsAdapter(
         network ?? convertNetworkV1ToV0(COREUM_PROTOCOL_NETWORK, new CoreumBlockExplorer(COREUM_PROTOCOL_NETWORK.blockExplorerUrl))
+      )
+    case MainProtocolSymbols.OPTIMISM:
+    case SubProtocolSymbols.OPTIMISM_ERC20:
+      return new ProtocolOptionsAdapter(
+        network ??
+          convertNetworkV1ToV0(
+            OPTIMISM_MAINNET_PROTOCOL_NETWORK,
+            new EtherscanBlockExplorer(OPTIMISM_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl)
+          )
       )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())

@@ -10,7 +10,7 @@ import {
   createV0AeternityProtocol,
   createV0BitcoinProtocol,
   createV0CosmosProtocol,
-  createV0ERC20Token,
+  createV0EthereumERC20Token,
   createV0EthereumProtocol,
   createV0KusamaProtocol,
   createV0PolkadotProtocol,
@@ -811,7 +811,7 @@ describe('ProtocolService', () => {
           [tezosProtocol, await createV0TezosStakerProtocol()],
           [
             ethereumProtocol,
-            await createV0ERC20Token({
+            await createV0EthereumERC20Token({
               name: 'ERC20_1',
               identifier: 'eth-erc20_1',
               symbol: 'ERC20_1',
@@ -826,7 +826,7 @@ describe('ProtocolService', () => {
           [tezosTestnetProtocol, await createV0TezosQuipuswapProtocol({ network: tezosTestnet })],
           [
             ethereumProtocol,
-            await createV0ERC20Token({
+            await createV0EthereumERC20Token({
               name: 'ERC20_2',
               identifier: 'eth-erc20_2',
               symbol: 'ERC20_2',
@@ -837,7 +837,7 @@ describe('ProtocolService', () => {
           ],
           [
             ethereumProtocol,
-            await createV0ERC20Token({
+            await createV0EthereumERC20Token({
               name: 'ERC20_3',
               identifier: 'eth-erc20_3',
               symbol: 'ERC20_3',

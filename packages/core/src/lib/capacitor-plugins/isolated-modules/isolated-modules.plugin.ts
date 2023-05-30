@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
 import { WebPlugin } from '@capacitor/core'
-import { AeternityModule } from '@airgap/aeternity/v1'
-import { AstarModule } from '@airgap/astar/v1'
-import { BitcoinModule } from '@airgap/bitcoin/v1'
-import { CosmosModule } from '@airgap/cosmos/v1'
-import { EthereumModule } from '@airgap/ethereum/v1'
-import { GroestlcoinModule } from '@airgap/groestlcoin/v1'
-import { ICPModule } from '@airgap/icp/v1'
+import { AeternityModule } from '@airgap/aeternity'
+import { AstarModule } from '@airgap/astar'
+import { BitcoinModule } from '@airgap/bitcoin'
+import { CosmosModule } from '@airgap/cosmos'
+import { EthereumModule } from '@airgap/ethereum'
+import { GroestlcoinModule } from '@airgap/groestlcoin'
+import { ICPModule } from '@airgap/icp'
 import { CoreumModule } from '@airgap/coreum'
 import {
   AirGapAnyProtocol,
@@ -26,9 +26,10 @@ import {
   ProtocolNetwork,
   SubProtocolType
 } from '@airgap/module-kit'
-import { MoonbeamModule } from '@airgap/moonbeam/v1'
-import { PolkadotModule } from '@airgap/polkadot/v1'
-import { TezosModule } from '@airgap/tezos/v1'
+import { MoonbeamModule } from '@airgap/moonbeam'
+import { OptimismModule } from '@airgap/optimism'
+import { PolkadotModule } from '@airgap/polkadot'
+import { TezosModule } from '@airgap/tezos'
 import {
   BatchCallMethodOptions,
   BatchCallMethodResult,
@@ -76,7 +77,8 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new MoonbeamModule(),
       new AstarModule(),
       new ICPModule(),
-      new CoreumModule()
+      new CoreumModule(),
+      new OptimismModule()
     ]
   ) {
     super()
