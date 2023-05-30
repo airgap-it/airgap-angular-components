@@ -3,7 +3,7 @@ import { ERC20TokenMetadata, erc20Tokens } from '@airgap/ethereum'
 import { Injectable } from '@angular/core'
 
 import { Token } from '../../types/Token'
-import { createV0ERC20Token } from '../../utils/protocol/protocol-v0-adapter'
+import { createV0EthereumERC20Token } from '../../utils/protocol/protocol-v0-adapter'
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,7 @@ export class TokenService {
   ): Promise<IAirGapTransaction> {
     const token: Token | undefined = recipientToken ?? this.getRecipientToken(tx)
     if (token !== undefined) {
-      const genericErc20: ICoinProtocol = await createV0ERC20Token(token)
+      const genericErc20: ICoinProtocol = await createV0EthereumERC20Token(token)
 
       try {
         const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetailsFromSigned(signedTransaction)
@@ -43,7 +43,7 @@ export class TokenService {
   ): Promise<IAirGapTransaction> {
     const token: Token | undefined = recipientToken ?? this.getRecipientToken(tx)
     if (token !== undefined) {
-      const genericErc20: ICoinProtocol = await createV0ERC20Token(token)
+      const genericErc20: ICoinProtocol = await createV0EthereumERC20Token(token)
 
       try {
         const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetails(unsignedTransaction)

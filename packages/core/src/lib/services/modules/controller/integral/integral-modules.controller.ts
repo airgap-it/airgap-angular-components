@@ -41,15 +41,21 @@ export class IntegralModulesController implements BaseModulesController {
     ignoreProtocols: Set<string>
   ): Promise<LoadedModule> {
     const v3SerializerCompanion: AirGapV3SerializerCompanion = await module.createV3SerializerCompanion()
-    const protocols: LoadedProtocol[][] = await Promise.all(
-      Object.entries(module.supportedProtocols)
-        .filter(([identifier, _]) => !ignoreProtocols.has(identifier))
-        .map(([identifier, configuration]: [string, ProtocolConfiguration]) =>
-          this.loadModuleProtocols(module, identifier, configuration, protocolType)
-        )
+    const protocols: LoadedProtocol[] = flattened(
+      await Promise.all(
+        Object.entries(module.supportedProtocols)
+          .filter(([identifier, _]) => !ignoreProtocols.has(identifier))
+          .map(([identifier, configuration]: [string, ProtocolConfiguration]) =>
+            this.loadModuleProtocols(module, identifier, configuration, protocolType)
+          )
+      )
     )
 
-    return { protocols: flattened(protocols), v3SerializerCompanion }
+    protocols.forEach((protocol: LoadedProtocol) => {
+      this.supportedProtocols.add(protocol.identifier)
+    })
+
+    return { protocols, v3SerializerCompanion }
   }
 
   private async loadModuleProtocols(
@@ -79,7 +85,7 @@ export class IntegralModulesController implements BaseModulesController {
       return []
     }
 
-    return [{ protocol }]
+    return [{ identifier, protocol }]
   }
 
   private async loadOnlineProtocols(
@@ -97,7 +103,7 @@ export class IntegralModulesController implements BaseModulesController {
           return undefined
         }
 
-        return { protocol, blockExplorer }
+        return { identifier, protocol, blockExplorer }
       })
     )
 

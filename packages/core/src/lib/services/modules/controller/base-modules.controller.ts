@@ -13,6 +13,7 @@ export interface LoadedModule {
 }
 
 export interface LoadedProtocol {
+  identifier: string
   protocol: AirGapAnyProtocol
   blockExplorer?: AirGapBlockExplorer
 }

@@ -1011,7 +1011,11 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
   protected async getSerializerIdentifier(): Promise<string> {
     const identifier: string = await this.getIdentifier()
 
-    return identifier.startsWith(SubProtocolSymbols.ETH_ERC20) ? SubProtocolSymbols.ETH_ERC20 : identifier
+    return identifier.startsWith(SubProtocolSymbols.ETH_ERC20)
+      ? SubProtocolSymbols.ETH_ERC20
+      : identifier.startsWith(SubProtocolSymbols.OPTIMISM_ERC20)
+      ? SubProtocolSymbols.OPTIMISM_ERC20
+      : identifier
   }
 
   public async convertUnsignedTransactionV0ToV1(transaction: TransactionSignRequest): Promise<UnsignedTransaction> {

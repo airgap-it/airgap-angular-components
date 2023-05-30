@@ -13,6 +13,7 @@ self.importScripts('../libs/airgap-polkadot.browserify.js')
 self.importScripts('../libs/airgap-tezos.browserify.js')
 self.importScripts('../libs/airgap-icp.browserify.js')
 self.importScripts('../libs/airgap-coreum.browserify.js')
+self.importScripts('../libs/airgap-optimism.browserify.js')
 
 const modules = [
   new airgapCoinLibAeternity.AeternityModule(),
@@ -25,7 +26,8 @@ const modules = [
   new airgapCoinLibPolkadot.PolkadotModule(),
   new airgapCoinLibMoonbeam.MoonbeamModule(),
   new airgapCoinLibAstar.AstarModule(),
-  new airgapCoinLibICP.ICPModule()
+  new airgapCoinLibICP.ICPModule(),
+  new airgapCoinLibOptimism.OptimismModule()
 ]
 
 const HEX_REGEX = new RegExp(`^(0x)?[0-9a-fA-F]*$`)

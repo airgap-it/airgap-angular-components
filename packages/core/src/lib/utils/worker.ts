@@ -32,6 +32,10 @@ export async function deriveAddressesAsync(
       : [convertDeriveAddressesWallet(walletOrWallets)]
   )
 
+  if (wallets.length === 0) {
+    return {}
+  }
+
   const airGapWorker = new Worker('./assets/workers/airgap-coin-lib.js')
 
   return new Promise<DerieveAddressesAsyncResult>((resolve) => {

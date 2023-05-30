@@ -8,7 +8,7 @@ import {
   createV0BitcoinProtocol,
   createV0BitcoinSegwitProtocol,
   createV0CosmosProtocol,
-  createV0ERC20Token,
+  createV0EthereumERC20Token,
   createV0EthereumProtocol,
   createV0GroestlcoinProtocol,
   createV0KusamaProtocol,
@@ -83,7 +83,7 @@ export async function getDefaultActiveSubProtocols(): Promise<[ICoinProtocol, IC
     createV0TezosETHTezProtocol().then(pairWithMainProtocol(tezosProtocol)),
     createV0TezosTetherUSDProtocol().then(pairWithMainProtocol(tezosProtocol)),
     createV0TezosKtProtocol().then(pairWithMainProtocol(tezosProtocol)),
-    ...Object.values(erc20Tokens).map((token: Token) => createV0ERC20Token(token).then(pairWithMainProtocol(ethereumProtocol)))
+    ...Object.values(erc20Tokens).map((token: Token) => createV0EthereumERC20Token(token).then(pairWithMainProtocol(ethereumProtocol)))
   ])
 }
 
