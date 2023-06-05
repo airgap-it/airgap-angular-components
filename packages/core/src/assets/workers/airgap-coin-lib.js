@@ -2,32 +2,20 @@ var window = self
 
 // available as airgapCoinLib due to browserify postInstall hook
 self.importScripts('../libs/airgap-coin-lib.browserify.js')
-self.importScripts('../libs/airgap-aeternity.browserify.js')
-self.importScripts('../libs/airgap-astar.browserify.js')
-self.importScripts('../libs/airgap-bitcoin.browserify.js')
-self.importScripts('../libs/airgap-cosmos.browserify.js')
-self.importScripts('../libs/airgap-ethereum.browserify.js')
-self.importScripts('../libs/airgap-groestlcoin.browserify.js')
-self.importScripts('../libs/airgap-moonbeam.browserify.js')
-self.importScripts('../libs/airgap-polkadot.browserify.js')
-self.importScripts('../libs/airgap-tezos.browserify.js')
-self.importScripts('../libs/airgap-icp.browserify.js')
-self.importScripts('../libs/airgap-coreum.browserify.js')
-self.importScripts('../libs/airgap-optimism.browserify.js')
 
 const modules = [
-  new airgapCoinLibAeternity.AeternityModule(),
-  new airgapCoinLibBitcoin.BitcoinModule(),
-  new airgapCoinLibEthereum.EthereumModule(),
-  new airgapCoinLibGroestlcoin.GroestlcoinModule(),
-  new airgapCoinLibTezos.TezosModule(),
-  new airgapCoinLibCosmos.CosmosModule(),
-  new airgapCoinLibCoreum.CoreumModule(),
-  new airgapCoinLibPolkadot.PolkadotModule(),
-  new airgapCoinLibMoonbeam.MoonbeamModule(),
-  new airgapCoinLibAstar.AstarModule(),
-  new airgapCoinLibICP.ICPModule(),
-  new airgapCoinLibOptimism.OptimismModule()
+  new airgapCoinLib.aeternity.AeternityModule(),
+  new airgapCoinLib.bitcoin.BitcoinModule(),
+  new airgapCoinLib.ethereum.EthereumModule(),
+  new airgapCoinLib.groestlcoin.GroestlcoinModule(),
+  new airgapCoinLib.tezos.TezosModule(),
+  new airgapCoinLib.cosmos.CosmosModule(),
+  new airgapCoinLib.coreum.CoreumModule(),
+  new airgapCoinLib.polkadot.PolkadotModule(),
+  new airgapCoinLib.moonbeam.MoonbeamModule(),
+  new airgapCoinLib.astar.AstarModule(),
+  new airgapCoinLib.icp.ICPModule(),
+  new airgapCoinLib.optimism.OptimismModule()
 ]
 
 const HEX_REGEX = new RegExp(`^(0x)?[0-9a-fA-F]*$`)
