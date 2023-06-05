@@ -700,9 +700,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetails(
     transaction: UnsignedTransactionV0,
-    data?: { [key: string]: unknown; knownViewingKeys?: string[] }
+    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
   ): Promise<IAirGapTransaction[]> {
-    const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1(transaction)
+    const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.publicKey)) {
@@ -734,9 +734,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetailsFromSigned(
     transaction: SignedTransactionV0,
-    data?: { [key: string]: unknown; knownViewingKeys?: string[] }
+    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
   ): Promise<IAirGapTransaction[]> {
-    const signed: SignedTransaction = await this.convertSignedTransactionV0ToV1(transaction)
+    const signed: SignedTransaction = await this.convertSignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.accountIdentifier)) {
@@ -1008,8 +1008,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return this.protocolV1.deriveFromExtendedSecretKey(extendedSecretKey, visibilityIndex, addressIndex)
   }
 
-  protected async getSerializerIdentifier(): Promise<string> {
-    const identifier: string = await this.getIdentifier()
+  protected async getSerializerIdentifier(base?: string): Promise<string> {
+    const identifier: string = base ?? (await this.getIdentifier())
 
     return identifier.startsWith(SubProtocolSymbols.ETH_ERC20)
       ? SubProtocolSymbols.ETH_ERC20
@@ -1018,8 +1018,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       : identifier
   }
 
-  public async convertUnsignedTransactionV0ToV1(transaction: TransactionSignRequest): Promise<UnsignedTransaction> {
-    const identifier: string = await this.getSerializerIdentifier()
+  public async convertUnsignedTransactionV0ToV1(transaction: TransactionSignRequest, owner?: string): Promise<UnsignedTransaction> {
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.fromTransactionSignRequest(identifier, transaction)
   }
@@ -1027,21 +1027,26 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
   public async convertUnsignedTransactionV1ToV0(
     transaction: UnsignedTransaction,
     publicKey: string,
-    callbackUrl?: string
+    callbackUrl?: string,
+    owner?: string
   ): Promise<TransactionSignRequest> {
-    const identifier: string = await this.getSerializerIdentifier()
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.toTransactionSignRequest(identifier, transaction, publicKey, callbackUrl)
   }
 
-  public async convertSignedTransactionV0ToV1(transaction: TransactionSignResponse): Promise<SignedTransaction> {
-    const identifier: string = await this.getSerializerIdentifier()
+  public async convertSignedTransactionV0ToV1(transaction: TransactionSignResponse, owner?: string): Promise<SignedTransaction> {
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.fromTransactionSignResponse(identifier, transaction)
   }
 
-  public async convertSignedTransactionV1ToV0(transaction: SignedTransaction, accountIdentifier: string): Promise<TransactionSignResponse> {
-    const identifier: string = await this.getSerializerIdentifier()
+  public async convertSignedTransactionV1ToV0(
+    transaction: SignedTransaction,
+    accountIdentifier: string,
+    owner?: string
+  ): Promise<TransactionSignResponse> {
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.toTransactionSignResponse(identifier, transaction, accountIdentifier)
   }
