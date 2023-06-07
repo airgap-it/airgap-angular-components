@@ -965,7 +965,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return this.protocolV1.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)))
   }
 
-  public async getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey: string, childDerivationPath: string): Promise<string> {
+  public async getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey: string, childDerivationPath?: string): Promise<string> {
     if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
@@ -996,7 +996,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     )
   }
 
-  protected async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string): Promise<SecretKey> {
+  protected async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string = '0/0'): Promise<SecretKey> {
     if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error(`Protocol doesn't support secret key derivation, missing inferface: Offline, Bip32.`)
     }
