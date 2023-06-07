@@ -159,6 +159,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
   public readonly symbol: string
   public readonly name: string
   public readonly marketSymbol: string
+  public readonly assetSymbol: string | undefined
   public readonly feeSymbol: string
   public readonly feeDefaults: FeeDefaultsV0
   public readonly decimals: number
@@ -206,6 +207,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
     this.symbol = symbol.value
     this.marketSymbol = symbol.market ?? symbol.value
+    this.assetSymbol = symbol.asset
     this.decimals = units[mainUnit].decimals
 
     this.feeSymbol = feeSymbol.value
@@ -248,6 +250,10 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getMarketSymbol(): Promise<string> {
     return this.marketSymbol
+  }
+
+  public async getAssetSymbol(): Promise<string | undefined> {
+    return this.assetSymbol
   }
 
   public async getFeeSymbol(): Promise<string> {

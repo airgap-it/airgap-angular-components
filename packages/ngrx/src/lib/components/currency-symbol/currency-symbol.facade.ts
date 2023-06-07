@@ -1,5 +1,5 @@
 import { FilesystemService, ICurrencySymbolFacade, ProtocolService, SymbolInput } from '@airgap/angular-core'
-import { ProtocolSymbols } from '@airgap/coinlib-core'
+import { ICoinProtocol, ProtocolSymbols } from '@airgap/coinlib-core'
 import { Injectable, Injector } from '@angular/core'
 import { Observable } from 'rxjs'
 import { BaseNgRxFacade } from '../../base/base-ngrx.facade'
@@ -16,19 +16,38 @@ export class CurrencySymbolNgRxFacade extends BaseNgRxFacade<CurrencySymbolStore
   }
 
   public initWithSymbol(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void {
-    this.store.setInitialSrc(this.getSymbolInputs(symbol, protocolIdentifier))
+    this.getSymbolInputs(symbol, protocolIdentifier)
+      .then((symbolInputs: SymbolInput[]) => this.store.setInitialSrc(symbolInputs))
+      .catch(console.error)
   }
 
   public onSymbolChanged(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): void {
-    this.store.setInitialSrc(this.getSymbolInputs(symbol, protocolIdentifier))
+    this.getSymbolInputs(symbol, protocolIdentifier)
+      .then((symbolInputs: SymbolInput[]) => this.store.setInitialSrc(symbolInputs))
+      .catch(console.error)
   }
 
   public onError(_symbol: string | undefined, _protocolIdentifier: ProtocolSymbols | undefined, _src?: string): void {
     this.store.onError$()
   }
 
-  private getSymbolInputs(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): SymbolInput[] {
-    const symbolInput: SymbolInput | undefined = symbol ? { value: symbol, caseSensitive: false } : undefined
+  private async getSymbolInputs(symbol: string | undefined, protocolIdentifier: ProtocolSymbols | undefined): Promise<SymbolInput[]> {
+    let assetSymbol: string | undefined
+    try {
+      const protocol: ICoinProtocol = await this.protocolService.getProtocol(protocolIdentifier)
+      const [protocolSymbol, protocolAssetSymbol]: [string, string | undefined] = await Promise.all([
+        protocol.getSymbol(),
+        protocol.getAssetSymbol()
+      ])
+
+      assetSymbol = protocolSymbol.toLowerCase() === symbol.toLowerCase() ? protocolAssetSymbol : undefined
+    } catch (e) {
+      console.warn(e)
+    }
+
+    assetSymbol = assetSymbol ?? symbol
+
+    const symbolInput: SymbolInput | undefined = assetSymbol ? { value: assetSymbol, caseSensitive: false } : undefined
     const protocolIdentifierInput: SymbolInput | undefined = protocolIdentifier
       ? { value: protocolIdentifier, caseSensitive: true }
       : undefined
