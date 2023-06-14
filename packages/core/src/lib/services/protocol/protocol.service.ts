@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core'
+import { Injectable } from '@angular/core'
 import {
   ICoinProtocol,
   ICoinSubProtocol,
@@ -8,13 +8,13 @@ import {
   MainProtocolSymbols
 } from '@airgap/coinlib-core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
+import { erc20Tokens } from '@airgap/ethereum'
 import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 import { Token } from '../../types/Token'
 import { getProtocolOptionsByIdentifier } from '../../utils/protocol/protocol-options'
-import { ISOLATED_MODULES_PLUGIN } from '../../capacitor-plugins/injection-tokens'
-import { IsolatedModulesPlugin } from '../../capacitor-plugins/definitions'
+import { ModulesController } from '../modules/controller/modules.controller'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -23,7 +23,6 @@ import {
   getDefaultPassiveSubProtocols,
   getDefaultActiveSubProtocols
 } from './defaults'
-import { ethTokens } from './tokens'
 
 export interface ProtocolServiceConfig extends Partial<MainProtocolStoreConfig & SubProtocolStoreConfig> {
   extraPassiveProtocols?: ICoinProtocol[]
@@ -43,7 +42,7 @@ export class ProtocolService {
   constructor(
     private readonly mainProtocolStore: MainProtocolStoreService,
     private readonly subProtocolStore: SubProtocolStoreService,
-    @Inject(ISOLATED_MODULES_PLUGIN) private readonly isolatedModules: IsolatedModulesPlugin
+    private readonly modulesController: ModulesController
   ) {}
 
   private get isInitialized(): boolean {
@@ -96,14 +95,16 @@ export class ProtocolService {
 
     await Promise.all([
       this.mainProtocolStore.init({
-        passiveProtocols: (config?.passiveProtocols ?? getDefaultPassiveProtocols()).concat(config?.extraPassiveProtocols ?? []),
-        activeProtocols: (config?.activeProtocols ?? getDefaultActiveProtocols()).concat(config?.extraActiveProtocols ?? [])
+        passiveProtocols: (config?.passiveProtocols ?? (await getDefaultPassiveProtocols())).concat(config?.extraPassiveProtocols ?? []),
+        activeProtocols: (config?.activeProtocols ?? (await getDefaultActiveProtocols())).concat(config?.extraActiveProtocols ?? [])
       }),
       this.subProtocolStore.init({
-        passiveSubProtocols: (config?.passiveSubProtocols ?? getDefaultPassiveSubProtocols()).concat(
+        passiveSubProtocols: (config?.passiveSubProtocols ?? (await getDefaultPassiveSubProtocols())).concat(
           config?.extraPassiveSubProtocols ?? []
         ),
-        activeSubProtocols: (config?.activeSubProtocols ?? getDefaultActiveSubProtocols()).concat(config?.extraActiveSubProtocols ?? [])
+        activeSubProtocols: (config?.activeSubProtocols ?? (await getDefaultActiveSubProtocols())).concat(
+          config?.extraActiveSubProtocols ?? []
+        )
       })
     ])
 
@@ -273,7 +274,7 @@ export class ProtocolService {
 
     const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
     const targetNetwork: ProtocolNetwork | string =
-      network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, mainIdentifier)).network
+      network ?? (await getProtocolOptionsByIdentifier(this.modulesController, mainIdentifier)).network
     const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
@@ -352,7 +353,7 @@ export class ProtocolService {
       this.knownProtocolSymbols = new Set([
         ...Object.values(MainProtocolSymbols),
         ...Object.values(SubProtocolSymbols),
-        ...ethTokens.map((token: Token) => token.identifier)
+        ...Object.values(erc20Tokens).map((token: Token) => token.identifier)
       ])
     }
 
@@ -368,7 +369,7 @@ export class ProtocolService {
     const targetNetwork: ProtocolNetwork =
       typeof protocolOrIdentifier !== 'string'
         ? (await protocolOrIdentifier.getOptions()).network
-        : network ?? (await getProtocolOptionsByIdentifier(this.isolatedModules, identifier)).network
+        : network ?? (await getProtocolOptionsByIdentifier(this.modulesController, identifier)).network
 
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
       .then(

@@ -1,12 +1,12 @@
 /* eslint-disable max-classes-per-file */
 import { WebPlugin } from '@capacitor/core'
-import { AeternityModule } from '@airgap/aeternity/v1'
-import { AstarModule } from '@airgap/astar/v1'
-import { BitcoinModule } from '@airgap/bitcoin/v1'
-import { CosmosModule } from '@airgap/cosmos/v1'
-import { EthereumModule } from '@airgap/ethereum/v1'
-import { GroestlcoinModule } from '@airgap/groestlcoin/v1'
-import { ICPModule } from '@airgap/icp/v1'
+import { AeternityModule } from '@airgap/aeternity'
+import { AstarModule } from '@airgap/astar'
+import { BitcoinModule } from '@airgap/bitcoin'
+import { CosmosModule } from '@airgap/cosmos'
+import { EthereumModule } from '@airgap/ethereum'
+import { GroestlcoinModule } from '@airgap/groestlcoin'
+import { ICPModule } from '@airgap/icp'
 import { CoreumModule } from '@airgap/coreum'
 import {
   AirGapAnyProtocol,
@@ -26,10 +26,14 @@ import {
   ProtocolNetwork,
   SubProtocolType
 } from '@airgap/module-kit'
-import { MoonbeamModule } from '@airgap/moonbeam/v1'
-import { PolkadotModule } from '@airgap/polkadot/v1'
-import { TezosModule } from '@airgap/tezos/v1'
+import { MoonbeamModule } from '@airgap/moonbeam'
+import { OptimismModule } from '@airgap/optimism'
+import { PolkadotModule } from '@airgap/polkadot'
+import { TezosModule } from '@airgap/tezos'
 import {
+  BatchCallMethodOptions,
+  BatchCallMethodResult,
+  BatchCallMethodSingleResult,
   BlockExplorerCallMethodOptions,
   CallMethodOptions,
   CallMethodResult,
@@ -40,13 +44,18 @@ import {
   OnlineProtocolCallMethodOptions,
   PreviewDynamicModuleOptions,
   PreviewDynamicModuleResult,
+  ReadDynamicModuleOptions,
+  ReadDynamicModuleResult,
   RegisterDynamicModuleOptions,
   RemoveDynamicModulesOptions,
-  V3SerializerCompanionCallMethodOptions
+  V3SerializerCompanionCallMethodOptions,
+  VerifyDynamicModuleOptions,
+  VerifyDynamicModuleResult
 } from '../definitions'
 import { flattened } from '../../utils/array'
 import { assertNever } from '../../utils/utils'
 import { IsolatedModule, IsolatedProtocol } from '../../types/isolated-modules/IsolatedModule'
+import { getOfflineProtocolConfiguration, getOnlineProtocolConfiguration } from '../../utils/modules/load-protocol'
 
 export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin {
   private readonly offlineProtocols: Record<string, AirGapOfflineProtocol> = {}
@@ -69,6 +78,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new AstarModule(),
       new ICPModule(),
       new CoreumModule(),
+      new OptimismModule()
     ]
   ) {
     super()
@@ -78,8 +88,16 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     throw new Error('Dynamic isolated module preview not supported in a browser')
   }
 
+  public async verifyDynamicModule(_options: VerifyDynamicModuleOptions): Promise<VerifyDynamicModuleResult> {
+    throw new Error('Dynamic isolated module verification not supported in a browser')
+  }
+
   public async registerDynamicModule(_options: RegisterDynamicModuleOptions): Promise<void> {
     throw new Error('Dynamic isolated module registration not supported in a browser')
+  }
+
+  public async readDynamicModule(_options: ReadDynamicModuleOptions): Promise<ReadDynamicModuleResult> {
+    throw new Error('Dynamic isolated module read not supported in a browser')
   }
 
   public async removeDynamicModules(_options: RemoveDynamicModulesOptions): Promise<void> {
@@ -88,22 +106,31 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
 
   public async loadAllModules(options: LoadAllModulesOptions = {}): Promise<LoadAllModulesResult> {
     const modules: IsolatedModule[] = await Promise.all(
-      this.modules.map((module: AirGapModule, index: number) => this.loadModule(module, index, options.protocolType))
+      this.modules.map((module: AirGapModule, index: number) =>
+        this.loadModule(module, index, options.protocolType, new Set(options.ignoreProtocols ?? []))
+      )
     )
 
     return { modules }
   }
 
-  private async loadModule(module: AirGapModule, index: number, protocolType?: ProtocolConfiguration['type']): Promise<IsolatedModule> {
+  private async loadModule(
+    module: AirGapModule,
+    index: number,
+    protocolType: ProtocolConfiguration['type'] | undefined,
+    ignoreProtocols: Set<string>
+  ): Promise<IsolatedModule> {
     const moduleIdentifier: string = index.toString()
     const v3SerializerCompanion: AirGapV3SerializerCompanion = await module.createV3SerializerCompanion()
 
     this.v3SerializerCompanions[moduleIdentifier] = v3SerializerCompanion
 
     const protocols: IsolatedProtocol[][] = await Promise.all(
-      Object.entries(module.supportedProtocols).map(([identifier, configuration]: [string, ProtocolConfiguration]) =>
-        this.loadModuleProtocols(module, index, identifier, configuration, protocolType)
-      )
+      Object.entries(module.supportedProtocols)
+        .filter(([identifier, _]) => !ignoreProtocols.has(identifier))
+        .map(([identifier, configuration]: [string, ProtocolConfiguration]) =>
+          this.loadModuleProtocols(module, index, identifier, configuration, protocolType)
+        )
     )
 
     return {
@@ -121,23 +148,8 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     configuration: ProtocolConfiguration,
     protocolType?: ProtocolConfiguration['type']
   ): Promise<IsolatedProtocol[]> {
-    const offlineConfiguration: OfflineProtocolConfiguration | undefined =
-      protocolType === 'offline' || protocolType === 'full' || protocolType === undefined
-        ? configuration.type === 'offline'
-          ? configuration
-          : configuration.type === 'full'
-          ? configuration.offline
-          : undefined
-        : undefined
-
-    const onlineConfiguration: OnlineProtocolConfiguration | undefined =
-      protocolType === 'online' || protocolType === 'full' || protocolType === undefined
-        ? configuration.type === 'online'
-          ? configuration
-          : configuration.type === 'full'
-          ? configuration.online
-          : undefined
-        : undefined
+    const offlineConfiguration: OfflineProtocolConfiguration | undefined = getOfflineProtocolConfiguration(configuration, protocolType)
+    const onlineConfiguration: OnlineProtocolConfiguration | undefined = getOnlineProtocolConfiguration(configuration, protocolType)
 
     const [offlineProtocols, onlineProtocols]: [IsolatedProtocol[], IsolatedProtocol[]] = await Promise.all([
       offlineConfiguration ? this.loadOfflineProtocols(module, moduleIndex, identifier, offlineConfiguration) : Promise.resolve([]),
@@ -216,8 +228,10 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       protocolMetadata,
       blockExplorerMetadata: blockExplorerMetadata ?? null,
       network: network ?? null,
-      crypto: crypto ?? null,
-      methods: this.collectMethods(protocol)
+      methods: this.collectMethods(protocol),
+      cachedValues: {
+        getCryptoConfiguration: crypto
+      }
     }
 
     if (isSubProtocol(protocol)) {
@@ -230,6 +244,11 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       return {
         ...configuration,
         type: 'sub',
+        cachedValues: Object.assign(configuration.cachedValues, {
+          getType: subType,
+          mainProtocol,
+          getContractAddress: contractAddress
+        }),
         subType,
         mainProtocolIdentifier: mainProtocol,
         contractAddress: contractAddress ?? null
@@ -354,6 +373,22 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     }
 
     return componentCollection[protocolKey]
+  }
+
+  public async batchCallMethod(options: BatchCallMethodOptions): Promise<BatchCallMethodResult> {
+    const values: BatchCallMethodSingleResult[] = await Promise.all(
+      options.options.map(async (o: CallMethodOptions): Promise<BatchCallMethodSingleResult> => {
+        try {
+          const value = await this.callMethod(o)
+
+          return { type: 'success', value }
+        } catch (error) {
+          return { type: 'error', error }
+        }
+      })
+    )
+
+    return { values }
   }
 
   private protocolKey(identifier: string, networkId?: string): string {

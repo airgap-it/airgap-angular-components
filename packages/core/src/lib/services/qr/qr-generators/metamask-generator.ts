@@ -6,7 +6,7 @@ import { CryptoKeypath, PathComponent, CryptoHDKey } from '@keystonehq/bc-ur-reg
 import { ETHSignature } from '@keystonehq/bc-ur-registry-eth'
 import { TransactionFactory } from '@ethereumjs/tx'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
-import { SignedEthereumTransaction } from '@airgap/ethereum'
+import { EthereumTransactionSignResponse } from '@airgap/ethereum'
 import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, MessageSignResponse } from '@airgap/serializer'
 
 import { IACQrGenerator } from '../../iac/qr-generator'
@@ -51,7 +51,7 @@ export class MetamaskGenerator extends IACQrGenerator {
       const element = data[0]
 
       return (
-        element.protocol === MainProtocolSymbols.ETH &&
+        (element.protocol === MainProtocolSymbols.ETH || element.protocol === MainProtocolSymbols.OPTIMISM) &&
         [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse, IACMessageType.MessageSignResponse].includes(
           element.type
         )
@@ -109,7 +109,7 @@ export class MetamaskGenerator extends IACQrGenerator {
     let rlpSignatureData: Buffer | undefined
 
     if ((data.payload as any).transaction) {
-      const transaction = data.payload as SignedEthereumTransaction
+      const transaction = data.payload as EthereumTransactionSignResponse
 
       const tx = TransactionFactory.fromSerializedData(Buffer.from(transaction.transaction, 'hex'))
 

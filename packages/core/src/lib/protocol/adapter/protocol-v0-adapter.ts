@@ -13,7 +13,7 @@ import {
   ICoinSubProtocol,
   IProtocolTransactionCursor,
   NetworkType as NetworkTypeV0,
-  ProtocolBlockExplorer,
+  ProtocolBlockExplorer as ProtocolBlockExplorerV0,
   ProtocolNetwork as ProtocolNetworkV0,
   ProtocolSymbols,
   SignedTransaction as SignedTransactionV0,
@@ -21,13 +21,8 @@ import {
   SubProtocolType as SubProtocolTypeV0,
   UnsignedTransaction as UnsignedTransactionV0
 } from '@airgap/coinlib-core'
-import { isHex } from '@airgap/coinlib-core/utils/hex'
 import { IProtocolAddressCursor, IAirGapAddressResult } from '@airgap/coinlib-core/interfaces/IAirGapAddress'
-import {
-  AirGapTransactionStatus as AirGapTransactionStatusV0,
-  AirGapTransactionWarning,
-  AirGapTransactionWarningType
-} from '@airgap/coinlib-core/interfaces/IAirGapTransaction'
+import { AirGapTransactionStatus as AirGapTransactionStatusV0 } from '@airgap/coinlib-core/interfaces/IAirGapTransaction'
 import { ProtocolOptions as ProtocolOptionsV0 } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { derive, mnemonicToSeed } from '@airgap/crypto'
 import {
@@ -37,13 +32,10 @@ import {
   AirGapTransaction,
   AirGapTransactionStatus,
   AirGapTransactionsWithCursor,
-  AirGapUIAction,
-  AirGapUIAlert,
   AirGapV3SerializerCompanion,
   Amount,
   Balance,
   BlockExplorerMetadata,
-  BytesStringFormat,
   canEncryptAES,
   canEncryptAsymmetric,
   canFetchDataForAddress,
@@ -52,6 +44,7 @@ import {
   CryptoConfiguration,
   CryptoDerivative,
   ExtendedKeyPair,
+  ExtendedPublicKey,
   ExtendedSecretKey,
   FeeDefaults,
   FeeEstimation,
@@ -59,6 +52,7 @@ import {
   hasMultiAddressPublicKeys,
   isAmount,
   isBip32Protocol,
+  isMultiTokenSubProtocol,
   isOfflineProtocol,
   isOnlineProtocol,
   isTransactionStatusChecker,
@@ -69,6 +63,7 @@ import {
   newPublicKey,
   newSecretKey,
   newSignature,
+  ProtocolConfiguration,
   ProtocolMetadata,
   ProtocolNetwork,
   ProtocolNetworkType,
@@ -87,12 +82,20 @@ import {
 import BigNumber from 'bignumber.js'
 import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
 import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
+import { isTezosSaplingProtocol } from '@airgap/tezos'
 import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
 import { supportsV1Delegation } from '../../utils/protocol/delegation'
+import {
+  convertFeeDefaultsV1ToV0,
+  convertNetworkTypeV1ToV0,
+  convertTransactionDetailsV1ToV0,
+  convertTransactionStatusV1ToV0,
+  getBytesFormatV1FromV0
+} from '../../utils/protocol/protocol-v0-adapter'
 
 // ProtocolBlockExplorer
 
-class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
+export class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorerV0 {
   constructor(private readonly blockExplorerV1: AirGapBlockExplorer, url: string) {
     super(url)
   }
@@ -104,6 +107,12 @@ class ProtocolBlockExplorerAdapter extends ProtocolBlockExplorer {
   public async getTransactionLink(transactionId: string): Promise<string> {
     return this.blockExplorerV1.createTransactionUrl(transactionId)
   }
+
+  public toJSON(): any {
+    return {
+      blockExplorer: this.blockExplorer
+    }
+  }
 }
 
 // ProtocolNetwork
@@ -113,16 +122,12 @@ export class ProtocolNetworkAdapter extends ProtocolNetworkV0 {
     name: string,
     type: ProtocolNetworkType | NetworkTypeV0,
     rpcUrl: string,
-    blockExplorer?: ProtocolBlockExplorer,
+    blockExplorer: ProtocolBlockExplorerV0 | undefined,
     extras: unknown = {}
   ) {
     const networkType: NetworkTypeV0 = Object.values(NetworkTypeV0).includes(type as NetworkTypeV0)
       ? (type as NetworkTypeV0)
-      : type === 'mainnet'
-      ? NetworkTypeV0.MAINNET
-      : type === 'testnet'
-      ? NetworkTypeV0.TESTNET
-      : NetworkTypeV0.CUSTOM
+      : convertNetworkTypeV1ToV0(type as ProtocolNetworkType)
 
     super(name, networkType, rpcUrl, blockExplorer, extras)
   }
@@ -154,6 +159,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
   public readonly symbol: string
   public readonly name: string
   public readonly marketSymbol: string
+  public readonly assetSymbol: string | undefined
   public readonly feeSymbol: string
   public readonly feeDefaults: FeeDefaultsV0
   public readonly decimals: number
@@ -201,10 +207,11 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
     this.symbol = symbol.value
     this.marketSymbol = symbol.market ?? symbol.value
+    this.assetSymbol = symbol.asset
     this.decimals = units[mainUnit].decimals
 
     this.feeSymbol = feeSymbol.value
-    this.feeDefaults = this.convertFeeDefaults(feeDefaults)
+    this.feeDefaults = this.convertFeeDefaultsV1ToV0(feeDefaults)
     this.feeDecimals = feeUnits[mainFeeUnit].decimals
 
     this.units = Object.entries(protocolMetadata.units).map((entry) => {
@@ -243,6 +250,10 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getMarketSymbol(): Promise<string> {
     return this.marketSymbol
+  }
+
+  public async getAssetSymbol(): Promise<string | undefined> {
+    return this.assetSymbol
   }
 
   public async getFeeSymbol(): Promise<string> {
@@ -319,13 +330,13 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const transactions: AirGapTransactionsWithCursor = await this.protocolV1.getTransactionsForPublicKey(
-      newPublicKey(publicKey, this.getBytesFormat(publicKey)),
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       limit,
       cursor as TransactionCursor
     )
 
     return {
-      transactions: await this.convertTransactionDetails(transactions.transactions),
+      transactions: await this.convertTransactionDetailsV1ToV0(transactions.transactions),
       cursor
     }
   }
@@ -340,13 +351,13 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const transactions: AirGapTransactionsWithCursor = await this.protocolV1.getTransactionsForPublicKey(
-      newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
+      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
       limit,
       cursor as TransactionCursor
     )
 
     return {
-      transactions: await this.convertTransactionDetails(transactions.transactions),
+      transactions: await this.convertTransactionDetailsV1ToV0(transactions.transactions),
       cursor
     }
   }
@@ -371,7 +382,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     return {
-      transactions: await this.convertTransactionDetails(transactions.transactions),
+      transactions: await this.convertTransactionDetailsV1ToV0(transactions.transactions),
       cursor: transactions.cursor ? transactions.cursor : cursor
     }
   }
@@ -394,12 +405,20 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return newAmount(balance.total).blockchain(this.protocolMetadata.units).value
   }
 
-  public async getBalanceOfPublicKey(publicKey: string, _data?: { [key: string]: unknown; addressIndex?: number }): Promise<string> {
+  public async getBalanceOfPublicKey(
+    publicKey: string,
+    data?: { [key: string]: unknown; addressIndex?: number; assetID?: string }
+  ): Promise<string> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const balance: Balance = await this.protocolV1.getBalanceOfPublicKey(newPublicKey(publicKey, this.getBytesFormat(publicKey)))
+    const publicKeyV1: PublicKey = newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
+
+    const balance: Balance =
+      data?.assetID && isMultiTokenSubProtocol(this.protocolV1)
+        ? await this.protocolV1.getBalanceOfPublicKey(publicKeyV1, { tokenId: data.assetID })
+        : await this.protocolV1.getBalanceOfPublicKey(publicKeyV1)
 
     return newAmount(balance.total).blockchain(this.protocolMetadata.units).value
   }
@@ -407,15 +426,18 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
   public async getBalanceOfExtendedPublicKey(
     extendedPublicKey: string,
     _offset: number,
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown; assetID?: string }
   ): Promise<string> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
     }
 
-    const balance: Balance = await this.protocolV1.getBalanceOfPublicKey(
-      newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey))
-    )
+    const extendedPublicKeyV1: ExtendedPublicKey = newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey))
+
+    const balance: Balance =
+      data?.assetID && isMultiTokenSubProtocol(this.protocolV1)
+        ? await this.protocolV1.getBalanceOfPublicKey(extendedPublicKeyV1, { tokenId: data.assetID })
+        : await this.protocolV1.getBalanceOfPublicKey(extendedPublicKeyV1)
 
     return newAmount(balance.total).blockchain(this.protocolMetadata.units).value
   }
@@ -448,7 +470,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return transactionHash.map((hash: string) => {
       const status: AirGapTransactionStatus = statuses[hash]
 
-      return this.convertTransactionStatus(status)
+      return convertTransactionStatusV1ToV0(status)
     })
   }
 
@@ -467,7 +489,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const maxAmount: Amount = await this.protocolV1.getTransactionMaxAmountWithPublicKey(
-      newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
+      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
       recipients,
       {
         fee: fee ? newAmount(fee, 'blockchain') : undefined
@@ -488,7 +510,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const maxAmount: Amount = await this.protocolV1.getTransactionMaxAmountWithPublicKey(
-      newPublicKey(publicKey, this.getBytesFormat(publicKey)),
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       recipients,
       {
         fee: fee ? newAmount(fee, 'blockchain') : undefined
@@ -502,29 +524,34 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     publicKey: string,
     recipients: string[],
     values: string[],
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown; assetID?: string }
   ): Promise<FeeDefaultsV0> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
     }
 
-    const feeEstimation: FeeEstimation = await this.protocolV1.getTransactionFeeWithPublicKey(
-      newExtendedPublicKey(publicKey, this.getBytesFormat(publicKey)),
-      this.combineTransactionDetails(recipients, values)
+    const feeEstimation: FeeEstimation | undefined = await this.protocolV1.getTransactionFeeWithPublicKey(
+      newExtendedPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
+      this.combineTransactionDetails(recipients, values),
+      { assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined }
     )
+
+    if (feeEstimation === undefined) {
+      throw new Error('Method `estimateFeeDefaultsFromExtendedPublicKey` not supported.')
+    }
 
     const feeDefaults: FeeDefaults = isAmount(feeEstimation)
       ? { low: feeEstimation, medium: feeEstimation, high: feeEstimation }
       : feeEstimation
 
-    return this.convertFeeDefaults(feeDefaults)
+    return this.convertFeeDefaultsV1ToV0(feeDefaults)
   }
 
   public async estimateFeeDefaultsFromPublicKey(
     publicKey: string,
     recipients: string[],
     values: string[],
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown; assetID?: string }
   ): Promise<FeeDefaultsV0> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
@@ -539,16 +566,21 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       amount: newAmount(values[index], 'blockchain')
     }))
 
-    const feeEstimation: FeeEstimation = await this.protocolV1.getTransactionFeeWithPublicKey(
-      newPublicKey(publicKey, this.getBytesFormat(publicKey)),
-      transactionDetails
+    const feeEstimation: FeeEstimation | undefined = await this.protocolV1.getTransactionFeeWithPublicKey(
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
+      transactionDetails,
+      { assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined }
     )
+
+    if (feeEstimation === undefined) {
+      throw new Error('Method `estimateFeeDefaultsFromPublicKey` not supported.')
+    }
 
     const feeDefaults: FeeDefaults = isAmount(feeEstimation)
       ? { low: feeEstimation, medium: feeEstimation, high: feeEstimation }
       : feeEstimation
 
-    return this.convertFeeDefaults(feeDefaults)
+    return this.convertFeeDefaultsV1ToV0(feeDefaults)
   }
 
   public async prepareTransactionFromExtendedPublicKey(
@@ -557,21 +589,22 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     recipients: string[],
     values: string[],
     fee: string,
-    _extras?: { [key: string]: unknown }
+    extras?: { [key: string]: unknown; assetID?: string }
   ): Promise<any> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
     const transaction: UnsignedTransaction = await this.protocolV1.prepareTransactionWithPublicKey(
-      newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
+      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
       this.combineTransactionDetails(recipients, values),
       {
-        fee: newAmount(fee, 'blockchain')
+        fee: newAmount(fee, 'blockchain'),
+        assetId: extras?.assetID ? parseInt(extras.assetID, 10) : undefined
       }
     )
 
-    const transactionV0 = await this.convertV1UnsignedTransactionToV0(transaction, extendedPublicKey)
+    const transactionV0 = await this.convertUnsignedTransactionV1ToV0(transaction, extendedPublicKey)
 
     return transactionV0.transaction
   }
@@ -581,21 +614,22 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     recipients: string[],
     values: string[],
     fee: string,
-    _extras?: { [key: string]: unknown }
+    extras?: { [key: string]: unknown; assetID?: string }
   ): Promise<any> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
     const transaction: UnsignedTransaction = await this.protocolV1.prepareTransactionWithPublicKey(
-      newPublicKey(publicKey, this.getBytesFormat(publicKey)),
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       this.combineTransactionDetails(recipients, values),
       {
-        fee: newAmount(fee, 'blockchain')
+        fee: newAmount(fee, 'blockchain'),
+        assetId: extras?.assetID ? parseInt(extras.assetID, 10) : undefined
       }
     )
 
-    const transactionV0 = await this.convertV1UnsignedTransactionToV0(transaction, publicKey)
+    const transactionV0 = await this.convertUnsignedTransactionV1ToV0(transaction, publicKey)
 
     return transactionV0.transaction
   }
@@ -606,14 +640,14 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const transaction = { transaction: rawTransaction, accountIdentifier: '' }
-    const signed: SignedTransaction = await this.convertV0SignedTransactionToV1(transaction)
+    const signed: SignedTransaction = await this.convertSignedTransactionV0ToV1(transaction)
 
     return this.protocolV1.broadcastTransaction(signed)
   }
 
   public async getAddressFromPublicKey(publicKey: string, _cursor?: IProtocolAddressCursor): Promise<IAirGapAddressResult> {
     const address: AddressWithCursor | string = await this.protocolV1.getAddressFromPublicKey(
-      newPublicKey(publicKey, this.getBytesFormat(publicKey))
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
     )
 
     return {
@@ -622,21 +656,10 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
   }
 
-  private static readonly addressesLimit: number = 10000
   public async getAddressesFromPublicKey(publicKey: string, _cursor?: IProtocolAddressCursor): Promise<IAirGapAddressResult[]> {
     if (hasMultiAddressPublicKeys(this.protocolV1)) {
-      const pk: PublicKey = newPublicKey(publicKey, this.getBytesFormat(publicKey))
-      const addresses: IAirGapAddressResult[] = []
-      const firstAddress: AddressWithCursor | string = await this.protocolV1.getAddressFromPublicKey(pk)
-
-      let nextAddress: AddressWithCursor | undefined =
-        typeof firstAddress === 'string' ? { address: firstAddress, cursor: { hasNext: false } } : firstAddress
-      addresses.push(nextAddress)
-
-      while (nextAddress !== undefined && nextAddress.cursor.hasNext && addresses.length < ICoinProtocolAdapter.addressesLimit) {
-        nextAddress = await this.protocolV1.getNextAddressFromPublicKey(pk, nextAddress.cursor)
-        addresses.push(nextAddress)
-      }
+      const pk: PublicKey = newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
+      const addresses: AddressWithCursor[] = await this.protocolV1.getInitialAddressesFromPublicKey(pk)
 
       return addresses
     } else {
@@ -654,7 +677,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const derivedPublicKey: PublicKey = await this.protocolV1.deriveFromExtendedPublicKey(
-      newExtendedPublicKey(extendedPublicKey, this.getBytesFormat(extendedPublicKey)),
+      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
       visibilityDerivationIndex,
       addressDerivationIndex
     )
@@ -683,9 +706,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetails(
     transaction: UnsignedTransactionV0,
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
   ): Promise<IAirGapTransaction[]> {
-    const unsigned: UnsignedTransaction = await this.convertV0UnsignedTransactionToV1(transaction)
+    const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.publicKey)) {
@@ -695,16 +718,17 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
       transactions = await this.protocolV1.getDetailsFromTransaction(
         unsigned,
-        newExtendedPublicKey(transaction.publicKey, this.getBytesFormat(transaction.publicKey))
+        newExtendedPublicKey(transaction.publicKey, getBytesFormatV1FromV0(transaction.publicKey))
       )
     } else {
-      transactions = await this.protocolV1.getDetailsFromTransaction(
-        unsigned,
-        newPublicKey(transaction.publicKey, this.getBytesFormat(transaction.publicKey))
-      )
+      const publicKey: PublicKey = newPublicKey(transaction.publicKey, getBytesFormatV1FromV0(transaction.publicKey))
+      transactions =
+        data?.knownViewingKeys && isTezosSaplingProtocol(this.protocolV1)
+          ? await this.protocolV1.getDetailsFromTransaction(unsigned as any, publicKey, data.knownViewingKeys)
+          : await this.protocolV1.getDetailsFromTransaction(unsigned, publicKey)
     }
 
-    const transactionsV0: IAirGapTransaction[] = await this.convertTransactionDetails(transactions)
+    const transactionsV0: IAirGapTransaction[] = await this.convertTransactionDetailsV1ToV0(transactions)
 
     return transactionsV0.map(
       (tx: IAirGapTransaction): IAirGapTransaction => ({
@@ -716,9 +740,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetailsFromSigned(
     transaction: SignedTransactionV0,
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
   ): Promise<IAirGapTransaction[]> {
-    const signed: SignedTransaction = await this.convertV0SignedTransactionToV1(transaction)
+    const signed: SignedTransaction = await this.convertSignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
     let transactions: AirGapTransaction[]
     if (this.isExtendedPublicKey(transaction.accountIdentifier)) {
@@ -728,16 +752,17 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
       transactions = await this.protocolV1.getDetailsFromTransaction(
         signed,
-        newExtendedPublicKey(transaction.accountIdentifier, this.getBytesFormat(transaction.accountIdentifier))
+        newExtendedPublicKey(transaction.accountIdentifier, getBytesFormatV1FromV0(transaction.accountIdentifier))
       )
     } else {
-      transactions = await this.protocolV1.getDetailsFromTransaction(
-        signed,
-        newPublicKey(transaction.accountIdentifier, this.getBytesFormat(transaction.accountIdentifier))
-      )
+      const publicKey: PublicKey = newPublicKey(transaction.accountIdentifier, getBytesFormatV1FromV0(transaction.accountIdentifier))
+      transactions =
+        data?.knownViewingKeys && isTezosSaplingProtocol(this.protocolV1)
+          ? await this.protocolV1.getDetailsFromTransaction(signed as any, publicKey, data.knownViewingKeys)
+          : await this.protocolV1.getDetailsFromTransaction(signed, publicKey)
     }
 
-    const transactionsV0: IAirGapTransaction[] = await this.convertTransactionDetails(transactions)
+    const transactionsV0: IAirGapTransaction[] = await this.convertTransactionDetailsV1ToV0(transactions)
 
     return transactionsV0.map(
       (tx: IAirGapTransaction): IAirGapTransaction => ({
@@ -754,8 +779,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
     return this.protocolV1.verifyMessageWithPublicKey(
       message,
-      newSignature(signature, this.getBytesFormat(signature)),
-      newPublicKey(publicKey, this.getBytesFormat(publicKey))
+      newSignature(signature, getBytesFormatV1FromV0(signature)),
+      newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
     )
   }
 
@@ -764,7 +789,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, AsymmetricEncryption.')
     }
 
-    return this.protocolV1.encryptAsymmetricWithPublicKey(payload, newPublicKey(publicKey, this.getBytesFormat(publicKey)))
+    return this.protocolV1.encryptAsymmetricWithPublicKey(payload, newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)))
   }
 
   public async getPublicKeyFromMnemonic(mnemonic: string, derivationPath: string, password?: string): Promise<string> {
@@ -864,19 +889,19 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
-    const unsigned: UnsignedTransaction = await this.convertV0UnsignedTransactionToV1({
+    const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1({
       transaction,
       publicKey: ''
     })
 
-    const extendedSecretKey: ExtendedSecretKey = newExtendedSecretKey(extendedPrivateKey, this.getBytesFormat(extendedPrivateKey))
+    const extendedSecretKey: ExtendedSecretKey = newExtendedSecretKey(extendedPrivateKey, getBytesFormatV1FromV0(extendedPrivateKey))
 
     const secretKey: ExtendedSecretKey | SecretKey = childDerivationPath
       ? await this.deriveSecretKey(extendedSecretKey, childDerivationPath)
       : extendedSecretKey
 
     const signed: SignedTransaction = await this.protocolV1.signTransactionWithSecretKey(unsigned, secretKey)
-    const signedV0: TransactionSignResponse = await this.convertV1SignedTransactionToV0(signed, '')
+    const signedV0: TransactionSignResponse = await this.convertSignedTransactionV1ToV0(signed, '')
 
     return signedV0.transaction
   }
@@ -886,16 +911,16 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline.')
     }
 
-    const unsigned: UnsignedTransaction = await this.convertV0UnsignedTransactionToV1({
+    const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1({
       transaction,
       publicKey: ''
     })
 
     const signed: SignedTransaction = await this.protocolV1.signTransactionWithSecretKey(
       unsigned,
-      newSecretKey(privateKey, this.getBytesFormat(privateKey))
+      newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey))
     )
-    const signedV0: TransactionSignResponse = await this.convertV1SignedTransactionToV0(signed, '')
+    const signedV0: TransactionSignResponse = await this.convertSignedTransactionV1ToV0(signed, '')
 
     return signedV0.transaction
   }
@@ -906,8 +931,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     const signature: Signature = await this.protocolV1.signMessageWithKeyPair(message, {
-      secretKey: newSecretKey(keypair.privateKey, this.getBytesFormat(keypair.privateKey)),
-      publicKey: newPublicKey(keypair.publicKey ?? '', this.getBytesFormat(keypair.publicKey ?? ''))
+      secretKey: newSecretKey(keypair.privateKey, getBytesFormatV1FromV0(keypair.privateKey)),
+      publicKey: newPublicKey(keypair.publicKey ?? '', getBytesFormatV1FromV0(keypair.publicKey ?? ''))
     })
 
     return signature.value
@@ -919,8 +944,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     }
 
     return this.protocolV1.decryptAsymmetricWithKeyPair(encryptedPayload, {
-      secretKey: newSecretKey(keypair.privateKey, this.getBytesFormat(keypair.privateKey)),
-      publicKey: newPublicKey(keypair.publicKey ?? '', this.getBytesFormat(keypair.publicKey ?? ''))
+      secretKey: newSecretKey(keypair.privateKey, getBytesFormatV1FromV0(keypair.privateKey)),
+      publicKey: newPublicKey(keypair.publicKey ?? '', getBytesFormatV1FromV0(keypair.publicKey ?? ''))
     })
   }
 
@@ -929,7 +954,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
 
-    return this.protocolV1.encryptAESWithSecretKey(payload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
+    return this.protocolV1.encryptAESWithSecretKey(payload, newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)))
   }
 
   public async decryptAES(encryptedPayload: string, privateKey: string): Promise<string> {
@@ -937,39 +962,41 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
 
-    return this.protocolV1.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, this.getBytesFormat(privateKey)))
+    return this.protocolV1.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)))
   }
 
-  public async getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey: string, childDerivationPath: string): Promise<string> {
+  public async getPrivateKeyFromExtendedPrivateKey(extendedPrivateKey: string, childDerivationPath?: string): Promise<string> {
     if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, Bip32.')
     }
 
     const secretKey: SecretKey = await this.deriveSecretKey(
-      newExtendedSecretKey(extendedPrivateKey, this.getBytesFormat(extendedPrivateKey)),
+      newExtendedSecretKey(extendedPrivateKey, getBytesFormatV1FromV0(extendedPrivateKey)),
       childDerivationPath
     )
 
     return secretKey.value
   }
 
-  private getNetwork(protocolOptions?: ProtocolOptionsV0): ProtocolNetworkV0 {
+  protected getNetwork(protocolOptions?: ProtocolOptionsV0): ProtocolNetworkV0 {
     let knownOptions: ProtocolOptionsV0 | undefined
     try {
       knownOptions = protocolOptions ?? getProtocolOptionsByIdentifierLegacy(this.identifier)
       // eslint-disable-next-line no-empty
     } catch {}
 
+    const { name, type, rpcUrl, ...rest } = this.network ?? {}
+
     return new ProtocolNetworkAdapter(
-      this.network?.name ?? knownOptions?.network.name ?? '',
-      this.network?.type ?? knownOptions?.network.type ?? 'mainnet',
-      this.network?.rpcUrl ?? knownOptions?.network.rpcUrl ?? '',
+      name ?? knownOptions?.network.name ?? '',
+      type ?? knownOptions?.network.type ?? 'mainnet',
+      rpcUrl ?? knownOptions?.network.rpcUrl ?? '',
       this.blockExplorerV0,
-      knownOptions?.network.extras ?? {}
+      rest || (knownOptions?.network.extras ?? {})
     )
   }
 
-  private async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string): Promise<SecretKey> {
+  protected async deriveSecretKey(extendedSecretKey: ExtendedSecretKey, childDerivationPath: string = '0/0'): Promise<SecretKey> {
     if (!isOfflineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error(`Protocol doesn't support secret key derivation, missing inferface: Offline, Bip32.`)
     }
@@ -987,100 +1014,58 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return this.protocolV1.deriveFromExtendedSecretKey(extendedSecretKey, visibilityIndex, addressIndex)
   }
 
-  private async getSerializerIdentifier(): Promise<string> {
-    const identifier: string = await this.getIdentifier()
+  protected async getSerializerIdentifier(base?: string): Promise<string> {
+    const identifier: string = base ?? (await this.getIdentifier())
 
-    return identifier.startsWith(SubProtocolSymbols.ETH_ERC20) ? SubProtocolSymbols.ETH_ERC20 : identifier
+    return identifier.startsWith(SubProtocolSymbols.ETH_ERC20)
+      ? SubProtocolSymbols.ETH_ERC20
+      : identifier.startsWith(SubProtocolSymbols.OPTIMISM_ERC20)
+      ? SubProtocolSymbols.OPTIMISM_ERC20
+      : identifier
   }
 
-  private async convertV0UnsignedTransactionToV1(transaction: TransactionSignRequest): Promise<UnsignedTransaction> {
-    const identifier: string = await this.getSerializerIdentifier()
+  public async convertUnsignedTransactionV0ToV1(transaction: TransactionSignRequest, owner?: string): Promise<UnsignedTransaction> {
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.fromTransactionSignRequest(identifier, transaction)
   }
 
-  protected async convertV1UnsignedTransactionToV0(
+  public async convertUnsignedTransactionV1ToV0(
     transaction: UnsignedTransaction,
     publicKey: string,
-    callbackUrl?: string
+    callbackUrl?: string,
+    owner?: string
   ): Promise<TransactionSignRequest> {
-    const identifier: string = await this.getSerializerIdentifier()
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.toTransactionSignRequest(identifier, transaction, publicKey, callbackUrl)
   }
 
-  protected async convertV0SignedTransactionToV1(transaction: TransactionSignResponse): Promise<SignedTransaction> {
-    const identifier: string = await this.getSerializerIdentifier()
+  public async convertSignedTransactionV0ToV1(transaction: TransactionSignResponse, owner?: string): Promise<SignedTransaction> {
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.fromTransactionSignResponse(identifier, transaction)
   }
 
-  protected async convertV1SignedTransactionToV0(
+  public async convertSignedTransactionV1ToV0(
     transaction: SignedTransaction,
-    accountIdentifier: string
+    accountIdentifier: string,
+    owner?: string
   ): Promise<TransactionSignResponse> {
-    const identifier: string = await this.getSerializerIdentifier()
+    const identifier: string = await this.getSerializerIdentifier(owner)
 
     return this.v3SerializerCompanion.toTransactionSignResponse(identifier, transaction, accountIdentifier)
   }
 
-  private convertFeeDefaults(feeDefaults: FeeDefaults): FeeDefaultsV0 {
-    const feeUnits: ProtocolUnitsMetadata = this.protocolMetadata.fee?.units ?? this.protocolMetadata.units
-    const feeUnit: string = this.protocolMetadata.fee?.mainUnit ?? this.protocolMetadata.mainUnit
-
-    return {
-      low: new BigNumber(newAmount(feeDefaults.low).convert(feeUnit, feeUnits).value).toFixed(),
-      medium: new BigNumber(newAmount(feeDefaults.medium).convert(feeUnit, feeUnits).value).toFixed(),
-      high: new BigNumber(newAmount(feeDefaults.high).convert(feeUnit, feeUnits).value).toFixed()
-    }
+  public convertFeeDefaultsV1ToV0(feeDefaults: FeeDefaults): FeeDefaultsV0 {
+    return convertFeeDefaultsV1ToV0(feeDefaults, this.protocolMetadata)
   }
 
-  private async convertTransactionDetails(txs: AirGapTransaction[]): Promise<IAirGapTransaction[]> {
-    const units: ProtocolUnitsMetadata = this.protocolMetadata.units
-    const feeUnits: ProtocolUnitsMetadata = this.protocolMetadata.fee?.units ?? units
-
-    return Promise.all(
-      txs.map(
-        async (tx: AirGapTransaction): Promise<IAirGapTransaction> => ({
-          from: tx.from,
-          to: tx.to,
-          isInbound: tx.isInbound,
-
-          amount: newAmount(tx.amount).blockchain(units).value,
-          fee: newAmount(tx.fee).blockchain(feeUnits).value,
-
-          timestamp: tx.timestamp,
-
-          protocolIdentifier: this.protocolMetadata.identifier as ProtocolSymbols,
-          network: this.networkV0,
-
-          data: typeof tx.arbitraryData === 'string' ? tx.arbitraryData : tx.arbitraryData?.[1],
-
-          hash: tx.status?.hash,
-          blockHeight: tx.status?.block,
-          status: tx.status ? this.convertTransactionStatus(tx.status) : undefined,
-
-          warnings: tx.uiAlerts ? this.convertUIAlerts(tx.uiAlerts) : undefined,
-
-          extra: {
-            ...tx.extra,
-            type: tx.type
-          },
-          transactionDetails: tx.json
-        })
-      )
-    )
+  public async convertTransactionDetailsV1ToV0(txs: AirGapTransaction[]): Promise<IAirGapTransaction[]> {
+    return convertTransactionDetailsV1ToV0(txs, this.protocolMetadata, this.networkV0)
   }
 
-  private convertTransactionStatus(status: AirGapTransactionStatus): AirGapTransactionStatusV0 {
-    return status.type === 'applied'
-      ? AirGapTransactionStatusV0.APPLIED
-      : status.type === 'failed'
-      ? AirGapTransactionStatusV0.FAILED
-      : undefined
-  }
-
-  private combineTransactionDetails(recipients: string[], values: string[]): TransactionDetails[] {
+  protected combineTransactionDetails(recipients: string[], values: string[]): TransactionDetails[] {
     if (recipients.length !== values.length) {
       throw new Error('Recipients length must match values length.')
     }
@@ -1089,34 +1074,6 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       to: recipient,
       amount: newAmount(values[index], 'blockchain')
     }))
-  }
-
-  private convertUIAlerts(alerts: AirGapUIAlert[]): AirGapTransactionWarning[] {
-    return alerts.map((alert: AirGapUIAlert) => ({
-      type:
-        alert.type === 'success'
-          ? AirGapTransactionWarningType.SUCCESS
-          : alert.type === 'info'
-          ? AirGapTransactionWarningType.NOTE
-          : alert.type === 'warning'
-          ? AirGapTransactionWarningType.WARNING
-          : AirGapTransactionWarningType.ERROR,
-      title: alert.title.value,
-      description: alert.description.value,
-      icon: alert.icon,
-      actions: alert.actions ? this.convertUIActions(alert.actions) : undefined
-    }))
-  }
-
-  private convertUIActions(actions: AirGapUIAction[]): AirGapTransactionWarning['actions'] {
-    return actions.map((action: AirGapUIAction) => ({
-      text: action.text.value,
-      link: ''
-    }))
-  }
-
-  protected getBytesFormat(bytes: string): BytesStringFormat {
-    return isHex(bytes) ? 'hex' : 'encoded'
   }
 
   protected isExtendedPublicKey(publicKey: string): boolean {
@@ -1135,7 +1092,10 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
   }
 
   public async getCurrentDelegateesForPublicKey(publicKey: string, data?: any): Promise<string[]> {
-    return this.protocolV1.getCurrentDelegateesForPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
+    return this.protocolV1.getCurrentDelegateesForPublicKey(
+      { type: 'pub', value: publicKey, format: getBytesFormatV1FromV0(publicKey) },
+      data
+    )
   }
 
   public async getCurrentDelegateesForAddress(address: string, data?: any): Promise<string[]> {
@@ -1147,7 +1107,7 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
   }
 
   public async isPublicKeyDelegating(publicKey: string, data?: any): Promise<boolean> {
-    return this.protocolV1.isPublicKeyDelegating({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
+    return this.protocolV1.isPublicKeyDelegating({ type: 'pub', value: publicKey, format: getBytesFormatV1FromV0(publicKey) }, data)
   }
 
   public async isAddressDelegating(address: string, data?: any): Promise<boolean> {
@@ -1155,7 +1115,10 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
   }
 
   public async getDelegatorDetailsFromPublicKey(publicKey: string, data?: any): Promise<DelegatorDetails> {
-    return this.protocolV1.getDelegatorDetailsFromPublicKey({ type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) }, data)
+    return this.protocolV1.getDelegatorDetailsFromPublicKey(
+      { type: 'pub', value: publicKey, format: getBytesFormatV1FromV0(publicKey) },
+      data
+    )
   }
 
   public async getDelegatorDetailsFromAddress(address: string, data?: any): Promise<DelegatorDetails> {
@@ -1164,7 +1127,7 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
 
   public async getDelegationDetailsFromPublicKey(publicKey: string, delegatees: string[], data?: any): Promise<DelegationDetails> {
     return this.protocolV1.getDelegationDetailsFromPublicKey(
-      { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
+      { type: 'pub', value: publicKey, format: getBytesFormatV1FromV0(publicKey) },
       delegatees,
       data
     )
@@ -1176,13 +1139,13 @@ export class ICoinDelegateProtocolAdapter<T extends AirGapAnyProtocol & AirGapDe
 
   public async prepareDelegatorActionFromPublicKey(publicKey: string, type: any, data?: any): Promise<any[]> {
     const transactions = await this.protocolV1.prepareDelegatorActionFromPublicKey(
-      { type: 'pub', value: publicKey, format: this.getBytesFormat(publicKey) },
+      { type: 'pub', value: publicKey, format: getBytesFormatV1FromV0(publicKey) },
       type,
       data
     )
 
     const transactionsV0 = await Promise.all(
-      transactions.map((transaction) => this.convertV1UnsignedTransactionToV0(transaction, publicKey))
+      transactions.map((transaction) => this.convertUnsignedTransactionV1ToV0(transaction, publicKey))
     )
 
     return transactionsV0.map((transaction) => transaction.transaction)
@@ -1323,6 +1286,7 @@ export async function createICoinProtocolAdapter<T extends AirGapAnyProtocol>(
   blockExplorerV1: AirGapBlockExplorer | undefined,
   v3SerializerCompanion: AirGapV3SerializerCompanion,
   extra: {
+    type?: ProtocolConfiguration['type']
     protocolMetadata?: ProtocolMetadata
     crypto?: CryptoConfiguration | null
     network?: ProtocolNetwork | null
@@ -1338,17 +1302,17 @@ export async function createICoinProtocolAdapter<T extends AirGapAnyProtocol>(
     extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
     extra.crypto
       ? Promise.resolve(extra.crypto)
-      : extra.crypto === null || !isOfflineProtocol(protocolV1)
+      : extra.crypto === null || !isOfflineProtocol(protocolV1) || (extra.type !== 'offline' && extra.type !== 'full')
       ? Promise.resolve(undefined)
       : protocolV1.getCryptoConfiguration(),
     extra.network
       ? Promise.resolve(extra.network)
-      : extra.network === null || !isOnlineProtocol(protocolV1)
+      : extra.network === null || !isOnlineProtocol(protocolV1) || (extra.type !== 'online' && extra.type !== 'full')
       ? Promise.resolve(undefined)
       : protocolV1.getNetwork(),
     extra.blockExplorerMetadata
       ? Promise.resolve(extra.blockExplorerMetadata)
-      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
+      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined || (extra.type !== 'online' && extra.type !== 'full')
       ? Promise.resolve(undefined)
       : blockExplorerV1.getMetadata()
   ])
@@ -1377,16 +1341,18 @@ export async function createICoinProtocolAdapter<T extends AirGapAnyProtocol>(
   }
 }
 
+// eslint-disable-next-line complexity
 export async function createICoinSubProtocolAdapter<T extends AirGapAnyProtocol & SubProtocol>(
   protocolV1: T,
   blockExplorerV1: AirGapBlockExplorer | undefined,
   v3SerializerCompanion: AirGapV3SerializerCompanion,
   extra: {
+    type?: ProtocolConfiguration['type']
     protocolMetadata?: ProtocolMetadata
     crypto?: CryptoConfiguration | null
     network?: ProtocolNetwork | null
     blockExplorerMetadata?: BlockExplorerMetadata | null
-    type?: SubProtocolType
+    subType?: SubProtocolType
     contractAddress?: string | null
   } = {}
 ): Promise<ICoinSubProtocolAdapter<T>> {
@@ -1401,20 +1367,20 @@ export async function createICoinSubProtocolAdapter<T extends AirGapAnyProtocol 
     extra.protocolMetadata ? Promise.resolve(extra.protocolMetadata) : protocolV1.getMetadata(),
     extra.crypto
       ? Promise.resolve(extra.crypto)
-      : extra.crypto === null || !isOfflineProtocol(protocolV1)
+      : extra.crypto === null || !isOfflineProtocol(protocolV1) || (extra?.type !== 'offline' && extra?.type !== 'full')
       ? Promise.resolve(undefined)
       : protocolV1.getCryptoConfiguration(),
     extra.network
       ? Promise.resolve(extra.network)
-      : extra.network === null || !isOnlineProtocol(protocolV1)
+      : extra.network === null || !isOnlineProtocol(protocolV1) || (extra?.type !== 'online' && extra?.type !== 'full')
       ? Promise.resolve(undefined)
       : protocolV1.getNetwork(),
     extra.blockExplorerMetadata
       ? Promise.resolve(extra.blockExplorerMetadata)
-      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined
+      : extra.blockExplorerMetadata === null || blockExplorerV1 === undefined || (extra?.type !== 'online' && extra?.type !== 'full')
       ? Promise.resolve(undefined)
       : blockExplorerV1.getMetadata(),
-    extra.type ? Promise.resolve(extra.type) : protocolV1.getType(),
+    extra.subType ? Promise.resolve(extra.subType) : protocolV1.getType(),
     extra.contractAddress
       ? Promise.resolve(extra.contractAddress)
       : extra.contractAddress === null || !hasConfigurableContract(protocolV1)

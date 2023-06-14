@@ -2,8 +2,9 @@ import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import * as bs58check from 'bs58check'
 import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
+import * as rlp from '@ethereumjs/rlp'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
-import { UnsignedBitcoinSegwitTransaction } from '@airgap/bitcoin'
+import { BitcoinSegwitTransactionSignRequest } from '@airgap/bitcoin'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
@@ -149,7 +150,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
-    const payload: UnsignedBitcoinSegwitTransaction = {
+    const payload: BitcoinSegwitTransactionSignRequest = {
       transaction: { psbt },
       publicKey: ''
     }
@@ -168,7 +169,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   private async convertMetaMaskSignRequest(request: EthSignRequest): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
-    const data = request.getSignData()
+    const signData = request.getSignData()
 
     const sourceFingerprint = ((request as any).derivationPath as CryptoKeypath).getSourceFingerprint().toString('hex')
 
@@ -183,17 +184,44 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
 
     const context = { requestId: metamaskRequestId, derivationPath: request.getDerivationPath(), sourceFingerprint }
 
+    const chainId = request.getChainId()
+
+    const protocol =
+      chainId === 10 /* Optimism Mainnet */ || chainId === 420 /* Optimism Goerli */
+        ? MainProtocolSymbols.OPTIMISM
+        : MainProtocolSymbols.ETH
+
     switch (request.getDataType()) {
       case DataType.transaction: {
-        const ethTx = TransactionFactory.fromSerializedData(Buffer.from(data))
+        // Metamask uses `Transaction#getMessageToSign` to get the transaction bytes which will be later encoded with RLP.
+        // This method returns data that is already prepared to be hashed and signed,
+        // for EIP-155 compliant transactions it means there's `chainId` put where the `v` component is usually placed.
+        // However, the data prepared in that way is not meant to be used to recreate the `Transaction` object.
+        // To construct the `Transaction` object on our side we have to use the transaction data to replicate the
+        // output we would get with `Transaction#serialized`. This means that we first have to decode the data,
+        // drop the EIP-155 compliant parts and finally encode the reduced array of bytes again.
+        const rawTx = rlp.decode(signData)
+        const [nonce, gasPrice, gasLimit, to, value, data] = rawTx
+        const serializedTx = rlp.encode([
+          nonce,
+          gasPrice,
+          gasLimit,
+          to,
+          value,
+          data,
+          Buffer.from([]) /* v */,
+          Buffer.from([]) /* r */,
+          Buffer.from([]) /* s */
+        ])
 
+        const ethTx = TransactionFactory.fromSerializedData(Buffer.from(serializedTx))
         const tx: Transaction = ethTx as Transaction
 
         return {
           result: [
             {
               id: ownRequestId,
-              protocol: MainProtocolSymbols.ETH,
+              protocol,
               type: IACMessageType.TransactionSignRequest,
               payload: {
                 transaction: {
@@ -216,7 +244,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
 
       case DataType.typedData:
         const typedDataSignRequest: MessageSignRequest = {
-          message: data.toString(),
+          message: signData.toString(),
           publicKey: ''
         }
 
@@ -224,7 +252,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
           result: [
             {
               id: ownRequestId,
-              protocol: MainProtocolSymbols.ETH,
+              protocol,
               type: IACMessageType.MessageSignRequest,
               payload: typedDataSignRequest
             }
@@ -234,7 +262,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
         }
       case DataType.personalMessage:
         const signRequest: MessageSignRequest = {
-          message: `0x${data.toString('hex')}`,
+          message: `0x${signData.toString('hex')}`,
           publicKey: ''
         }
 
@@ -242,7 +270,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
           result: [
             {
               id: ownRequestId,
-              protocol: MainProtocolSymbols.ETH,
+              protocol,
               type: IACMessageType.MessageSignRequest,
               payload: signRequest
             }
@@ -256,11 +284,11 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
           result: [
             {
               id: ownRequestId,
-              protocol: MainProtocolSymbols.ETH,
+              protocol,
               type: IACMessageType.TransactionSignRequest,
               payload: {
                 transaction: {
-                  serialized: data.toString('hex'),
+                  serialized: signData.toString('hex'),
                   derivationPath: request.getDerivationPath(),
                   masterFingerprint: sourceFingerprint
                 },

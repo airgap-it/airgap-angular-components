@@ -1,16 +1,16 @@
-import { IAirGapTransaction, SignedTransaction, SubProtocolSymbols, UnsignedTransaction } from '@airgap/coinlib-core'
-import { GenericERC20, EthereumERC20ProtocolOptions, EthereumProtocolNetwork, EthereumERC20ProtocolConfig } from '@airgap/ethereum'
+import { IAirGapTransaction, ICoinProtocol, SignedTransaction, UnsignedTransaction } from '@airgap/coinlib-core'
+import { ERC20TokenMetadata, erc20Tokens } from '@airgap/ethereum'
 import { Injectable } from '@angular/core'
 
 import { Token } from '../../types/Token'
-import { ethTokens } from '../protocol/tokens'
+import { createV0EthereumERC20Token } from '../../utils/protocol/protocol-v0-adapter'
 
 @Injectable({
   providedIn: 'root'
 })
 export class TokenService {
   public getRecipientToken(tx: IAirGapTransaction): Token | undefined {
-    return ethTokens.find((token: Token) => token.contractAddress.toLowerCase() === tx.to[0].toLowerCase())
+    return Object.values(erc20Tokens).find((token: ERC20TokenMetadata) => token.contractAddress.toLowerCase() === tx.to[0].toLowerCase())
   }
 
   public async getTokenTransferDetailsFromSigned(
@@ -20,19 +20,7 @@ export class TokenService {
   ): Promise<IAirGapTransaction> {
     const token: Token | undefined = recipientToken ?? this.getRecipientToken(tx)
     if (token !== undefined) {
-      const genericErc20: GenericERC20 = new GenericERC20(
-        new EthereumERC20ProtocolOptions(
-          new EthereumProtocolNetwork(),
-          new EthereumERC20ProtocolConfig(
-            token.symbol,
-            token.name,
-            token.marketSymbol,
-            token.identifier as SubProtocolSymbols,
-            token.contractAddress,
-            token.decimals
-          )
-        )
-      )
+      const genericErc20: ICoinProtocol = await createV0EthereumERC20Token(token)
 
       try {
         const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetailsFromSigned(signedTransaction)
@@ -55,28 +43,16 @@ export class TokenService {
   ): Promise<IAirGapTransaction> {
     const token: Token | undefined = recipientToken ?? this.getRecipientToken(tx)
     if (token !== undefined) {
-      const genericErc20: GenericERC20 = new GenericERC20(
-        new EthereumERC20ProtocolOptions(
-          new EthereumProtocolNetwork(),
-          new EthereumERC20ProtocolConfig(
-            token.symbol,
-            token.name,
-            token.marketSymbol,
-            token.identifier as SubProtocolSymbols,
-            token.contractAddress,
-            token.decimals
-          )
-        )
-      )
+      const genericErc20: ICoinProtocol = await createV0EthereumERC20Token(token)
+
       try {
-        const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetails(unsignedTransaction) 
+        const transactions: IAirGapTransaction[] = await genericErc20.getTransactionDetails(unsignedTransaction)
         if (transactions.length !== 1) {
           throw Error('`getTransactionDetails` returned more than 1 transaction!')
         }
 
         return transactions[0]
       } catch (error) {}
-
     }
 
     return tx

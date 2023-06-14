@@ -9,9 +9,10 @@ import { Storage } from '@ionic/storage'
 import { ComponentsModule } from '../../src/lib/components/components.module'
 import { PipesModule } from '../../src/lib/pipes/pipes.module'
 import { APP_CONFIG, AppConfig } from '../../src/lib/config/app-config'
-import { ISOLATED_MODULES_PLUGIN } from '../../src/lib/capacitor-plugins/injection-tokens'
+import { FILESYSTEM_PLUGIN, ISOLATED_MODULES_PLUGIN, ZIP_PLUGIN } from '../../src/lib/capacitor-plugins/injection-tokens'
 import { IsolatedModules } from '../../src/lib/capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { StorageMock } from './storage-mock'
+import { FilesystemPluginMock, ZipPluginMock } from './plugins-mock'
 
 export class TestBedUtils {
   public moduleDef(moduleMedatada: TestModuleMetadata, useIonicOnlyTestBed: boolean = false): TestModuleMetadata {
@@ -42,7 +43,9 @@ export class TestBedUtils {
     const mandatoryProviders: any[] = [
       { provide: Storage, useClass: StorageMock },
       { provide: APP_CONFIG, useValue: appConfig },
-      { provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() }
+      { provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() },
+      { provide: FILESYSTEM_PLUGIN, useValue: new FilesystemPluginMock() },
+      { provide: ZIP_PLUGIN, useValue: new ZipPluginMock() }
     ]
 
     if (!useIonicOnlyTestBed) {

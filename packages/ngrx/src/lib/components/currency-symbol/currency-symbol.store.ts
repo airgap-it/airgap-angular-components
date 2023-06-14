@@ -20,8 +20,8 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
     super(initialStore)
   }
 
-  public readonly onError$ = this.effect((props$: Observable<void>) => {
-    return props$.pipe(
+  public readonly onError$ = this.effect((trigger$: Observable<void>) => {
+    return trigger$.pipe(
       withLatestFrom(this.state$),
       switchMap(([, state]: [void, CurrencySymbolState]) => {
         return this.loadFallbackImage(state).pipe(
@@ -78,10 +78,24 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
           fallbackType:
             value.extension === 'svg'
               ? { kind: 'asset', symbolInput: value.symbolInput, extension: 'png' } /* use .png as a fallback */
-              : { kind: 'lazy', symbolInput: value.symbolInput } /* try loading external image as a fallback */,
+              : { kind: 'isolated', symbolInput: value.symbolInput } /* try loading external isolated image as a fallback */,
 
           input: assetCurrent,
           fallbackInput: assetFallback
+        }
+      case 'isolated':
+        const { current: isolatedCurrent, fallback: isolatedFallback } = this.getNextInputs(state, value.symbolInput)
+
+        return {
+          ...state,
+          src: value.url ?? '',
+          fallbackType:
+            !state.fallbackInput || value.symbolInput === state.fallbackInput
+              ? { kind: 'lazy', symbolInput: value.symbolInput } /* try loading external image as a fallback */
+              : { kind: 'asset', symbolInput: state.fallbackInput, extension: 'svg' } /* try again with fallback symbol */,
+
+          input: isolatedCurrent,
+          fallbackInput: isolatedFallback
         }
       case 'lazy':
         const { current: lazyCurrent, fallback: lazyFallback } = this.getNextInputs(state, value.symbolInput)
@@ -119,6 +133,9 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
           subscriber.next({ kind: 'default' })
           if (state.fallbackType?.kind === 'asset') {
             subscriber.next({ kind: 'asset', symbolInput: state.fallbackType.symbolInput, extension: state.fallbackType.extension })
+          } else if (state.fallbackType?.kind === 'isolated') {
+            const imageURI: string | undefined = await this.loadIsolatedImage(state.fallbackType.symbolInput)
+            subscriber.next({ kind: 'isolated', symbolInput: state.fallbackType.symbolInput, url: imageURI })
           } else if (state.fallbackType?.kind === 'lazy') {
             // try loading external image
             const imageURI: string | undefined = await this.loadLazyImage(state.fallbackType.symbolInput)
@@ -136,6 +153,10 @@ export class CurrencySymbolStore extends ComponentStore<CurrencySymbolState> {
         subscriber.complete()
       })
     })
+  }
+
+  private async loadIsolatedImage(symbolInput: SymbolInput): Promise<string | undefined> {
+    return this.filesystemService.readIsolatedSymbol(symbolInput.caseSensitive ? symbolInput.value : symbolInput.value.toLocaleLowerCase())
   }
 
   private async loadLazyImage(symbolInput: SymbolInput): Promise<string | undefined> {

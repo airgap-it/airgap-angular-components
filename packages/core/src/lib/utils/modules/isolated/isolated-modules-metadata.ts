@@ -1,12 +1,10 @@
 import { implementsInterface } from '@airgap/module-kit'
-import { IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata } from '../../../types/isolated-modules/IsolatedModuleMetadata'
 
 export function isIsolatedModuleMetadata(object: unknown): object is IsolatedModuleMetadata {
   return implementsInterface<IsolatedModuleMetadata>(object, {
+    type: 'required',
     module: 'required',
-    manifest: 'required',
-    path: 'required',
-    root: 'required',
-    directory: 'required'
+    manifest: 'required'
   })
 }

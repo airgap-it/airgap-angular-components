@@ -1,6 +1,8 @@
 import { ProtocolSymbols } from '@airgap/coinlib-core'
 import { Component, Inject, Injector, Input, OnChanges, SimpleChanges } from '@angular/core'
-import { first } from 'rxjs/operators'
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
+import { Observable } from 'rxjs'
+import { first, map } from 'rxjs/operators'
 import { BaseComponent } from '../../base/base.component'
 import { currencySymbolFacade, CurrencySymbolFacade, CURRENCY_SYMBOL_FACADE } from './currency-symbol.facade'
 
@@ -17,8 +19,12 @@ export class CurrencySymbolComponent extends BaseComponent<CurrencySymbolFacade>
   @Input()
   public protocolIdentifier: ProtocolSymbols | undefined
 
-  constructor(@Inject(CURRENCY_SYMBOL_FACADE) facade: CurrencySymbolFacade) {
+  public readonly symbolSrc$: Observable<SafeUrl>
+
+  constructor(@Inject(CURRENCY_SYMBOL_FACADE) facade: CurrencySymbolFacade, private readonly domSanitizer: DomSanitizer) {
     super(facade)
+
+    this.symbolSrc$ = facade.symbolSrc$.pipe(map((src: string) => this.domSanitizer.bypassSecurityTrustUrl(src)))
   }
 
   public ngOnInit() {
