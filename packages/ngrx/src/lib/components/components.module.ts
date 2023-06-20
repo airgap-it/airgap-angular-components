@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common'
 import { NgModule } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { IonicModule } from '@ionic/angular'
 import { TranslateModule } from '@ngx-translate/core'
-import { MomentModule } from 'ngx-moment'
-
 import { QRCodeModule } from 'angularx-qrcode'
-import { FormsModule } from '@angular/forms'
+import { MomentModule } from 'ngx-moment'
 
 @NgModule({
   declarations: [],

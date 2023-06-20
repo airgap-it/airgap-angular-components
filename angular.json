@@ -28,15 +28,9 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "packages/core/test/test.ts",
+            "polyfills": "packages/core/polyfills.ts",
             "tsConfig": "packages/core/tsconfig.spec.json",
             "karmaConfig": "packages/core/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": ["packages/core/tsconfig.lib.json", "packages/core/tsconfig.spec.json"],
-            "exclude": ["**/node_modules/**"]
           }
         }
       }
@@ -63,15 +57,9 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "packages/ngrx/test/test.ts",
+            "polyfills": "packages/ngrx/polyfills.ts",
             "tsConfig": "packages/ngrx/tsconfig.spec.json",
             "karmaConfig": "packages/ngrx/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": ["packages/ngrx/tsconfig.lib.json", "packages/ngrx/tsconfig.spec.json"],
-            "exclude": ["**/node_modules/**"]
           }
         }
       }

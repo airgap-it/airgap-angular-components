@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, Inject } from '@angular/core'
-
-import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
 import { IACMessageDefinitionObjectV3 } from '@airgap/serializer'
+import { QRCodeErrorCorrectionLevel } from 'qrcode'
+
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 import { SerializerService } from '../../services/serializer/serializer.service'
 import { APP_CONFIG, AppConfig } from '../../config/app-config'
@@ -40,7 +40,7 @@ export class IACQrComponent implements OnDestroy {
   private activeGenerator: IACQrGenerator | undefined
 
   @Input()
-  public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
+  public level: QRCodeErrorCorrectionLevel = 'L'
 
   @Input()
   public size: number = 300

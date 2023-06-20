@@ -4,8 +4,8 @@ import { BaseComponent } from '../../base/base.component'
 import { IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
 import { UIResource, UIResourceStatus } from '../../types/ui/UIResource'
 import {
-  IsolatedModulesDetailsFacade,
   isolatedModulesDetailsFacade,
+  IsolatedModulesDetailsFacade,
   ISOLATED_MODULES_DETAILS_FACADE
 } from './isolated-modules-details.facade'
 

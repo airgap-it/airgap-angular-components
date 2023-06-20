@@ -1,13 +1,15 @@
 {
-  "version": "0.0.38",
-  "packages": [
-    "packages/*"
-  ],
+  "version": "0.0.39-beta.5",
   "command": {
     "publish": {
       "ignoreChanges": [
         "*.sh",
         "*.md"
+      ]
+    },
+    "version": {
+      "npmClientArgs": [
+        "--legacy-peer-deps"
       ]
     }
   }

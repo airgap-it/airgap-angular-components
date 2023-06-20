@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core'
+import { QRCodeErrorCorrectionLevel } from 'qrcode'
 
-import { QRCodeErrorCorrectionLevel } from 'angularx-qrcode'
 import { ClipboardService } from '../../services/clipboard/clipboard.service'
 
 @Component({
@@ -10,7 +10,7 @@ import { ClipboardService } from '../../services/clipboard/clipboard.service'
 })
 export class QrComponent {
   @Input()
-  public level: keyof typeof QRCodeErrorCorrectionLevel = 'L'
+  public level: QRCodeErrorCorrectionLevel = 'L'
 
   @Input()
   public size: number = 300
@@ -21,7 +21,8 @@ export class QrComponent {
   @Input()
   public qrdata: string = ''
 
-  @Input() disableClipboard: boolean = false
+  @Input()
+  public disableClipboard: boolean = false
 
   constructor(private readonly clipboardService: ClipboardService) {}
 

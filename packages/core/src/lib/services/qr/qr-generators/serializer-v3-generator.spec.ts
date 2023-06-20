@@ -84,13 +84,6 @@ describe('SerializerV3Generator', () => {
     const part5 = await generator.nextPart()
     const part6 = await generator.nextPart()
 
-    console.log('part1', part1)
-    console.log('part2', part2)
-    console.log('part3', part3)
-    console.log('part4', part4)
-    console.log('part5', part5)
-    console.log('part6', part6)
-
     expect(part1).toBe('UR:BYTES/1-6/LPADAMCSINCYKBHEEYHGGMHDIOCTLUAYAEAEAEAEAEAEAXJEIDJTJZIHIEKTTIVEDL')
     expect(part2).toBe('UR:BYTES/2-6/LPAOAMCSINCYKBHEEYHGGMGAPLDEPTMOIDTADPKKOLRYDYHGURSSDKFXURTNCPGHSR')
     expect(part3).toBe('UR:BYTES/3-6/LPAXAMCSINCYKBHEEYHGGMTIUOSPEYFXURAELRHHNLFWZOQDHGDAKGRHRKCLGOGYYT')

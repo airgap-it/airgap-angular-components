@@ -1,4 +1,5 @@
 import { ProtocolNetwork } from '@airgap/coinlib-core'
+import { Injectable } from '@angular/core'
 import { createNotInitialized } from '../../../utils/not-initialized'
 
 export interface BaseProtocolStoreConfig<T> {
@@ -6,6 +7,7 @@ export interface BaseProtocolStoreConfig<T> {
   activeProtocols: T
 }
 
+@Injectable()
 export abstract class BaseProtocolStoreService<
   ICoinType = unknown,
   SymbolType = unknown,

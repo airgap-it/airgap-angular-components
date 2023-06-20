@@ -10,3 +10,4 @@ coverage
 dist
 node_modules
 **/*.js
+**/polyfills.ts
