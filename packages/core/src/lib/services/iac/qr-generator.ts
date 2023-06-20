@@ -1,6 +1,8 @@
 import { IACMessageDefinitionObjectV3 } from '@airgap/serializer'
+import { Injectable } from '@angular/core'
 import { serializedDataToUrlString } from '../../utils/utils'
 
+@Injectable()
 export abstract class IACQrGenerator {
   abstract create(data: IACMessageDefinitionObjectV3[], multiFragmentLength?: number, singleFragmentLength?: number): Promise<void>
   abstract nextPart(): Promise<string> // handle complete

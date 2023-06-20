@@ -32,7 +32,6 @@ describe('MetamaskGenerator', () => {
 
     await generator.create([data], 300, 150)
     const part = await generator.nextPart()
-    console.log('part', part)
     expect(part).toBe(
       'UR:CRYPTO-HDKEY/ONAXHDCLAOWDVEROKOPDINHSEEROISYALKSAYKCTJSHEDPRNUYJYFGROVAWEWFTYGHCEGLRPKGAAHDCXTPLFJSLUKNFWLAISAXWYPALBJYLSWZAMCXHSCYUYLOZTMWFNLDLGSKPYPTGSDECFAMTAADDYOEADLNCSDWYKCSFNYKAEYKAOCYHNRPLUINAYCYIEIAECETASJEFPINJPFLHSJOCXDPCXGTGTCHMSTSVA'
     )
@@ -54,8 +53,6 @@ describe('MetamaskGenerator', () => {
     await generator.create([data], 300, 150)
 
     const part1 = await generator.nextPart()
-
-    console.log('part1', part1)
 
     // Signatures are always different
     expect(part1.length).toBe(

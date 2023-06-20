@@ -5,11 +5,7 @@
     "baseUrl": "./",
     "declarationMap": true,
     "outDir": "./out-tsc/core",
-    "typeRoots": ["../../node_modules/@types", "node_modules/@types", "src/typings"],
-    "paths": {
-      "rxjs": ["../../node_modules/rxjs"],
-      "rxjs/*": ["../../node_modules/rxjs/*"]
-    }
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types", "src/typings"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/test.ts", "**/*.spec.ts", "src/typings"]

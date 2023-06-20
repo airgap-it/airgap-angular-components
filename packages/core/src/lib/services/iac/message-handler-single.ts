@@ -1,8 +1,10 @@
+import { Injectable } from '@angular/core'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from './message-handler'
 
 /**
  * Handles requests that can only be in a single QR
  */
+@Injectable()
 export abstract class IACSinglePartHandler<T> extends IACMessageHandler<T> {
   protected payload: T | undefined
   protected rawData: string | undefined

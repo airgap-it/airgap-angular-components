@@ -1,5 +1,5 @@
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
-import { Inject } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
@@ -13,6 +13,7 @@ export type ScanAgainCallback = (progress?: number) => void
 
 export type RelayMessage = string
 
+@Injectable()
 export abstract class BaseIACService {
   protected readonly handlers: IACMessageHandler<unknown>[]
   private transport: IACMessageTransport | undefined = undefined

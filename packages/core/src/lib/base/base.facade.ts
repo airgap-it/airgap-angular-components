@@ -1,6 +1,8 @@
 /* eslint-disable spaced-comment */
+import { Injectable } from '@angular/core'
 import { Subject } from 'rxjs'
 
+@Injectable()
 export abstract class BaseFacade {
   private static readonly callSuperOnViewCreate: unique symbol = Symbol('Expected to call `super.onViewCreate()`')
   private static readonly callSuperOnViewInit: unique symbol = Symbol('Expected to call `super.onViewInit()`')

@@ -1,20 +1,13 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.38",
-  "main": "dist/bundles/airgap-angular-ngrx.umd.js",
-  "module": "dist/fesm2015/airgap-angular-ngrx.js",
-  "es2015": "dist/fesm2015/airgap-angular-ngrx.js",
-  "esm2015": "dist/esm2015/airgap-angular-ngrx.js",
-  "fesm2015": "dist/fesm2015/airgap-angular-ngrx.js",
-  "typings": "dist/airgap-angular-ngrx.d.ts",
-  "metadata": "dist/airgap-angular-ngrx.metadata.json",
+  "version": "0.0.39-beta.5",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "ng": "ng",
     "build": "ng build ngrx",
-    "build:prod": "ng build --prod ngrx",
+    "build:prod": "ng build ngrx --configuration production",
     "test": "ng test ngrx",
     "test:ci": "ng test ngrx --code-coverage --watch=false",
     "test:lerna": "ng test ngrx --watch=false",
@@ -24,20 +17,25 @@
     "e2e": "ng e2e ngrx"
   },
   "dependencies": {
-    "tslib": "^2.2.0"
+    "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@airgap/angular-core": "^0.0.38",
+    "@airgap/angular-core": "0.0.38",
     "@airgap/coinlib-core": "^0.13.16",
-    "@angular/common": "^11.2.9",
-    "@angular/core": "^11.2.9",
-    "@angular/platform-browser": "^11.2.9",
-    "@angular/platform-browser-dynamic": "^11.2.9",
-    "@ionic/core": "^5.6.4",
-    "@ngrx/component": "^11.1.1",
-    "@ngrx/component-store": "^11.1.1",
-    "@ngrx/store": "^11.1.0",
-    "rxjs": "^6.6.7",
-    "zone.js": "^0.11.4"
+    "@angular/common": "^16.1.0",
+    "@angular/core": "^16.1.0",
+    "@angular/forms": "^16.1.0",
+    "@angular/platform-browser": "^16.1.0",
+    "@angular/platform-browser-dynamic": "^16.1.0",
+    "@ionic/angular": "^7.0.12",
+    "@ionic/core": "^7.0.12",
+    "@ngrx/component": "^16.0.1",
+    "@ngrx/component-store": "^16.0.1",
+    "@ngrx/store": "^16.0.1",
+    "@ngx-translate/core": "^13.0.0",
+    "angularx-qrcode": "^16.0.0",
+    "ngx-moment": "^6.0.2",
+    "rxjs": "^7.8.1",
+    "zone.js": "^0.13.1"
   }
 }

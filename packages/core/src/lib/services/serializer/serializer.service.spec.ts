@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing'
-import { Storage } from '@ionic/storage'
+import { Storage } from '@ionic/storage-angular'
 import { StorageMock } from '../../../../test/utils/storage-mock'
 import { TestBedUtils } from '../../../../test/utils/test-bed'
 

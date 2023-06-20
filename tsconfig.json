@@ -5,29 +5,29 @@
     "declaration": true,
     "module": "es2020",
     "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "downlevelIteration": true, // To enable [].entries()
-    "target": "es5",
-    "lib": ["es2018", "dom"],
+    "downlevelIteration": true,
+    "target": "ES2022",
+    "lib": [
+      "es2018",
+      "dom"
+    ],
     "skipLibCheck": true,
-    /* Strict Type-Checking Options */
-    "strict": false /* Enable all strict type-checking options. */,
-    "skipDefaultLibCheck": true
+    "strict": false,
+    "skipDefaultLibCheck": true,
+    "useDefineForClassFields": false,
+    "paths": {
+      "@airgap/angular-core": ["./node_modules/@airgap/angular-core/src/public-api.ts"],
+      "@airgap/angular-ngrx": ["./node_modules/@airgap/angular-ngrx/src/public-api.ts"],
+    }
   },
   "angularCompilerOptions": {
-    "enableIvy": false,
+    "compilationMode": "partial",
     "strictInjectionParameters": true,
     "fullTemplateTypeCheck": true,
     "strictTemplates": true,
     "strictInputAccessModifiers": true,
-    "strictMetadataEmit": false,
-  },
-  "paths": {
-    "core": ["packages/core/dist"],
-    "ngrx": ["packages/ngrx/dist"],
-    "@airgap/angular-core": ["packages/core/dist"],
-    "@airgap/angular-ngrx": ["packages/ngrx/dist"]
+    "strictMetadataEmit": false
   }
 }
