@@ -90,7 +90,9 @@ import {
   convertNetworkTypeV1ToV0,
   convertTransactionDetailsV1ToV0,
   convertTransactionStatusV1ToV0,
-  getBytesFormatV1FromV0
+  getBytesFormatV1FromV0,
+  getPublicKeyType,
+  getSecretKeyType
 } from '../../utils/protocol/protocol-v0-adapter'
 
 // ProtocolBlockExplorer
@@ -930,9 +932,20 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, SignMessage.')
     }
 
+    const privateKey =
+      getSecretKeyType(keypair.privateKey) === 'xpriv'
+        ? await this.getPrivateKeyFromExtendedPrivateKey(keypair.privateKey)
+        : keypair.privateKey
+
+    const publicKey = keypair.publicKey
+      ? getPublicKeyType(keypair.publicKey) === 'xpub'
+        ? await this.getPublicKeyFromExtendedPrivateKey(keypair.publicKey)
+        : keypair.publicKey
+      : ''
+
     const signature: Signature = await this.protocolV1.signMessageWithKeyPair(message, {
-      secretKey: newSecretKey(keypair.privateKey, getBytesFormatV1FromV0(keypair.privateKey)),
-      publicKey: newPublicKey(keypair.publicKey ?? '', getBytesFormatV1FromV0(keypair.publicKey ?? ''))
+      secretKey: newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)),
+      publicKey: newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
     })
 
     return signature.value
@@ -943,9 +956,20 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, AsymmetricEncryption.')
     }
 
+    const privateKey =
+      getSecretKeyType(keypair.privateKey) === 'xpriv'
+        ? await this.getPrivateKeyFromExtendedPrivateKey(keypair.privateKey)
+        : keypair.privateKey
+
+    const publicKey = keypair.publicKey
+      ? getPublicKeyType(keypair.publicKey) === 'xpub'
+        ? await this.getPublicKeyFromExtendedPrivateKey(keypair.publicKey)
+        : keypair.publicKey
+      : ''
+
     return this.protocolV1.decryptAsymmetricWithKeyPair(encryptedPayload, {
-      secretKey: newSecretKey(keypair.privateKey, getBytesFormatV1FromV0(keypair.privateKey)),
-      publicKey: newPublicKey(keypair.publicKey ?? '', getBytesFormatV1FromV0(keypair.publicKey ?? ''))
+      secretKey: newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)),
+      publicKey: newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey))
     })
   }
 
@@ -954,6 +978,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
 
+    // eslint-disable-next-line no-param-reassign
+    privateKey = getSecretKeyType(privateKey) === 'xpriv' ? await this.getPrivateKeyFromExtendedPrivateKey(privateKey) : privateKey
+
     return this.protocolV1.encryptAESWithSecretKey(payload, newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)))
   }
 
@@ -961,6 +988,9 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     if (!isOfflineProtocol(this.protocolV1) || !canEncryptAES(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Offline, AES.')
     }
+
+    // eslint-disable-next-line no-param-reassign
+    privateKey = getSecretKeyType(privateKey) === 'xpriv' ? await this.getPrivateKeyFromExtendedPrivateKey(privateKey) : privateKey
 
     return this.protocolV1.decryptAESWithSecretKey(encryptedPayload, newSecretKey(privateKey, getBytesFormatV1FromV0(privateKey)))
   }
@@ -976,6 +1006,19 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     )
 
     return secretKey.value
+  }
+
+  public async getPublicKeyFromExtendedPrivateKey(extendedPublicKey: string, childDerivationPath?: string): Promise<string> {
+    if (!isBip32Protocol(this.protocolV1)) {
+      throw new Error('Method not supported, required inferface: Bip32.')
+    }
+
+    const publicKey: PublicKey = await this.derivePublicKey(
+      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
+      childDerivationPath
+    )
+
+    return publicKey.value
   }
 
   protected getNetwork(protocolOptions?: ProtocolOptionsV0): ProtocolNetworkV0 {
@@ -1012,6 +1055,24 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     const [visibilityIndex, addressIndex]: number[] = childDerivationPath.split('/').map((index: string) => parseInt(index, 10))
 
     return this.protocolV1.deriveFromExtendedSecretKey(extendedSecretKey, visibilityIndex, addressIndex)
+  }
+
+  protected async derivePublicKey(extendedPublicKey: ExtendedPublicKey, childDerivationPath: string = '0/0'): Promise<PublicKey> {
+    if (!isBip32Protocol(this.protocolV1)) {
+      throw new Error(`Protocol doesn't support public key derivation, missing inferface: Bip32.`)
+    }
+
+    if (childDerivationPath.startsWith('m')) {
+      throw new Error('Received full derivation path, expected child derivation path')
+    }
+
+    if (childDerivationPath.toLowerCase().includes('h') || childDerivationPath.includes(`'`)) {
+      throw new Error('Child derivation path cannot include hardened children')
+    }
+
+    const [visibilityIndex, addressIndex]: number[] = childDerivationPath.split('/').map((index: string) => parseInt(index, 10))
+
+    return this.protocolV1.deriveFromExtendedPublicKey(extendedPublicKey, visibilityIndex, addressIndex)
   }
 
   protected async getSerializerIdentifier(base?: string): Promise<string> {
