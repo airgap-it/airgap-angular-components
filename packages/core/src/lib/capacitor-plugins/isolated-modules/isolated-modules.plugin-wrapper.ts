@@ -75,7 +75,7 @@ export class IsolatedModulesPluginWrapper implements IsolatedModulesPlugin {
   }
 
   public async batchCallMethod(options: BatchCallMethodOptions): Promise<BatchCallMethodResult> {
-    const newOptions: BatchCallMethodOptions = this.plugin instanceof WebIsolatedModules ? options : this.replaceUndefined(options)
+    const newOptions: BatchCallMethodOptions = WebIsolatedModules.isWebPlugin(this.plugin) ? options : this.replaceUndefined(options)
 
     return this.plugin.batchCallMethod(newOptions)
   }
