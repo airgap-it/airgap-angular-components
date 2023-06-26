@@ -59,9 +59,6 @@ import { IsolatedModule, IsolatedProtocol } from '../../types/isolated-modules/I
 import { getOfflineProtocolConfiguration, getOnlineProtocolConfiguration } from '../../utils/modules/load-protocol'
 
 export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public readonly __isWeb__: true = true
-
   private readonly offlineProtocols: Record<string, AirGapOfflineProtocol> = {}
   private readonly onlineProtocols: Record<string, AirGapOnlineProtocol> = {}
   private readonly blockExplorers: Record<string, AirGapBlockExplorer> = {}
@@ -86,11 +83,6 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     ]
   ) {
     super()
-  }
-
-  public static isWebPlugin(plugin: IsolatedModulesPlugin): plugin is IsolatedModules {
-    // eslint-disable-next-line no-underscore-dangle
-    return (plugin as IsolatedModules).__isWeb__ === true
   }
 
   public async previewDynamicModule(_options: PreviewDynamicModuleOptions): Promise<PreviewDynamicModuleResult> {
