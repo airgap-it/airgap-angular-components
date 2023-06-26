@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core'
 import { ICoinProtocol, MainProtocolSymbols, ProtocolNetwork } from '@airgap/coinlib-core'
-import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
-import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
+import { splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
 import { ModulesController } from '../../../modules/controller/modules.controller'
+import { BaseEnvironmentService } from '../../../environment/base-environment.service'
 
 export type ProtocolsMap = Map<string, ICoinProtocol>
 
@@ -18,8 +18,8 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   ProtocolsMap,
   MainProtocolStoreConfig
 > {
-  constructor(private readonly modulesController: ModulesController) {
-    super('MainProtocolService')
+  constructor(environment: BaseEnvironmentService, modulesController: ModulesController) {
+    super('MainProtocolService', environment, modulesController)
   }
 
   public async removeProtocols(identifiers: MainProtocolSymbols[]): Promise<void> {
@@ -50,10 +50,8 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
     retry: boolean = true
   ): Promise<ICoinProtocol | undefined> {
     try {
-      const targetNetwork: ProtocolNetwork | string =
-        network ?? (await getProtocolOptionsByIdentifier(this.modulesController, identifier)).network
-
-      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(identifier, targetNetwork)
+      const targetNetwork: ProtocolNetwork | string | undefined = await this.getTargetNetwork(identifier, network)
+      const protocolAndNetworkIdentifier: string = await this.getProtocolAndNetworkIdentifier(identifier, targetNetwork)
       const protocols: ProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
       const found: ICoinProtocol | undefined = protocols.get(protocolAndNetworkIdentifier)
 
@@ -93,7 +91,7 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
       this.createProtocolMap(config.activeProtocols)
     ])
 
-    return { passiveProtocols, activeProtocols }
+    return { ...config, passiveProtocols, activeProtocols }
   }
 
   protected async mergeProtocols(protocols1: ProtocolsMap, protocols2: ProtocolsMap | undefined): Promise<ProtocolsMap> {
@@ -114,7 +112,7 @@ export class MainProtocolStoreService extends BaseProtocolStoreService<
   private async createProtocolMap(protocols: ICoinProtocol[]): Promise<ProtocolsMap> {
     const protocolsWithIdentifiers: [string, ICoinProtocol][] = await Promise.all(
       protocols.map(async (protocol: ICoinProtocol) => {
-        const protocolAndNetworkIdentifier = await getProtocolAndNetworkIdentifier(protocol)
+        const protocolAndNetworkIdentifier = await this.getProtocolAndNetworkIdentifier(protocol)
 
         return [protocolAndNetworkIdentifier, protocol] as [string, ICoinProtocol]
       })

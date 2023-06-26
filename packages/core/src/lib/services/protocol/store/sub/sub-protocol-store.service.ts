@@ -9,11 +9,11 @@ import {
 } from '@airgap/coinlib-core'
 import { erc20Tokens } from '@airgap/ethereum'
 import { getMainIdentifier } from '../../../../utils/protocol/protocol-identifier'
-import { getProtocolAndNetworkIdentifier, splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
+import { splitProtocolNetworkIdentifier } from '../../../../utils/protocol/protocol-network-identifier'
 import { Token } from '../../../../types/Token'
 import { BaseProtocolStoreService, BaseProtocolStoreConfig } from '../base-protocol-store.service'
-import { getProtocolOptionsByIdentifier } from '../../../../utils/protocol/protocol-options'
 import { ModulesController } from '../../../modules/controller/modules.controller'
+import { BaseEnvironmentService } from '../../../environment/base-environment.service'
 
 export interface SubProtocolsMap {
   [key: string]: {
@@ -37,8 +37,8 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
 > {
   private _ethTokenIdentifers: Set<string> | undefined
 
-  constructor(private readonly modulesController: ModulesController) {
-    super('SubProtocolService')
+  constructor(environment: BaseEnvironmentService, modulesController: ModulesController) {
+    super('SubProtocolService', environment, modulesController)
   }
 
   private get ethTokenIdentifiers(): Set<string> {
@@ -101,9 +101,8 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
   ): Promise<ICoinSubProtocol | undefined> {
     try {
       const mainIdentifier: MainProtocolSymbols = getMainIdentifier(identifier)
-      const targetNetwork: ProtocolNetwork | string =
-        network ?? (await getProtocolOptionsByIdentifier(this.modulesController, mainIdentifier)).network
-      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+      const targetNetwork: ProtocolNetwork | string | undefined = await this.getTargetNetwork(mainIdentifier, network)
+      const protocolAndNetworkIdentifier: string = await this.getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
       const subProtocolsMap: SubProtocolsMap = activeOnly ? this.activeProtocols : await this.supportedProtocols
       const found = (subProtocolsMap[protocolAndNetworkIdentifier] ?? {})[identifier]
@@ -152,7 +151,7 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
       this.createSubProtocolMap(config.activeSubProtocols)
     ])
 
-    return { passiveProtocols, activeProtocols }
+    return { ...config, passiveProtocols, activeProtocols }
   }
 
   protected async mergeProtocols(protocols1: SubProtocolsMap, protocols2: SubProtocolsMap): Promise<SubProtocolsMap> {
@@ -206,7 +205,7 @@ export class SubProtocolStoreService extends BaseProtocolStoreService<
         throw new Error(`Sub protocol ${subProtocolName} must have the same network as the main protocol.`)
       }
 
-      const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
+      const protocolAndNetworkIdentifier: string = await this.getProtocolAndNetworkIdentifier(protocol)
 
       if (subProtocolMap[protocolAndNetworkIdentifier] === undefined) {
         subProtocolMap[protocolAndNetworkIdentifier] = {}

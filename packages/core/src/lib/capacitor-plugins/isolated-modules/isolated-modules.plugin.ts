@@ -60,7 +60,7 @@ import { getOfflineProtocolConfiguration, getOnlineProtocolConfiguration } from 
 
 export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private readonly __isWeb__: true = true
+  public readonly __isWeb__: true = true
 
   private readonly offlineProtocols: Record<string, AirGapOfflineProtocol> = {}
   private readonly onlineProtocols: Record<string, AirGapOnlineProtocol> = {}

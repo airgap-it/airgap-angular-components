@@ -9,12 +9,9 @@ import {
 } from '@airgap/coinlib-core'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { erc20Tokens } from '@airgap/ethereum'
-import { getProtocolAndNetworkIdentifier } from '../../utils/protocol/protocol-network-identifier'
 import { ExposedPromise } from '../../utils/ExposedPromise'
 import { getMainIdentifier } from '../../utils/protocol/protocol-identifier'
 import { Token } from '../../types/Token'
-import { getProtocolOptionsByIdentifier } from '../../utils/protocol/protocol-options'
-import { ModulesController } from '../modules/controller/modules.controller'
 import { MainProtocolStoreConfig, MainProtocolStoreService } from './store/main/main-protocol-store.service'
 import { SubProtocolStoreConfig, SubProtocolStoreService, SubProtocolsMap } from './store/sub/sub-protocol-store.service'
 import {
@@ -39,11 +36,7 @@ export class ProtocolService {
   private readonly isReady: ExposedPromise<void> = new ExposedPromise()
   private knownProtocolSymbols: Set<string> | undefined
 
-  constructor(
-    private readonly mainProtocolStore: MainProtocolStoreService,
-    private readonly subProtocolStore: SubProtocolStoreService,
-    private readonly modulesController: ModulesController
-  ) {}
+  constructor(private readonly mainProtocolStore: MainProtocolStoreService, private readonly subProtocolStore: SubProtocolStoreService) {}
 
   private get isInitialized(): boolean {
     return this.mainProtocolStore.isInitialized && this.subProtocolStore.isInitialized
@@ -201,7 +194,7 @@ export class ProtocolService {
       filtered
         .filter((protocol: ICoinProtocol | undefined) => protocol !== undefined)
         .map(async (protocol: ICoinProtocol) => {
-          const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(protocol)
+          const protocolAndNetworkIdentifier: string = await this.mainProtocolStore.getProtocolAndNetworkIdentifier(protocol)
 
           return [protocolAndNetworkIdentifier, protocol] as [string, ICoinProtocol]
         })
@@ -228,7 +221,10 @@ export class ProtocolService {
         const protocolOptions: ProtocolOptions = await protocol.getOptions()
 
         const mainIdentifier: MainProtocolSymbols = getMainIdentifier(protocolIdentifier)
-        const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, protocolOptions.network)
+        const protocolAndNetworkIdentifier: string = await this.subProtocolStore.getProtocolAndNetworkIdentifier(
+          mainIdentifier,
+          protocolOptions.network
+        )
 
         return [protocolAndNetworkIdentifier, [protocolIdentifier, protocol]] as [string, [ProtocolSymbols, ICoinProtocol]]
       })
@@ -273,9 +269,8 @@ export class ProtocolService {
     await this.waitReady()
 
     const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
-    const targetNetwork: ProtocolNetwork | string =
-      network ?? (await getProtocolOptionsByIdentifier(this.modulesController, mainIdentifier)).network
-    const protocolAndNetworkIdentifier: string = await getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
+    const targetNetwork: ProtocolNetwork | string | undefined = await this.subProtocolStore.getTargetNetwork(mainIdentifier, network)
+    const protocolAndNetworkIdentifier: string = await this.subProtocolStore.getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
 
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
 
@@ -366,16 +361,18 @@ export class ProtocolService {
     checkActiveOnly: boolean = true
   ): Promise<boolean> {
     const identifier = typeof protocolOrIdentifier === 'string' ? protocolOrIdentifier : await protocolOrIdentifier.getIdentifier()
-    const targetNetwork: ProtocolNetwork =
-      typeof protocolOrIdentifier !== 'string'
-        ? (await protocolOrIdentifier.getOptions()).network
-        : network ?? (await getProtocolOptionsByIdentifier(this.modulesController, identifier)).network
+    const targetNetwork = this.mainProtocolStore.isIdentifierValid(identifier)
+      ? await this.mainProtocolStore.getTargetNetwork(identifier, network)
+      : await this.subProtocolStore.getTargetNetwork(identifier, network)
+    const targetNetworkIdentifier = typeof targetNetwork === 'string' ? targetNetwork : targetNetwork?.identifier
 
     return this.getProtocol(identifier, targetNetwork, checkActiveOnly)
-      .then(
-        async (protocol) =>
-          (await protocol.getIdentifier()) === identifier && (await protocol.getOptions()).network.identifier === targetNetwork.identifier
-      )
+      .then(async (protocol) => {
+        const foundIdentifier = await protocol.getIdentifier()
+        const foundNetworkIdentifier = targetNetworkIdentifier !== undefined ? (await protocol.getOptions()).network.identifier : undefined
+
+        return foundIdentifier === identifier && foundNetworkIdentifier === targetNetworkIdentifier
+      })
       .catch(() => false)
   }
 }

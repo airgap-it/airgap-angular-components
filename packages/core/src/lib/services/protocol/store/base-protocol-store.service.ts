@@ -1,6 +1,11 @@
-import { ProtocolNetwork } from '@airgap/coinlib-core'
+import { ICoinProtocol, ProtocolNetwork, ProtocolSymbols } from '@airgap/coinlib-core'
 import { Injectable } from '@angular/core'
+import { RuntimeMode } from '../../../types/RuntimeMode'
 import { createNotInitialized } from '../../../utils/not-initialized'
+import { getProtocolAndNetworkIdentifier } from '../../../utils/protocol/protocol-network-identifier'
+import { getProtocolOptionsByIdentifier } from '../../../utils/protocol/protocol-options'
+import { BaseEnvironmentService } from '../../environment/base-environment.service'
+import { ModulesController } from '../../modules/controller/modules.controller'
 
 export interface BaseProtocolStoreConfig<T> {
   passiveProtocols: T
@@ -21,7 +26,11 @@ export abstract class BaseProtocolStoreService<
 
   protected notInitialized: () => never
 
-  constructor(private readonly _tag: string = '_ProtocolService') {
+  constructor(
+    private readonly _tag: string = '_ProtocolService',
+    protected readonly environment: BaseEnvironmentService,
+    protected readonly modulesController: ModulesController
+  ) {
     this.notInitialized = createNotInitialized(this._tag, 'Call `init` first.')
   }
 
@@ -84,4 +93,20 @@ export abstract class BaseProtocolStoreService<
   protected abstract mergeProtocols(protocols1: CollectionType, protocols2: CollectionType | undefined): Promise<CollectionType>
 
   protected abstract removeProtocolDuplicates(): Promise<void>
+
+  public async getProtocolAndNetworkIdentifier(
+    protocolOrIdentifier: ICoinProtocol | ProtocolSymbols,
+    network?: ProtocolNetwork | string
+  ): Promise<string> {
+    return getProtocolAndNetworkIdentifier(this.environment.mode, protocolOrIdentifier, network)
+  }
+
+  public async getTargetNetwork(
+    protocolIdentifier: ProtocolSymbols,
+    network?: ProtocolNetwork | string
+  ): Promise<ProtocolNetwork | string | undefined> {
+    return this.environment.mode === RuntimeMode.ONLINE
+      ? network ?? (await getProtocolOptionsByIdentifier(this.modulesController, protocolIdentifier)).network
+      : undefined
+  }
 }
