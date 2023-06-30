@@ -1,5 +1,5 @@
 {
-  "version": "0.0.39-beta.9",
+  "version": "0.0.39",
   "command": {
     "publish": {
       "ignoreChanges": [
