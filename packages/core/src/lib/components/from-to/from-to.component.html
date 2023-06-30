@@ -92,8 +92,14 @@
     <ion-row *ngIf="transaction.transactionDetails">
       <ion-col class="ion-no-padding">
         <ion-item class="ion-no-padding" lines="none">
-          <ion-label>{{ 'from-to.transaction-details_label' | translate }}</ion-label>
-          <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" slot="end"></ion-toggle>
+          <ion-toggle 
+            [checked]="displayRawData" 
+            (ionChange)="toggleDisplayRawData()" 
+            justify="space-between" 
+            labelPlacement="start"
+          >
+            {{ 'from-to.transaction-details_label' | translate }}
+          </ion-toggle>
         </ion-item>
         <pre *ngIf="displayRawData" class="ion-no-margin">{{ transaction.transactionDetails | json }}</pre>
         <ion-button *ngIf="displayRawData" (click)="copyToClipboard()">Copy data to clipboard</ion-button>
@@ -103,8 +109,14 @@
     <ion-row *ngIf="interactionData">
       <ion-col class="ion-no-padding">
         <ion-item class="ion-no-padding" lines="none">
-          <ion-label>{{ 'from-to.details' | translate }}</ion-label>
-          <ion-toggle [checked]="displayDetails" (ionChange)="toggleDisplayDetails()" slot="end"></ion-toggle>
+          <ion-toggle 
+            [checked]="displayDetails" 
+            (ionChange)="toggleDisplayDetails()"
+            justify="space-between" 
+            labelPlacement="start"
+          >
+            {{ 'from-to.details' | translate }}
+          </ion-toggle>
         </ion-item>
         <pre *ngIf="displayDetails" class="ion-no-margin">{{ interactionData | json }}</pre>
       </ion-col>

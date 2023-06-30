@@ -11,6 +11,7 @@ import {
   V3SchemaConfiguration
 } from '@airgap/module-kit'
 import { SerializerV3, TransactionValidator } from '@airgap/serializer'
+import { Injectable } from '@angular/core'
 import {
   createICoinProtocolAdapter,
   createICoinSubProtocolAdapter,
@@ -47,6 +48,7 @@ interface Protocols {
   passiveSubProtocols: [ICoinProtocol, ICoinSubProtocol][]
 }
 
+@Injectable()
 export abstract class BaseModulesService {
   private get isInitialized(): boolean {
     return this.modulesController.isInitialized

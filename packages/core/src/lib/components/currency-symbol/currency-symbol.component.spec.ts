@@ -1,13 +1,11 @@
 import { ProtocolSymbols } from '@airgap/coinlib-core'
-import { Injector } from '@angular/core'
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { BehaviorSubject, Observable } from 'rxjs'
 
 import { TestBedUtils } from '../../../../test/utils/test-bed'
-import { AirGapAngularCoreModule } from '../../airgap-angular-core.module'
 import { BaseFacade } from '../../base/base.facade'
 import { CurrencySymbolComponent } from './currency-symbol.component'
-import { CurrencySymbolFacade, ICurrencySymbolFacade } from './currency-symbol.facade'
+import { CURRENCY_SYMBOL_FACADE_FACTORY, ICurrencySymbolFacade } from './currency-symbol.facade'
 
 class CurrencySymbolTestFacade extends BaseFacade implements ICurrencySymbolFacade {
   public symbolSrc$: Observable<string> = new BehaviorSubject('').asObservable()
@@ -27,12 +25,12 @@ describe('CurrencySymbolComponent', () => {
   let testBedUtils: TestBedUtils
 
   beforeEach(waitForAsync(async () => {
-    AirGapAngularCoreModule.factories = {
-      currencySymbolFacade: (_injector: Injector): CurrencySymbolFacade => new CurrencySymbolTestFacade()
-    }
-
     testBedUtils = new TestBedUtils()
-    await TestBed.configureTestingModule(testBedUtils.moduleDef({})).compileComponents()
+    await TestBed.configureTestingModule(
+      testBedUtils.moduleDef({
+        providers: [{ provide: CURRENCY_SYMBOL_FACADE_FACTORY, useValue: () => new CurrencySymbolTestFacade() }]
+      })
+    ).compileComponents()
   }))
 
   beforeEach(() => {

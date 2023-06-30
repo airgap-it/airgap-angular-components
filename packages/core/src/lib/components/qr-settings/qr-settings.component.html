@@ -1,8 +1,7 @@
 <ion-content>
   <ion-list no-border lines="none">
     <ion-item>
-      {{ 'qr-settings.enable-new-serializer_label' | translate }}
-      <ion-toggle [(ngModel)]="serializerService.useV3" slot="end"></ion-toggle>
+      <ion-toggle [(ngModel)]="serializerService.useV3" justify="space-between" labelPlacement="start">{{ 'qr-settings.enable-new-serializer_label' | translate }}</ion-toggle>
     </ion-item>
     <ion-item>
       <ion-label>{{ 'qr-settings.page-time_label' | translate }} ({{ serializerService.displayTimePerChunk }} ms)</ion-label>

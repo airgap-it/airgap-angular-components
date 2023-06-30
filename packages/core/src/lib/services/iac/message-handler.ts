@@ -1,3 +1,5 @@
+import { Injectable } from '@angular/core'
+
 export enum IACMessageTransport {
   QR_SCANNER = 'QR_SCANNER',
   DEEPLINK = 'DEEPLINK',
@@ -22,6 +24,7 @@ export interface IACMessageWrapper<T> {
   context?: IACContext
 }
 
+@Injectable()
 export abstract class IACMessageHandler<T> {
   abstract name: string
 

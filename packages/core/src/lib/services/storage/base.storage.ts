@@ -1,28 +1,38 @@
-import { Storage } from '@ionic/storage'
+import { Storage } from '@ionic/storage-angular'
 
 export class BaseStorage<SettingsKey extends string, SettingsKeyReturnType extends Record<SettingsKey, unknown>> {
+  private readonly storage: Promise<Storage>
+
   constructor(
-    protected readonly storage: Storage,
-    protected readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] }
-  ) {}
+    storage: Storage,
+    protected readonly defaultValues: { [key in SettingsKey]: SettingsKeyReturnType[key] },
+    drivers: any[] = []
+  ) {
+    this.storage = Promise.all(drivers.map((driver) => storage.defineDriver(driver))).then(() => storage.create())
+  }
+
+  protected async getStorage(): Promise<Storage> {
+    return this.storage
+  }
 
   public async get<K extends SettingsKey>(key: K): Promise<SettingsKeyReturnType[K]> {
-    await this.storage.ready()
-    const value = await this.storage.get(key)
+    const storage = await this.getStorage()
+    const value = await storage.get(key)
     const result: SettingsKeyReturnType[K] = value !== null && value !== undefined ? value : this.defaultValues[key]
+
     return result
   }
 
   public async set<K extends SettingsKey>(key: K, value: SettingsKeyReturnType[K]): Promise<void> {
-    await this.storage.ready()
+    const storage = await this.getStorage()
 
-    return this.storage.set(key, value)
+    return storage.set(key, value)
   }
 
   public async delete<K extends SettingsKey>(key: K): Promise<boolean> {
     try {
-      await this.storage.ready()
-      await this.storage.remove(key)
+      const storage = await this.getStorage()
+      await storage.remove(key)
 
       return true
     } catch (error) {

@@ -27,6 +27,8 @@ import {
   AirGapUIAlert as AirGapUIAlertV1,
   AirGapV3SerializerCompanion,
   BytesStringFormat,
+  ExtendedPublicKey,
+  ExtendedSecretKey,
   FeeDefaults as FeeDefaultsV1,
   isOnlineProtocol,
   newAmount,
@@ -35,7 +37,9 @@ import {
   ProtocolNetwork as ProtocolNetworkV1,
   ProtocolNetworkType as ProtocolNetworkTypeV1,
   ProtocolUnitsMetadata,
+  PublicKey,
   RecursivePartial,
+  SecretKey,
   SubProtocol
 } from '@airgap/module-kit'
 import { BitcoinModule, BitcoinProtocol, BitcoinSegwitProtocol, createBitcoinProtocol, createBitcoinSegwitProtocol } from '@airgap/bitcoin'
@@ -733,4 +737,12 @@ export function convertFeeDefaultsV1ToV0(feeDefaults: FeeDefaultsV1, protocolMet
 
 export function getBytesFormatV1FromV0(bytes: string): BytesStringFormat {
   return isHex(bytes) ? 'hex' : 'encoded'
+}
+
+export function getSecretKeyType(secretKey: string): SecretKey['type'] | ExtendedSecretKey['type'] {
+  return secretKey.startsWith('xprv') ? 'xpriv' : 'priv'
+}
+
+export function getPublicKeyType(publicKey: string): PublicKey['type'] | ExtendedPublicKey['type'] {
+  return publicKey.startsWith('xpub') ? 'xpub' : 'pub'
 }

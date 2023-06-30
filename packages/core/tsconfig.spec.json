@@ -4,8 +4,19 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/spec",
     "types": ["jasmine", "node"],
-    "strict": false
+    "strict": false,
+    "paths": {
+      "rxjs": ["../../node_modules/rxjs"],
+      "rxjs/*": ["../../node_modules/rxjs/*"],
+      "buffer": ["../../node_modules/buffer"],
+      "crypto": ["../../node_modules/crypto-browserify"],
+      "http": ["../../node_modules/stream-http"],
+      "https": ["../../node_modules/https-browserify"],
+      "stream": ["../../node_modules/stream-browserify"],
+      "url": ["../../node_modules/url"],
+      "zlib": ["../../node_modules/browserify-zlib"]
+    },
   },
-  "files": ["test/test.ts"],
+  "files": ["test/test.ts", "polyfills.ts"],
   "include": ["**/*.spec.ts", "**/*.d.ts", "test/**/*.ts"]
 }
