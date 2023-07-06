@@ -50,6 +50,7 @@ import {
   FeeEstimation,
   hasConfigurableContract,
   hasMultiAddressPublicKeys,
+  implementsInterface,
   isAmount,
   isBip32Protocol,
   isMultiTokenSubProtocol,
@@ -68,8 +69,10 @@ import {
   ProtocolNetwork,
   ProtocolNetworkType,
   ProtocolSymbol,
+  ProtocolTransactionArbitraryDataMetadata,
   ProtocolUnitsMetadata,
   PublicKey,
+  Schema,
   SecretKey,
   Signature,
   SignedTransaction,
@@ -83,6 +86,7 @@ import BigNumber from 'bignumber.js'
 import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
 import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
 import { isTezosSaplingProtocol } from '@airgap/tezos'
+import { BitcoinSegwitProtocol, isBitcoinSegwitProtocol } from '@airgap/bitcoin'
 import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
 import { supportsV1Delegation } from '../../utils/protocol/delegation'
 import {
@@ -484,7 +488,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     extendedPublicKey: string,
     recipients: string[],
     fee?: string,
-    _data?: { [key: string]: unknown }
+    data?: { [key: string]: unknown }
   ): Promise<string> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
@@ -494,6 +498,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
       recipients,
       {
+        arbitraryData: this.getArbitraryData(data),
         fee: fee ? newAmount(fee, 'blockchain') : undefined
       }
     )
@@ -505,7 +510,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     publicKey: string,
     recipients: string[],
     fee?: string,
-    _data?: { [key: string]: unknown; addressIndex?: number }
+    data?: { [key: string]: unknown; addressIndex?: number }
   ): Promise<string> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
@@ -515,7 +520,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       recipients,
       {
-        fee: fee ? newAmount(fee, 'blockchain') : undefined
+        fee: fee ? newAmount(fee, 'blockchain') : undefined,
+        arbitraryData: this.getArbitraryData(data)
       }
     )
 
@@ -526,7 +532,12 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     publicKey: string,
     recipients: string[],
     values: string[],
-    data?: { [key: string]: unknown; assetID?: string }
+    data?: {
+      [key: string]: unknown
+
+      // Tezos FA2
+      assetID?: string
+    }
   ): Promise<FeeDefaultsV0> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online, Bip32.')
@@ -535,7 +546,10 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     const feeEstimation: FeeEstimation | undefined = await this.protocolV1.getTransactionFeeWithPublicKey(
       newExtendedPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       this.combineTransactionDetails(recipients, values),
-      { assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined }
+      {
+        arbitraryData: this.getArbitraryData(data),
+        assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined
+      }
     )
 
     if (feeEstimation === undefined) {
@@ -553,7 +567,12 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     publicKey: string,
     recipients: string[],
     values: string[],
-    data?: { [key: string]: unknown; assetID?: string }
+    data?: {
+      [key: string]: unknown
+
+      // Tezos FA2
+      assetID?: string
+    }
   ): Promise<FeeDefaultsV0> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
@@ -571,7 +590,10 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     const feeEstimation: FeeEstimation | undefined = await this.protocolV1.getTransactionFeeWithPublicKey(
       newPublicKey(publicKey, getBytesFormatV1FromV0(publicKey)),
       transactionDetails,
-      { assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined }
+      {
+        arbitraryData: this.getArbitraryData(data),
+        assetId: data?.assetID ? parseInt(data.assetID, 10) : undefined
+      }
     )
 
     if (feeEstimation === undefined) {
@@ -591,20 +613,47 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     recipients: string[],
     values: string[],
     fee: string,
-    extras?: { [key: string]: unknown; assetID?: string }
+    extras?: {
+      [key: string]: unknown
+
+      // Bitcoin
+      masterFingerprint: string
+      replaceByFee: boolean
+
+      // Tezos FA2
+      assetID?: string
+    }
   ): Promise<any> {
     if (!isOnlineProtocol(this.protocolV1) || !isBip32Protocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
     }
 
-    const transaction: UnsignedTransaction = await this.protocolV1.prepareTransactionWithPublicKey(
-      newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
-      this.combineTransactionDetails(recipients, values),
-      {
-        fee: newAmount(fee, 'blockchain'),
-        assetId: extras?.assetID ? parseInt(extras.assetID, 10) : undefined
-      }
-    )
+    let transaction: UnsignedTransaction
+    if (isBitcoinSegwitProtocol(this.protocolV1)) {
+      transaction = await (this.protocolV1 as BitcoinSegwitProtocol).prepareTransactionWithPublicKey(
+        newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
+        this.combineTransactionDetails(recipients, values),
+        {
+          fee: newAmount(fee, 'blockchain'),
+          arbitraryData: this.getArbitraryData(extras),
+          masterFingerprint: {
+            format: 'hex',
+            value: extras?.masterFingerprint
+          },
+          replaceByFee: extras?.replaceByFee
+        }
+      )
+    } else {
+      transaction = await this.protocolV1.prepareTransactionWithPublicKey(
+        newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
+        this.combineTransactionDetails(recipients, values),
+        {
+          fee: newAmount(fee, 'blockchain'),
+          assetId: extras?.assetID ? parseInt(extras.assetID, 10) : undefined,
+          arbitraryData: this.getArbitraryData(extras)
+        }
+      )
+    }
 
     const transactionV0 = await this.convertUnsignedTransactionV1ToV0(transaction, extendedPublicKey)
 
@@ -616,7 +665,12 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     recipients: string[],
     values: string[],
     fee: string,
-    extras?: { [key: string]: unknown; assetID?: string }
+    extras?: {
+      [key: string]: unknown
+
+      // Tezos FA2
+      assetID?: string
+    }
   ): Promise<any> {
     if (!isOnlineProtocol(this.protocolV1)) {
       throw new Error('Method not supported, required inferface: Online.')
@@ -627,6 +681,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       this.combineTransactionDetails(recipients, values),
       {
         fee: newAmount(fee, 'blockchain'),
+        arbitraryData: this.getArbitraryData(extras),
         assetId: extras?.assetID ? parseInt(extras.assetID, 10) : undefined
       }
     )
@@ -708,7 +763,13 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetails(
     transaction: UnsignedTransactionV0,
-    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
+    data?: {
+      [key: string]: unknown
+      transactionOwner?: string
+
+      // TezosSapling
+      knownViewingKeys?: string[]
+    }
   ): Promise<IAirGapTransaction[]> {
     const unsigned: UnsignedTransaction = await this.convertUnsignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
@@ -742,7 +803,13 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   public async getTransactionDetailsFromSigned(
     transaction: SignedTransactionV0,
-    data?: { [key: string]: unknown; knownViewingKeys?: string[]; transactionOwner?: string }
+    data?: {
+      [key: string]: unknown
+      transactionOwner?: string
+
+      // TezosSapling
+      knownViewingKeys?: string[]
+    }
   ): Promise<IAirGapTransaction[]> {
     const signed: SignedTransaction = await this.convertSignedTransactionV0ToV1(transaction, data?.transactionOwner)
 
@@ -1126,7 +1193,7 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
     return convertTransactionDetailsV1ToV0(txs, this.protocolMetadata, this.networkV0)
   }
 
-  protected combineTransactionDetails(recipients: string[], values: string[]): TransactionDetails[] {
+  protected combineTransactionDetails<_Units extends string>(recipients: string[], values: string[]): TransactionDetails<_Units>[] {
     if (recipients.length !== values.length) {
       throw new Error('Recipients length must match values length.')
     }
@@ -1139,6 +1206,23 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
   protected isExtendedPublicKey(publicKey: string): boolean {
     return publicKey.startsWith('xpub') || publicKey.startsWith('ypub') || publicKey.startsWith('zpub')
+  }
+
+  protected getArbitraryData(data: any): string | undefined {
+    const simpleArbitraryDataMetadataSchema: Schema<ProtocolTransactionArbitraryDataMetadata> = {
+      name: 'required',
+      maxLength: 'optional',
+      regex: 'optional'
+    }
+
+    return this.protocolMetadata.transaction?.arbitraryData
+      ? implementsInterface<ProtocolTransactionArbitraryDataMetadata>(
+          this.protocolMetadata.transaction?.arbitraryData,
+          simpleArbitraryDataMetadataSchema
+        )
+        ? data[this.protocolMetadata.transaction.arbitraryData.name]
+        : data[this.protocolMetadata.transaction.arbitraryData.root?.name ?? this.protocolMetadata.transaction.arbitraryData.inner?.name]
+      : undefined
   }
 }
 
