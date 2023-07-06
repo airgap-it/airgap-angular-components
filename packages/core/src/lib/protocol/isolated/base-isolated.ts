@@ -16,7 +16,9 @@ export abstract class IsolatedBase<I> {
       return this.cachedValues[name] as T
     }
 
-    const { value }: CallMethodResult = await this.isolatedModulesPlugin.callMethod(await this.createCallOptions(name, args))
+    const { value }: CallMethodResult = await this.isolatedModulesPlugin.callMethod(
+      await this.createCallOptions(name, this.serializeArgs(args))
+    )
 
     return value as T
   }
@@ -25,9 +27,13 @@ export abstract class IsolatedBase<I> {
     for (const method of methods) {
       if (this[method] === undefined) {
         this[method] = (...args) => {
-          return this.callMethod<any, string>(method, args)
+          return this.callMethod<any, string>(method, this.serializeArgs(args))
         }
       }
     }
+  }
+
+  private serializeArgs(args?: unknown[]): unknown[] | undefined {
+    return args ? JSON.parse(JSON.stringify(args)) : undefined
   }
 }
