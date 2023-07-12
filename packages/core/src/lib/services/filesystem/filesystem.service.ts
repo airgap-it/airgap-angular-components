@@ -230,7 +230,7 @@ export class FilesystemService {
 
         await Promise.all(
           Object.entries(symbols).map(async ([symbol, uri]: [string, string]) => {
-            const path: string = `${symbolsDir}/${symbol}`
+            const path: string = `${symbolsDir}/${symbol.toLowerCase()}`
 
             if (uri.startsWith('file://')) {
               const resPath: string = uri.replace(/^file:\/\//, '')
