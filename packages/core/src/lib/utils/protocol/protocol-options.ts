@@ -46,6 +46,7 @@ import { EtherscanBlockExplorer } from '@airgap/ethereum'
 import { ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
 import { ModulesController } from '../../services/modules/controller/modules.controller'
 import { convertNetworkV1ToV0 } from './protocol-v0-adapter'
+import { TezosUXTZProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosUXTZ'
 
 export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
@@ -198,12 +199,17 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
         network ? (network as TezosProtocolNetwork) : new TezosProtocolNetwork(),
         new TezosBTCTezProtocolConfig()
       )
+    case SubProtocolSymbols.XTZ_UXTZ:
+      return new TezosFAProtocolOptions(
+        network ? (network as TezosProtocolNetwork) : new TezosProtocolNetwork(),
+        new TezosUXTZProtocolConfig()
+      )
     default:
       // Maybe we get an identifier of a sub-protocol that is not in the known list. In that case, get the options of the parent
       if ((identifier as string).includes('-')) {
         return getProtocolOptionsByIdentifierLegacy((identifier as string).split('-')[0] as any)
       }
-      assertNever(identifier)
+      assertNever(identifier as never)
       throw new NotFoundError(Domain.UTILS, `No protocol options found for ${identifier}`)
   }
 }
