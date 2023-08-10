@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable max-classes-per-file */
 import { WebPlugin } from '@capacitor/core'
 import { AeternityModule } from '@airgap/aeternity'
@@ -379,7 +380,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
     const values: BatchCallMethodSingleResult[] = await Promise.all(
       options.options.map(async (o: CallMethodOptions): Promise<BatchCallMethodSingleResult> => {
         try {
-          const value = await this.callMethod(o)
+          const { value } = await this.callMethod(o)
 
           return { type: 'success', value }
         } catch (error) {

@@ -8,6 +8,7 @@ import {
 } from '@airgap/module-kit'
 import { registerPlugin } from '@capacitor/core'
 import { Directory } from '@capacitor/filesystem'
+import { Platform } from '@ionic/angular'
 import { IsolatedModule } from '../types/isolated-modules/IsolatedModule'
 import { IsolatedModuleManifest } from '../types/isolated-modules/IsolatedModuleManifest'
 import { IsolatedModulesPluginWrapper } from './isolated-modules/isolated-modules.plugin-wrapper'
@@ -153,4 +154,6 @@ const _IsolatedModules: IsolatedModulesPlugin = registerPlugin('IsolatedModules'
 })
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const IsolatedModules: IsolatedModulesPlugin = new IsolatedModulesPluginWrapper(_IsolatedModules)
+export function isolatedModules(platform: Platform): IsolatedModulesPlugin {
+  return new IsolatedModulesPluginWrapper(_IsolatedModules, platform)
+}

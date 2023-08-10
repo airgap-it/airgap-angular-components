@@ -110,7 +110,7 @@ export class FilesystemService {
   public async readIsolatedSymbol(name: string): Promise<string | undefined> {
     try {
       const dir: string = `${ISOLATED_MODULES_PATH}/${ISOLATED_SYMBOLS_PATH}`
-      const path: string = `${dir}/${name}`
+      const path: string = `${dir}/${name.toLowerCase()}`
 
       const { data }: ReadFileResult = await this.readDataFile({ path })
 
@@ -230,7 +230,7 @@ export class FilesystemService {
 
         await Promise.all(
           Object.entries(symbols).map(async ([symbol, uri]: [string, string]) => {
-            const path: string = `${symbolsDir}/${symbol}`
+            const path: string = `${symbolsDir}/${symbol.toLowerCase()}`
 
             if (uri.startsWith('file://')) {
               const resPath: string = uri.replace(/^file:\/\//, '')
