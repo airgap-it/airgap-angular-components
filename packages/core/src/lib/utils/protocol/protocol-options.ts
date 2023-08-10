@@ -174,7 +174,6 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
       if ((identifier as string).includes('-')) {
         return getProtocolOptionsByIdentifierLegacy((identifier as string).split('-')[0] as any)
       }
-      // assertNever(identifier)
       throw new NotFoundError(Domain.UTILS, `No protocol options found for ${identifier}`)
   }
 }
