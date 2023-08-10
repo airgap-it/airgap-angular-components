@@ -13,6 +13,8 @@ import { FILESYSTEM_PLUGIN, ISOLATED_MODULES_PLUGIN, ZIP_PLUGIN } from '../../sr
 import { IsolatedModules } from '../../src/lib/capacitor-plugins/isolated-modules/isolated-modules.plugin'
 import { StorageMock } from './storage-mock'
 import { FilesystemPluginMock, ZipPluginMock } from './plugins-mock'
+import { BaseEnvironmentService } from '../../src/lib/services/environment/base-environment.service'
+import { MockEnvironmentService } from './service.mocks'
 
 export class TestBedUtils {
   public moduleDef(moduleMedatada: TestModuleMetadata, useIonicOnlyTestBed: boolean = false): TestModuleMetadata {
@@ -45,7 +47,8 @@ export class TestBedUtils {
       { provide: APP_CONFIG, useValue: appConfig },
       { provide: ISOLATED_MODULES_PLUGIN, useValue: new IsolatedModules() },
       { provide: FILESYSTEM_PLUGIN, useValue: new FilesystemPluginMock() },
-      { provide: ZIP_PLUGIN, useValue: new ZipPluginMock() }
+      { provide: ZIP_PLUGIN, useValue: new ZipPluginMock() },
+      { provide: BaseEnvironmentService, useClass: MockEnvironmentService }
     ]
 
     if (!useIonicOnlyTestBed) {
