@@ -1,3 +1,4 @@
+import { Platform } from '@ionic/angular'
 import {
   BatchCallMethodOptions,
   BatchCallMethodResult,
@@ -16,12 +17,15 @@ import {
   VerifyDynamicModuleOptions,
   VerifyDynamicModuleResult
 } from '../definitions'
-import { IsolatedModules as WebIsolatedModules } from './isolated-modules.plugin'
 
 const UNDEFINED_STRING = 'it.airgap.__UNDEFINED__'
 
 export class IsolatedModulesPluginWrapper implements IsolatedModulesPlugin {
-  constructor(private readonly plugin: IsolatedModulesPlugin) {}
+  private readonly isMobile: boolean
+
+  constructor(private readonly plugin: IsolatedModulesPlugin, platform: Platform) {
+    this.isMobile = platform.is('hybrid')
+  }
 
   public async previewDynamicModule(options: PreviewDynamicModuleOptions): Promise<PreviewDynamicModuleResult> {
     return this.plugin.previewDynamicModule(options)
@@ -75,7 +79,7 @@ export class IsolatedModulesPluginWrapper implements IsolatedModulesPlugin {
   }
 
   public async batchCallMethod(options: BatchCallMethodOptions): Promise<BatchCallMethodResult> {
-    const newOptions: BatchCallMethodOptions = this.plugin instanceof WebIsolatedModules ? options : this.replaceUndefined(options)
+    const newOptions: BatchCallMethodOptions = this.isMobile ? this.replaceUndefined(options) : options
 
     return this.plugin.batchCallMethod(newOptions)
   }

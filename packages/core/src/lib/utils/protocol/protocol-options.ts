@@ -31,50 +31,20 @@ import {
   TezosWRAPProtocolConfig,
   TezosYOUProtocolConfig
 } from '@airgap/tezos/v0'
-import { ProtocolSymbols, ProtocolNetwork, MainProtocolSymbols, SubProtocolSymbols, assertNever, Domain } from '@airgap/coinlib-core'
+import { ProtocolSymbols, ProtocolNetwork, MainProtocolSymbols, SubProtocolSymbols, Domain } from '@airgap/coinlib-core'
 import { NotFoundError } from '@airgap/coinlib-core/errors'
 import { ProtocolOptions } from '@airgap/coinlib-core/utils/ProtocolOptions'
 import { MoonbeamProtocolOptions, MoonbeamProtocolNetwork } from '@airgap/moonbeam/v0/protocol/moonbeam/MoonbeamProtocolOptions'
 import { TezosETHtzProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosFAProtocolOptions'
-import { ICP_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/ICPProtocol'
-import { COREUM_PROTOCOL_NETWORK } from '@airgap/coreum/v1/protocol/CoreumProtocol'
-import { OPTIMISM_MAINNET_PROTOCOL_NETWORK } from '@airgap/optimism/v1/protocol/OptimismProtocol'
-import { CKBTC_MAINNET_PROTOCOL_NETWORK } from '@airgap/icp/v1/protocol/icrc/CkBTCProtocol'
-import { ICPBlockExplorer } from '@airgap/icp'
-import { CoreumBlockExplorer } from '@airgap/coreum'
-import { EtherscanBlockExplorer } from '@airgap/ethereum'
 import { ProtocolOptionsAdapter } from '../../protocol/adapter/protocol-v0-adapter'
 import { ModulesController } from '../../services/modules/controller/modules.controller'
 import { convertNetworkV1ToV0 } from './protocol-v0-adapter'
-import { TezosUXTZProtocolConfig } from '@airgap/tezos/v0/protocol/fa/TezosUXTZ'
 
 export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols, network?: ProtocolNetwork) => ProtocolOptions = (
   identifier: ProtocolSymbols,
   network?: ProtocolNetwork
 ): ProtocolOptions => {
   switch (identifier) {
-    case MainProtocolSymbols.ICP:
-      return new ProtocolOptionsAdapter(
-        network ?? convertNetworkV1ToV0(ICP_MAINNET_PROTOCOL_NETWORK, new ICPBlockExplorer(ICP_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl))
-      )
-    case MainProtocolSymbols.ICP_CKBTC:
-      return new ProtocolOptionsAdapter(
-        network ??
-          convertNetworkV1ToV0(CKBTC_MAINNET_PROTOCOL_NETWORK, new ICPBlockExplorer(CKBTC_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl))
-      )
-    case MainProtocolSymbols.COREUM:
-      return new ProtocolOptionsAdapter(
-        network ?? convertNetworkV1ToV0(COREUM_PROTOCOL_NETWORK, new CoreumBlockExplorer(COREUM_PROTOCOL_NETWORK.blockExplorerUrl))
-      )
-    case MainProtocolSymbols.OPTIMISM:
-    case SubProtocolSymbols.OPTIMISM_ERC20:
-      return new ProtocolOptionsAdapter(
-        network ??
-          convertNetworkV1ToV0(
-            OPTIMISM_MAINNET_PROTOCOL_NETWORK,
-            new EtherscanBlockExplorer(OPTIMISM_MAINNET_PROTOCOL_NETWORK.blockExplorerUrl)
-          )
-      )
     case MainProtocolSymbols.AE:
       return new AeternityProtocolOptions(network ? (network as AeternityProtocolNetwork) : new AeternityProtocolNetwork())
     case MainProtocolSymbols.BTC:
@@ -199,17 +169,11 @@ export const getProtocolOptionsByIdentifierLegacy: (identifier: ProtocolSymbols,
         network ? (network as TezosProtocolNetwork) : new TezosProtocolNetwork(),
         new TezosBTCTezProtocolConfig()
       )
-    case SubProtocolSymbols.XTZ_UXTZ:
-      return new TezosFAProtocolOptions(
-        network ? (network as TezosProtocolNetwork) : new TezosProtocolNetwork(),
-        new TezosUXTZProtocolConfig()
-      )
     default:
       // Maybe we get an identifier of a sub-protocol that is not in the known list. In that case, get the options of the parent
       if ((identifier as string).includes('-')) {
         return getProtocolOptionsByIdentifierLegacy((identifier as string).split('-')[0] as any)
       }
-      assertNever(identifier as never)
       throw new NotFoundError(Domain.UTILS, `No protocol options found for ${identifier}`)
   }
 }
@@ -228,7 +192,7 @@ export const getProtocolOptionsByIdentifier: (
     return getProtocolOptionsByIdentifierLegacy(identifier, network)
   } catch {
     if (network) {
-      return { network, config: {} }
+      return new ProtocolOptionsAdapter(network)
     }
 
     if (!cache[identifier]) {
