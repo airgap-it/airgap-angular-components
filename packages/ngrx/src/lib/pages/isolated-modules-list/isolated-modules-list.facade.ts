@@ -1,10 +1,4 @@
-import {
-  BaseModulesService,
-  IsolatedModuleInstalledMetadata,
-  IsolatedModulesListPageFacade,
-  UiEventService,
-  UIResource
-} from '@airgap/angular-core'
+import { BaseModulesService, IsolatedModuleMetadata, IsolatedModulesListPageFacade, UiEventService, UIResource } from '@airgap/angular-core'
 import { Injector } from '@angular/core'
 import { Observable } from 'rxjs'
 import { BaseNgRxFacade } from '../../base/base-ngrx.facade'
@@ -16,7 +10,7 @@ export class IsolatedModulesListPageNgRxFacade
   extends BaseNgRxFacade<IsolatedModulesListPageStore>
   implements IsolatedModulesListPageFacade
 {
-  public readonly modules$: Observable<UIResource<IsolatedModuleInstalledMetadata[]>>
+  public readonly modules$: Observable<UIResource<IsolatedModuleMetadata[]>>
   public readonly filter$: Observable<string | undefined>
 
   constructor(store: IsolatedModulesListPageStore, uiEventService: UiEventService) {

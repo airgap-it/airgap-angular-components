@@ -1,6 +1,6 @@
-import { IsolatedModuleInstalledMetadata, UIResource } from '@airgap/angular-core'
+import { IsolatedModuleMetadata, UIResource } from '@airgap/angular-core'
 
 export interface IsolatedModulesListPageState {
-  modules: UIResource<IsolatedModuleInstalledMetadata[]>
+  modules: UIResource<IsolatedModuleMetadata[]>
   filter: string | undefined
 }

@@ -10,6 +10,8 @@ import {
   LoadAllModulesResult,
   PreviewDynamicModuleOptions,
   PreviewDynamicModuleResult,
+  ReadAssetModuleOptions,
+  ReadAssetModuleResult,
   ReadDynamicModuleOptions,
   ReadDynamicModuleResult,
   RegisterDynamicModuleOptions,
@@ -47,7 +49,11 @@ export class IsolatedModulesPluginWrapper implements IsolatedModulesPlugin {
     return this.plugin.removeDynamicModules(options)
   }
 
-  public async loadAllModules(options?: LoadAllModulesOptions): Promise<LoadAllModulesResult> {
+  public async readAssetModule(options?: ReadAssetModuleOptions): Promise<ReadAssetModuleResult> {
+    return this.plugin.readAssetModule(options)
+  }
+
+  public async loadAllModules(options: LoadAllModulesOptions): Promise<LoadAllModulesResult> {
     return this.plugin.loadAllModules(options)
   }
 

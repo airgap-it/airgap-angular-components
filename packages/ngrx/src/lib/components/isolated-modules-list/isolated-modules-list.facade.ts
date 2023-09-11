@@ -1,4 +1,4 @@
-import { IIsolatedModulesListFacade, IsolatedModuleInstalledMetadata, IsolatedModulesListFacade, UIResource } from '@airgap/angular-core'
+import { IIsolatedModulesListFacade, IsolatedModuleMetadata, IsolatedModulesListFacade, UIResource } from '@airgap/angular-core'
 import { Injectable, Injector } from '@angular/core'
 import { Observable } from 'rxjs'
 import { BaseNgRxFacade } from '../../base/base-ngrx.facade'
@@ -7,15 +7,15 @@ import { IsolatedModulesListState } from './isolated-modules-list.types'
 
 @Injectable()
 export class IsolatedModulesListNgRxFacade extends BaseNgRxFacade<IsolatedModulesListStore> implements IIsolatedModulesListFacade {
-  public readonly modules$: Observable<UIResource<IsolatedModuleInstalledMetadata[]>>
+  public readonly modules$: Observable<UIResource<IsolatedModuleMetadata[]>>
 
   constructor(store: IsolatedModulesListStore) {
     super(store)
 
-    this.modules$ = this.store.select((state: IsolatedModulesListState) => state.modules)
+    this.modules$ = this.store.select((state: IsolatedModulesListState) => state.filteredModules)
   }
 
-  public updateModules(modules: UIResource<IsolatedModuleInstalledMetadata[]>, query: string): void {
+  public updateModules(modules: UIResource<IsolatedModuleMetadata[]>, query: string): void {
     this.store.setModules({ modules, query })
   }
 

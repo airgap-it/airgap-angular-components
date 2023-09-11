@@ -1,7 +1,7 @@
 import { InjectionToken, Injector } from '@angular/core'
 import { Observable } from 'rxjs'
 import { BaseFacade } from '../../base/base.facade'
-import { IsolatedModuleInstalledMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
 import { UIResource } from '../../types/ui/UIResource'
 
 export const ISOLATED_MODULES_LIST_PAGE_FACADE = new InjectionToken<IsolatedModulesListPageFacade>('IsolatedModulesListPageFacade')
@@ -11,7 +11,7 @@ export const ISOLATED_MODULES_LIST_PAGE_FACADE_FACTORY = new InjectionToken<(inj
 export type IsolatedModulesListPageFacade<T extends BaseFacade = BaseFacade> = IIsolatedModulesListPageFacade & T
 
 export interface IIsolatedModulesListPageFacade {
-  readonly modules$: Observable<UIResource<IsolatedModuleInstalledMetadata[]>>
+  readonly modules$: Observable<UIResource<IsolatedModuleMetadata[]>>
   readonly filter$: Observable<string | undefined>
 
   onViewWillEnter(): void

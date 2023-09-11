@@ -6,6 +6,7 @@ interface BaseIsolatedModuleMetadata<T extends string> {
   type: T
   module: IsolatedModule
   manifest: IsolatedModuleManifest
+  source: 'airgap' | '3rd_party'
 }
 
 export interface IsolatedModulePreviewMetadata extends BaseIsolatedModuleMetadata<'preview'> {
@@ -18,4 +19,6 @@ export interface IsolatedModuleInstalledMetadata extends BaseIsolatedModuleMetad
   installedAt: string
 }
 
-export type IsolatedModuleMetadata = IsolatedModulePreviewMetadata | IsolatedModuleInstalledMetadata
+export type IsolatedModuleAssetMetadata = BaseIsolatedModuleMetadata<'asset'>
+
+export type IsolatedModuleMetadata = IsolatedModulePreviewMetadata | IsolatedModuleInstalledMetadata | IsolatedModuleAssetMetadata

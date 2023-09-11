@@ -5,6 +5,7 @@ export function isIsolatedModuleMetadata(object: unknown): object is IsolatedMod
   return implementsInterface<IsolatedModuleMetadata>(object, {
     type: 'required',
     module: 'required',
-    manifest: 'required'
+    manifest: 'required',
+    source: 'required'
   })
 }

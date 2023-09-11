@@ -45,6 +45,8 @@ import {
   OnlineProtocolCallMethodOptions,
   PreviewDynamicModuleOptions,
   PreviewDynamicModuleResult,
+  ReadAssetModuleOptions,
+  ReadAssetModuleResult,
   ReadDynamicModuleOptions,
   ReadDynamicModuleResult,
   RegisterDynamicModuleOptions,
@@ -103,6 +105,10 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
 
   public async removeDynamicModules(_options: RemoveDynamicModulesOptions): Promise<void> {
     throw new Error('Dynamic isolated module removal not supported in a browser')
+  }
+
+  public async readAssetModule(_options: ReadAssetModuleOptions): Promise<ReadAssetModuleResult> {
+    throw new Error('Asset isolated module read not supported in a browser')
   }
 
   public async loadAllModules(options: LoadAllModulesOptions = {}): Promise<LoadAllModulesResult> {

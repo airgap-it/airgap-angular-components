@@ -13,6 +13,7 @@ import {
   IsolatedModulesPlugin,
   LoadAllModulesResult,
   PreviewDynamicModuleResult,
+  ReadAssetModuleResult,
   ReadDynamicModuleResult
 } from '../../../../capacitor-plugins/definitions'
 import { IsolatedModule, IsolatedProtocol } from '../../../../types/isolated-modules/IsolatedModule'
@@ -21,9 +22,16 @@ import { flattened } from '../../../../utils/array'
 import { IsolatedAirGapOfflineProtocol } from '../../../../protocol/isolated/protocol-offline-isolated'
 import { IsolatedAirGapOnlineProtocol } from '../../../../protocol/isolated/protocol-online-isolated'
 import { IsolatedAirGapBlockExplorer } from '../../../../protocol/isolated/block-explorer-isolated'
-import { IsolatedModuleInstalledMetadata, IsolatedModulePreviewMetadata } from '../../../../types/isolated-modules/IsolatedModuleMetadata'
+import {
+  IsolatedModuleAssetMetadata,
+  IsolatedModuleInstalledMetadata,
+  IsolatedModuleMetadata,
+  IsolatedModulePreviewMetadata
+} from '../../../../types/isolated-modules/IsolatedModuleMetadata'
 import { BaseModulesController, LoadedModule, LoadedProtocol } from '../base-modules.controller'
 import { FilesystemService } from '../../../filesystem/filesystem.service'
+
+const AIRGAP_PUBLIC_KEY: string = ''
 
 @Injectable({
   providedIn: 'root'
@@ -143,7 +151,33 @@ export class IsolatedModulesController implements BaseModulesController {
     return addressesByKey.reduce((obj: Record<string, string[]>, next: Record<string, string[]>) => Object.assign(obj, next), {})
   }
 
-  public async getModulesMetadata(): Promise<IsolatedModuleInstalledMetadata[]> {
+  public async getModulesMetadata(): Promise<IsolatedModuleMetadata[]> {
+    const metadata: [IsolatedModuleAssetMetadata[], IsolatedModuleInstalledMetadata[]] = await Promise.all([
+      this.getAssetModulesMetadata(),
+      this.getDynamicModulesMetadata()
+    ])
+
+    return flattened<IsolatedModuleMetadata>(metadata)
+  }
+
+  private async getAssetModulesMetadata(): Promise<IsolatedModuleAssetMetadata[]> {
+    return Promise.all(
+      Array.from(this.staticModules.values()).map(async (module: IsolatedModule): Promise<IsolatedModuleAssetMetadata> => {
+        const { manifest }: ReadAssetModuleResult = await this.isolatedModules.readAssetModule({
+          identifier: module.identifier
+        })
+
+        return {
+          type: 'asset',
+          manifest,
+          module,
+          source: manifest.publicKey === AIRGAP_PUBLIC_KEY ? 'airgap' : '3rd_party'
+        }
+      })
+    )
+  }
+
+  private async getDynamicModulesMetadata(): Promise<IsolatedModuleInstalledMetadata[]> {
     return Promise.all(
       Array.from(this.dynamicModules.values()).map(async (module: IsolatedModule): Promise<IsolatedModuleInstalledMetadata> => {
         const { manifest, installedAt }: ReadDynamicModuleResult = await this.isolatedModules.readDynamicModule({
@@ -154,7 +188,8 @@ export class IsolatedModulesController implements BaseModulesController {
           type: 'installed',
           manifest,
           module,
-          installedAt
+          installedAt,
+          source: manifest.publicKey === AIRGAP_PUBLIC_KEY ? 'airgap' : '3rd_party'
         }
       })
     )
@@ -184,7 +219,8 @@ export class IsolatedModulesController implements BaseModulesController {
         manifest: preview.manifest,
         path: tempDir.path,
         root,
-        directory: tempDir.directory
+        directory: tempDir.directory,
+        source: preview.manifest.publicKey === AIRGAP_PUBLIC_KEY ? 'airgap' : '3rd_party'
       }
     } catch (error) {
       await this.filesystemService.removeTempProtocolModule(tempDir.path, tempDir.directory).catch(() => {
