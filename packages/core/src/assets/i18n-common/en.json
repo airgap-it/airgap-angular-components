@@ -98,5 +98,10 @@
         "label": "Files"
       }
     }
+  },
+  "isolated-modules-badges": {
+    "audited_label": "Audited",
+    "built-in_label": "Built-in",
+    "3rd-party_label": "3rd Party Module"
   }
 }

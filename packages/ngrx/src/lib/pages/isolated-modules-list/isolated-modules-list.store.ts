@@ -1,4 +1,4 @@
-import { BaseModulesService, IsolatedModuleInstalledMetadata, UIResourceStatus } from '@airgap/angular-core'
+import { BaseModulesService, IsolatedModuleMetadata, UIResourceStatus } from '@airgap/angular-core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { from, Observable } from 'rxjs'
 import { first, switchMap, tap } from 'rxjs/operators'
@@ -22,13 +22,13 @@ export class IsolatedModulesListPageStore extends ComponentStore<IsolatedModules
       tap(() => this.onModulesLoading()),
       switchMap(() => from(this.loadModules()).pipe(first())),
       tapResponse(
-        (value: IsolatedModuleInstalledMetadata[]) => this.setModules(value),
+        (value: IsolatedModuleMetadata[]) => this.setModules(value),
         () => this.onModulesLoadingError()
       )
     )
   })
 
-  public readonly setModules = this.updater((state: IsolatedModulesListPageState, modules: IsolatedModuleInstalledMetadata[]) => {
+  public readonly setModules = this.updater((state: IsolatedModulesListPageState, modules: IsolatedModuleMetadata[]) => {
     return {
       ...state,
       modules: {
@@ -65,7 +65,7 @@ export class IsolatedModulesListPageStore extends ComponentStore<IsolatedModules
     }
   })
 
-  private async loadModules(): Promise<IsolatedModuleInstalledMetadata[]> {
+  private async loadModules(): Promise<IsolatedModuleMetadata[]> {
     return this.modulesService.getModulesMetadata()
   }
 }

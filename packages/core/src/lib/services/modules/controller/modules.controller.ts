@@ -1,7 +1,7 @@
 import { AirGapWallet } from '@airgap/coinlib-core'
 import { AirGapBlockExplorer, AirGapModule, ProtocolConfiguration, ProtocolNetwork } from '@airgap/module-kit'
 import { Injectable } from '@angular/core'
-import { IsolatedModuleInstalledMetadata, IsolatedModulePreviewMetadata } from '../../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata, IsolatedModulePreviewMetadata } from '../../../types/isolated-modules/IsolatedModuleMetadata'
 import { flattened } from '../../../utils/array'
 import { BaseModulesController, LoadedModule, LoadedProtocol } from './base-modules.controller'
 import { IntegralModulesController } from './integral/integral-modules.controller'
@@ -80,7 +80,7 @@ export class ModulesController {
     return Object.assign({}, integralAddresses, isolatedAddresses)
   }
 
-  public async getModulesMetadata(): Promise<IsolatedModuleInstalledMetadata[]> {
+  public async getModulesMetadata(): Promise<IsolatedModuleMetadata[]> {
     return this.isolatedModulesController.getModulesMetadata()
   }
 

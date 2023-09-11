@@ -20,6 +20,7 @@ import { IACQrComponent } from './iac-qr/iac-qr.component'
 import { IsolatedModulesListComponent } from './isolated-modules-list/isolated-modules-list.component'
 import { IsolatedModulesOnboardingComponent } from './isolated-modules-onboarding/isolated-modules-onboarding.component'
 import { IsolatedModulesDetailsComponent } from './isolated-modules-details/isolated-modules-details.component'
+import { IsolatedModulesBadgesComponent } from './isolated-modules-badges/isolated-modules-badges.component'
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { IsolatedModulesDetailsComponent } from './isolated-modules-details/isol
     QrSettingsComponent,
     IsolatedModulesDetailsComponent,
     IsolatedModulesListComponent,
-    IsolatedModulesOnboardingComponent
+    IsolatedModulesOnboardingComponent,
+    IsolatedModulesBadgesComponent
   ],
   imports: [CommonModule, IonicModule, TranslateModule, MomentModule, PipesModule, QRCodeModule, FormsModule],
   exports: [
@@ -53,7 +55,8 @@ import { IsolatedModulesDetailsComponent } from './isolated-modules-details/isol
     QrSettingsComponent,
     IsolatedModulesDetailsComponent,
     IsolatedModulesListComponent,
-    IsolatedModulesOnboardingComponent
+    IsolatedModulesOnboardingComponent,
+    IsolatedModulesBadgesComponent
   ]
 })
 export class ComponentsModule {}

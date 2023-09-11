@@ -19,7 +19,7 @@ import {
   ICoinSubProtocolAdapter,
   TransactionValidatorAdapter
 } from '../../protocol/adapter/protocol-v0-adapter'
-import { IsolatedModuleInstalledMetadata, IsolatedModulePreviewMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata, IsolatedModulePreviewMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
 import { flattened } from '../../utils/array'
 import { ProtocolService } from '../protocol/protocol.service'
 import { LoadedModule, LoadedProtocol } from './controller/base-modules.controller'
@@ -80,7 +80,7 @@ export abstract class BaseModulesService {
     return this.modulesController.deriveAddresses(wallets, amount)
   }
 
-  public async getModulesMetadata(): Promise<IsolatedModuleInstalledMetadata[]> {
+  public async getModulesMetadata(): Promise<IsolatedModuleMetadata[]> {
     return this.modulesController.getModulesMetadata()
   }
 

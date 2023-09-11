@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Inject, Injector, Input, OnChanges, Output, SimpleChanges } from '@angular/core'
 import { BaseComponent } from '../../base/base.component'
-import { IsolatedModuleInstalledMetadata, IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
 import { UIResource, UIResourceStatus } from '../../types/ui/UIResource'
 import { isolatedModulesListFacade, IsolatedModulesListFacade, ISOLATED_MODULES_LIST_FACADE } from './isolated-modules-list.facade'
 
@@ -14,7 +14,7 @@ export class IsolatedModulesListComponent extends BaseComponent<IsolatedModulesL
   public readonly UIResourceStatus: typeof UIResourceStatus = UIResourceStatus
 
   @Input()
-  public modules: UIResource<IsolatedModuleInstalledMetadata[]>
+  public modules: UIResource<IsolatedModuleMetadata[]>
 
   @Input()
   public filter: string | undefined
@@ -36,7 +36,7 @@ export class IsolatedModulesListComponent extends BaseComponent<IsolatedModulesL
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes.modules.previousValue !== changes.modules.currentValue) {
+    if (changes.modules?.previousValue !== changes.modules?.currentValue) {
       this.facade.updateModules(changes.modules.currentValue, changes.filter?.currentValue)
     }
 
@@ -45,7 +45,7 @@ export class IsolatedModulesListComponent extends BaseComponent<IsolatedModulesL
     }
   }
 
-  public selectModule(module: IsolatedModuleInstalledMetadata): void {
+  public selectModule(module: IsolatedModuleMetadata): void {
     this.onModuleSelected.emit(module)
   }
 }

@@ -3,6 +3,9 @@
       <ion-card>
         <ion-card-content>
           <div class="ion-margin-bottom">
+            <airgap-isolated-modules-badges [module]="metadata"></airgap-isolated-modules-badges>
+          </div>
+          <div class="ion-margin-bottom">
             <h3>{{ 'isolated-modules-details.manifest.name.label' | translate }}</h3>
             <p>{{ manifest.value.name }}</p>
           </div>

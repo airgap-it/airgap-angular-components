@@ -72,6 +72,14 @@ export interface RemoveDynamicModulesOptions {
   identifiers?: string[]
 }
 
+export interface ReadAssetModuleOptions {
+  identifier: string
+}
+
+export interface ReadAssetModuleResult {
+  manifest: IsolatedModuleManifest
+}
+
 export interface LoadAllModulesOptions {
   protocolType?: ProtocolConfiguration['type']
   ignoreProtocols?: string[]
@@ -141,6 +149,8 @@ export interface IsolatedModulesPlugin {
   readDynamicModule(options: ReadDynamicModuleOptions): Promise<ReadDynamicModuleResult>
 
   removeDynamicModules(options?: RemoveDynamicModulesOptions): Promise<void>
+
+  readAssetModule(options: ReadAssetModuleOptions): Promise<ReadAssetModuleResult>
 
   loadAllModules(options?: LoadAllModulesOptions): Promise<LoadAllModulesResult>
 
