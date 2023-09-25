@@ -60,6 +60,7 @@ export abstract class BaseProtocolStoreService<
   public async addActiveProtocols(protocols: CollectionType): Promise<void> {
     const activeProtocols: CollectionType = this._activeProtocols ?? this.notInitialized()
     this._activeProtocols = await this.mergeProtocols(protocols, activeProtocols)
+    this._supportedProtocols = undefined
   }
 
   public async init(config: ConfigType): Promise<void> {

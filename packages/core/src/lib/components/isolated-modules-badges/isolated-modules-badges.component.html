@@ -1,0 +1,5 @@
+<ion-item class="ion-no-padding" lines="none">
+  <ion-badge *ngIf="module.source === '3rd_party' && module.type === 'asset'" class="badge__margin" color="tertiary">{{ 'isolated-modules-badges.audited_label' | translate }}</ion-badge>
+  <ion-badge *ngIf="module.type === 'asset'" class="badge__margin" color="tertiary">{{ 'isolated-modules-badges.built-in_label' | translate }}</ion-badge>
+  <ion-badge *ngIf="module.source === '3rd_party'" class="badge__margin" color="medium">{{ 'isolated-modules-badges.3rd-party_label' | translate }}</ion-badge>
+</ion-item>

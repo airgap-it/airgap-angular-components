@@ -17,17 +17,22 @@
   <ion-card *ngFor="let module of modules.value" (click)="selectModule(module)">
     <ion-card-content>
       <div class="ion-margin-bottom">
+        <airgap-isolated-modules-badges [module]="module"></airgap-isolated-modules-badges>
+      </div>
+      <div class="ion-margin-bottom">
         <h3>{{ module.manifest.name }}</h3>
       </div>
       <div class="ion-margin-top">
         <h3>{{ module.manifest.author }}</h3>
         <p>{{ module.manifest.version }}</p>
       </div>
-      <div class="margin-top-sm" *ngIf="module.installedAt | date: 'dd.MM.yyyy HH:mm' as installedAt ">
-        <p class="date">
-          {{ 'isolated-modules-list.install-date' | translate: { date: installedAt } }}
-        </p>
-      </div>
+      <ng-container *ngIf="module.type === 'installed'">
+        <div class="margin-top-sm" *ngIf="module.installedAt | date: 'dd.MM.yyyy HH:mm' as installedAt ">
+          <p class="date">
+            {{ 'isolated-modules-list.install-date' | translate: { date: installedAt } }}
+          </p>
+        </div>
+      </ng-container>
     </ion-card-content>
   </ion-card>
 </ng-container>

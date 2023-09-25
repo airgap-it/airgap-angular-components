@@ -1,7 +1,7 @@
 import { InjectionToken, Injector } from '@angular/core'
 import { Observable } from 'rxjs'
 import { BaseFacade } from '../../base/base.facade'
-import { IsolatedModuleInstalledMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
+import { IsolatedModuleMetadata } from '../../types/isolated-modules/IsolatedModuleMetadata'
 import { UIResource } from '../../types/ui/UIResource'
 
 export const ISOLATED_MODULES_LIST_FACADE = new InjectionToken<IsolatedModulesListFacade>('IsolatedModulesListFacade')
@@ -11,9 +11,9 @@ export const ISOLATED_MODULES_LIST_FACADE_FACTORY = new InjectionToken<(injector
 export type IsolatedModulesListFacade<T extends BaseFacade = BaseFacade> = IIsolatedModulesListFacade & T
 
 export interface IIsolatedModulesListFacade {
-  readonly modules$: Observable<UIResource<IsolatedModuleInstalledMetadata[]>>
+  readonly modules$: Observable<UIResource<IsolatedModuleMetadata[]>>
 
-  updateModules(modules: UIResource<IsolatedModuleInstalledMetadata[]>, query: string | undefined)
+  updateModules(modules: UIResource<IsolatedModuleMetadata[]>, query: string | undefined)
   filterModules(query: string | undefined): void
 }
 
