@@ -31,7 +31,7 @@
         [text]="destination"
       ></airgap-titled-text>
 
-      <airgap-titled-text 
+      <airgap-titled-text
         *ngFor="let labeledValue of labeled"
         class="ion-padding-bottom"
         [title]="labeledValue[0]"
@@ -41,14 +41,14 @@
       <airgap-titled-text
         *ngIf="transaction.amount"
         class="ion-padding-bottom"
-        [title]="'from-to.amount_label' | translate"
-        [text]="transaction.amount | amountConverter: { protocol: transaction.protocolIdentifier, network: transaction.network } | async"
+        [title]="'from-to.total_amount_label' | translate"
+        [text]="transaction.amount | amountConverter : { protocol: transaction.protocolIdentifier, network: transaction.network } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text
         *ngIf="transaction.fee"
         [title]="'from-to.fee_label' | translate"
-        [text]="transaction.fee | feeConverter: { protocol: transaction.protocolIdentifier, network: transaction.network } | async"
+        [text]="transaction.fee | feeConverter : { protocol: transaction.protocolIdentifier, network: transaction.network } | async"
       ></airgap-titled-text>
 
       <airgap-titled-text
@@ -63,7 +63,7 @@
         *ngIf="transaction.timestamp"
         class="ion-padding-top"
         [title]="'from-to.time_label' | translate"
-        [text]="transaction.timestamp | amFromUnix | amCalendar: { sameDay: '[Today at] HH:mm', sameElse: 'HH:mm [on] LL' }"
+        [text]="transaction.timestamp | amFromUnix | amCalendar : { sameDay: '[Today at] HH:mm', sameElse: 'HH:mm [on] LL' }"
       ></airgap-titled-text>
 
       <airgap-titled-text
@@ -75,12 +75,42 @@
     </ion-col>
   </ion-row>
 
-  <airgap-titled-address
-    *ngFor="let transaction of toTransactions"
-    [address]="transaction.address"
-    [name]="transaction.name"
-    [title]="'from-to.to_label' | translate"
-  ></airgap-titled-address>
+  <ng-container *ngFor="let toTransaction of toTransactions; let i = index">
+    <airgap-titled-address
+      [address]="toTransaction.address"
+      [name]="toTransaction.name"
+      [title]="'from-to.to_label' | translate"
+    ></airgap-titled-address>
+
+    <ion-row class="ion-align-items-center ion-padding-top ion-padding-bottom" *ngIf="transaction.changeAddressInfo">
+      <ion-col size="3" class="ion-no-padding">
+        <ion-row class="ion-justify-content-center">
+          <div [ngStyle]="{ visibility: i === toTransactions.length - 1 ? 'hidden' : 'visible' }" class="from-to-line"></div>
+        </ion-row>
+      </ion-col>
+      <ion-col size="9">
+        <airgap-titled-text
+          *ngIf="transaction.changeAddressInfo[toTransaction.address].isChangeAddress"
+          class="ion-padding-bottom"
+          [title]="'from-to.change-address' | translate"
+          [text]="
+            transaction.changeAddressInfo[toTransaction.address].path != ''
+              ? transaction.changeAddressInfo[toTransaction.address].path
+              : ('from-to.unknown-change-address' | translate)
+          "
+        ></airgap-titled-text>
+        <airgap-titled-text
+          class="ion-padding-bottom"
+          [title]="'from-to.amount_label' | translate"
+          [text]="
+            transaction.changeAddressInfo[toTransaction.address].amount
+              | amountConverter : { protocol: transaction.protocolIdentifier, network: transaction.network }
+              | async
+          "
+        ></airgap-titled-text>
+      </ion-col>
+    </ion-row>
+  </ng-container>
 
   <ion-row class="ion-align-items-center ion-padding-top">
     <ion-col size="9" offset="3">
@@ -92,12 +122,7 @@
     <ion-row *ngIf="transaction.transactionDetails">
       <ion-col class="ion-no-padding">
         <ion-item class="ion-no-padding" lines="none">
-          <ion-toggle 
-            [checked]="displayRawData" 
-            (ionChange)="toggleDisplayRawData()" 
-            justify="space-between" 
-            labelPlacement="start"
-          >
+          <ion-toggle [checked]="displayRawData" (ionChange)="toggleDisplayRawData()" justify="space-between" labelPlacement="start">
             {{ 'from-to.transaction-details_label' | translate }}
           </ion-toggle>
         </ion-item>
@@ -109,12 +134,7 @@
     <ion-row *ngIf="interactionData">
       <ion-col class="ion-no-padding">
         <ion-item class="ion-no-padding" lines="none">
-          <ion-toggle 
-            [checked]="displayDetails" 
-            (ionChange)="toggleDisplayDetails()"
-            justify="space-between" 
-            labelPlacement="start"
-          >
+          <ion-toggle [checked]="displayDetails" (ionChange)="toggleDisplayDetails()" justify="space-between" labelPlacement="start">
             {{ 'from-to.details' | translate }}
           </ion-toggle>
         </ion-item>

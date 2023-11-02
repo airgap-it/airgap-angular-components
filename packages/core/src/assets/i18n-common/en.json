@@ -2,6 +2,7 @@
   "from-to": {
     "type_label": "Type",
     "amount_label": "Amount",
+    "total_amount_label": "Total Amount",
     "fee_label": "Fee",
     "time_label": "Time",
     "data_label": "Data",
@@ -10,7 +11,11 @@
     "to_label": "To",
     "destination_label": "Destination",
     "details": "Display details",
-    "transaction-details_label": "Display extra transaction details"
+    "transaction-details_label": "Display extra transaction details",
+    "change-address": "change address",
+    "verified": "verified",
+    "notverified": "AirGap Vault cannot verify change address",
+    "unknown-change-address": "not verified"
   },
   "clipboard": {
     "toast": {

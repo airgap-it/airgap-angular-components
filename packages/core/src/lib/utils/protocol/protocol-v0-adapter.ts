@@ -681,8 +681,8 @@ export async function convertTransactionDetailsV1ToV0(
   const units: ProtocolUnitsMetadata = protocolMetadata.units
   const feeUnits: ProtocolUnitsMetadata = protocolMetadata.fee?.units ?? units
 
-  return txs.map(
-    (tx: AirGapTransactionV1): AirGapTransactionV0 => ({
+  return txs.map((tx: AirGapTransactionV1): AirGapTransactionV0 => {
+    return {
       from: tx.from,
       to: tx.to,
       isInbound: tx.isInbound,
@@ -691,6 +691,7 @@ export async function convertTransactionDetailsV1ToV0(
       fee: newAmount(tx.fee).blockchain(feeUnits).value,
 
       timestamp: tx.timestamp,
+      changeAddressInfo: tx.changeAddressInfo,
 
       protocolIdentifier: protocolMetadata.identifier as ProtocolSymbols,
       network: networkV0,
@@ -708,8 +709,8 @@ export async function convertTransactionDetailsV1ToV0(
         type: tx.type
       },
       transactionDetails: tx.json
-    })
-  )
+    }
+  })
 }
 
 // FeeDefaults
