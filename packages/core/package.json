@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-core",
-  "version": "0.0.42",
+  "version": "0.0.43-beta.10",
   "publishConfig": {
     "access": "public"
   },
