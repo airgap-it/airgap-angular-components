@@ -13,13 +13,14 @@ import { MetamaskGenerator } from '../../services/qr/qr-generators/metamask-gene
 import { defaultValues } from '../../services/storage/storage.service'
 import { XPubGenerator } from '../../services/qr/qr-generators/xpub-generator'
 import { OutputDescriptorGenerator } from '../../services/qr/qr-generators/output-descriptor-generator'
+import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../utils/utils'
 
 export enum QRType {
   V2 = 'QR Code V2',
   V3 = 'QR Code V3',
-  BC_UR = 'BC UR (Beta)',
-  XPUB = 'xPub (Beta)',
-  OUTPUT_DESCRIPTOR = 'Output Descriptor (Beta)',
+  BC_UR = 'BC UR',
+  XPUB = 'xPub',
+  OUTPUT_DESCRIPTOR = 'Output Descriptor',
   METAMASK = 'MetaMask'
 }
 
@@ -157,7 +158,19 @@ export class IACQrComponent implements OnDestroy {
     // Add BC_UR type, if supported
     if (!this.availableQRTypes.includes(QRType.BC_UR) && (await BCURTypesGenerator.canHandle(this._messageDefinitionObjects))) {
       this.availableQRTypes.push(QRType.BC_UR)
+
+      // If we know the message ID, we activate the bcur toggle
+      this._messageDefinitionObjects.forEach((message) => {
+        const IDs = JSON.parse(localStorage.getItem(TEMP_BTC_REQUEST_IDS) ?? '{}')
+
+        const id = IDs[message.id]
+
+        if (id && id.qrType === QRType.BC_UR) {
+          this.updateGenerator(QRType.BC_UR)
+        }
+      })
     }
+
     // Add Ouput Descriptor, if supported
     if (
       !this.availableQRTypes.includes(QRType.OUTPUT_DESCRIPTOR) &&
@@ -175,7 +188,8 @@ export class IACQrComponent implements OnDestroy {
 
       // If we know the message ID, we activate the MetaMask toggle
       this._messageDefinitionObjects.forEach((message) => {
-        const IDs = JSON.parse(localStorage.getItem('TEMP-MM-REQUEST-IDS') ?? '{}')
+        const IDs = JSON.parse(localStorage.getItem(TEMP_MM_REQUEST_IDS) ?? '{}')
+
         const id = IDs[message.id]
 
         if (id) {

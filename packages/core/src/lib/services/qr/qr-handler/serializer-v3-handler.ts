@@ -8,6 +8,8 @@ import { BitcoinSegwitTransactionSignRequest } from '@airgap/bitcoin'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
+import { QRType } from '../../../../public-api'
+import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'
@@ -155,10 +157,15 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       publicKey: ''
     }
 
+    const ownRequestId: number = generateId(8)
+    const IDs = JSON.parse(localStorage.getItem(TEMP_BTC_REQUEST_IDS) ?? '{}')
+    IDs[ownRequestId] = { qrType: QRType.BC_UR }
+    localStorage.setItem(TEMP_BTC_REQUEST_IDS, JSON.stringify(IDs))
+
     return {
       result: [
         {
-          id: generateId(8),
+          id: ownRequestId,
           protocol: MainProtocolSymbols.BTC_SEGWIT,
           type: IACMessageType.TransactionSignRequest,
           payload
@@ -178,9 +185,9 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
     const metamaskRequestId: string = request.getRequestId().toString('hex')
 
     // TODO: This should be moved to a higher level, probably the "iac.service", and properly store context for any kind of request.
-    const IDs = JSON.parse(localStorage.getItem('TEMP-MM-REQUEST-IDS') ?? '{}')
+    const IDs = JSON.parse(localStorage.getItem(TEMP_MM_REQUEST_IDS) ?? '{}')
     IDs[ownRequestId] = metamaskRequestId
-    localStorage.setItem('TEMP-MM-REQUEST-IDS', JSON.stringify(IDs))
+    localStorage.setItem(TEMP_MM_REQUEST_IDS, JSON.stringify(IDs))
 
     const context = { requestId: metamaskRequestId, derivationPath: request.getDerivationPath(), sourceFingerprint }
 

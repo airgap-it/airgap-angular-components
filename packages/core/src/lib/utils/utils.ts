@@ -85,3 +85,6 @@ export function toBoolean(value: unknown): boolean {
 export function assertNever(name: string, arg: never): never {
   throw new Error(`${name} ${arg}`)
 }
+
+export const TEMP_BTC_REQUEST_IDS = 'TEMP-BTC-REQUEST-IDS'
+export const TEMP_MM_REQUEST_IDS = 'TEMP-MM-REQUEST-IDS'
