@@ -9,7 +9,12 @@ import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { EthereumTransactionSignResponse } from '@airgap/ethereum'
 import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, MessageSignResponse } from '@airgap/serializer'
 
+
+
 import { IACQrGenerator } from '../../iac/qr-generator'
+
+import { TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
+
 
 export class MetamaskGenerator extends IACQrGenerator {
   private encoder: UREncoder | undefined
@@ -129,7 +134,7 @@ export class MetamaskGenerator extends IACQrGenerator {
     }
 
     // TODO: This should be moved to a higher level, probably the "iac.service", and properly store context for any kind of request.
-    const IDs = JSON.parse(localStorage.getItem('TEMP-MM-REQUEST-IDS') ?? '{}')
+    const IDs = JSON.parse(localStorage.getItem(TEMP_MM_REQUEST_IDS) ?? '{}')
     const id = IDs[data.id]
 
     // TODO: We cannot immediately delete the ID because this method might be called multiple times
