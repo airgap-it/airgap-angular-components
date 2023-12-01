@@ -4,6 +4,8 @@ import { IACMessageDefinitionObjectV3, generateId, IACMessageType } from '@airga
 import { CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
+import { QRType } from '../../../components/iac-qr/iac-qr.component'
+import {TEMP_BTC_REQUEST_IDS} from "../../../utils/utils"
 
 export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'BCURTypesHandler'
@@ -193,10 +195,15 @@ export class BCURTypesHandler implements IACMessageHandler<IACMessageDefinitionO
       publicKey: ''
     }
 
+    const ownRequestId: number = generateId(8)
+    const IDs = JSON.parse(localStorage.getItem(TEMP_BTC_REQUEST_IDS) ?? '{}')
+    IDs[ownRequestId] = { qrType: QRType.BC_UR }
+    localStorage.setItem(TEMP_BTC_REQUEST_IDS, JSON.stringify(IDs))
+
     return {
       result: [
         {
-          id: generateId(8),
+          id: ownRequestId,
           protocol: MainProtocolSymbols.BTC_SEGWIT,
           type: IACMessageType.TransactionSignRequest,
           payload
