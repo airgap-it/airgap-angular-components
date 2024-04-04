@@ -9,6 +9,7 @@ import { EthereumModule } from '@airgap/ethereum'
 import { GroestlcoinModule } from '@airgap/groestlcoin'
 import { ICPModule } from '@airgap/icp'
 import { CoreumModule } from '@airgap/coreum'
+import { AcurastModule } from '@airgap/acurast'
 import {
   AirGapAnyProtocol,
   AirGapBlockExplorer,
@@ -31,6 +32,7 @@ import { MoonbeamModule } from '@airgap/moonbeam'
 import { OptimismModule } from '@airgap/optimism'
 import { PolkadotModule } from '@airgap/polkadot'
 import { TezosModule } from '@airgap/tezos'
+
 import {
   BatchCallMethodOptions,
   BatchCallMethodResult,
@@ -81,7 +83,8 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new AstarModule(),
       new ICPModule(),
       new CoreumModule(),
-      new OptimismModule()
+      new OptimismModule(),
+      new AcurastModule()
     ]
   ) {
     super()

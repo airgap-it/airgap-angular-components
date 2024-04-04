@@ -15,7 +15,8 @@ const modules = [
   new airgapCoinLib.moonbeam.MoonbeamModule(),
   new airgapCoinLib.astar.AstarModule(),
   new airgapCoinLib.icp.ICPModule(),
-  new airgapCoinLib.optimism.OptimismModule()
+  new airgapCoinLib.optimism.OptimismModule(),
+  new airgapCoinLib.acurast.AcurastModule()
 ]
 
 const HEX_REGEX = new RegExp(`^(0x)?[0-9a-fA-F]*$`)
@@ -28,9 +29,7 @@ const getPublicKeyV1 = (type, publicKey) => {
 }
 
 const normalizeAddress = (address) => {
-  return typeof address === 'string'
-    ? { address, cursor: { hasNext: false }}
-    : address
+  return typeof address === 'string' ? { address, cursor: { hasNext: false } } : address
 }
 
 const getProtocolByIdentifier = async (identifier, isExtendedPublicKey) => {
@@ -72,9 +71,10 @@ const getProtocolByIdentifier = async (identifier, isExtendedPublicKey) => {
   } else {
     protocol.getAddressesFromPublicKey = async (publicKey, cursor) => {
       const publicKeyV1 = getPublicKeyV1('pub', publicKey)
-      const addresses = 'getInitialAddressesFromPublicKey' in protocol
-        ? await protocol.getInitialAddressesFromPublicKey(publicKeyV1)
-        : [await protocol.getAddressFromPublicKey(publicKeyV1)]
+      const addresses =
+        'getInitialAddressesFromPublicKey' in protocol
+          ? await protocol.getInitialAddressesFromPublicKey(publicKeyV1)
+          : [await protocol.getAddressFromPublicKey(publicKeyV1)]
 
       return addresses.map(normalizeAddress)
     }
