@@ -1,0 +1,63 @@
+{
+  "from-to": {
+    "type_label": "Тип",
+    "amount_label": "Сумма",
+    "fee_label": "Комиссия",
+    "time_label": "Время",
+    "data_label": "Данные",
+    "status_label": "Статус",
+    "from_label": "От кого",
+    "to_label": "Кому",
+    "destination_label": "Место назначения",
+    "details": "Подробнее",
+    "transaction-details_label": "Отображение дополнительных сведений о транзакции"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Скопировано в буфер обмена.",
+      "ok_label": "Хорошо"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Несовместимый код",
+      "message": "Не удалось распознать код. Пожалуйста, убедитесь, что это действительный код AirGap. Вы можете попробовать обработать этот код в {{otherApp.name }} с помощью кнопки \"Перенаправить\" ниже.",
+      "relay_label": "Перенаправить",
+      "copy_label": "Копировать",
+      "cancel_label": "Отменить"
+    },
+    "message-not-supported_alert": {
+      "header": "Операция не поддерживается",
+      "message": "Пожалуйста, используйте {{otherApp.name }} для обработки этого кода. Вы можете нажать кнопку \"Перенаправить\" ниже, чтобы сделать это.",
+      "relay_label": "Перенаправить",
+      "copy_label": "Копировать",
+      "cancel_label": "Отменить"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Упс!",
+      "message": "Открытие deeplink поддерживается только на мобильных устройствах.",
+      "ok": "Хорошо"
+    },
+    "app-not-found": {
+      "title": "Упс!",
+      "message": "Похоже, у вас нет {{otherApp.name }}, установленного на этом устройстве.",
+      "ok": "Хорошо"
+    },
+    "invalid": {
+      "title": "Упс!",
+      "message": "Похоже, что deeplink не удалось сгенерировать.",
+      "ok": "Хорошо"
+    }
+  },
+  "qr-settings": {
+    "title": "Настройки QR ",
+    "paste-from-clipboard_label": "Вставить код из буфера обмена",
+    "enable-new-serializer_label": "Включить сериализатор V3",
+    "page-time_label": "Время QR-страницы",
+    "single-page-size_label": "Максимальный размер одного QR-кода",
+    "multi-page-size_label": "Максимальный размер нескольких QR-кодов",
+    "reset": "Сбросить значения"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "from-to": {
+    "type_label": "Tipo",
+    "amount_label": "Quantia",
+    "fee_label": "Taxa",
+    "time_label": "Tempo",
+    "data_label": "Data",
+    "status_label": "Status",
+    "from_label": "A partir de",
+    "to_label": "Para",
+    "destination_label": "Destino",
+    "details": "Exibir detalhes",
+    "transaction-details_label": "Exibir detalhes extras da transação"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Copiado com sucesso para a área de transferência!",
+      "ok_label": "Ok"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Código incompatível",
+      "message": "Não foi possível analisar o código. Certifique-se de que este é um código AirGap válido. Você pode tentar lidar com esse código em {{outroAplicativo.nome}} usando o botão \"Retransmitir\" abaixo.",
+      "relay_label": "Retransmissão",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    },
+    "message-not-supported_alert": {
+      "header": "Operação não suportada",
+      "message": "Por favor, use {{outroAplicativo.nome}} para lidar com este código. Você pode clicar no botão \"Relay\" abaixo para fazer isso.",
+      "relay_label": "Retransmissão",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Ops",
+      "message": "Deeplinking é suportado apenas em dispositivos móveis.",
+      "ok": "Ok"
+    },
+    "app-not-found": {
+      "title": "Ops",
+      "message": "Parece que você não tem {{outroAplicativo.nome}} instalado neste dispositivo.",
+      "ok": "Ok"
+    },
+    "invalid": {
+      "title": "Ops",
+      "message": "Parece que o deeplink não pôde ser gerado",
+      "ok": "Ok"
+    }
+  },
+  "qr-settings": {
+    "title": "QR Configurações",
+    "paste-from-clipboard_label": "Cole o código da área de transferência",
+    "enable-new-serializer_label": "Ativar Serializador V3",
+    "page-time_label": "QR Tempo da página",
+    "single-page-size_label": "Tamanho máximo de QR único",
+    "multi-page-size_label": "Multi QR Tamanho Máximo",
+    "reset": "Redefinir valores"
+  }
+}

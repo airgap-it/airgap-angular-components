@@ -1,7 +1,63 @@
 {
-  "from-to.amount_label": "Monto",
-  "from-to.fee_label": "Cuota",
-  "from-to.time_label": "Tiempo",
-  "from-to.from_label": "De",
-  "from-to.to_label": "A"
+  "from-to": {
+    "type_label": "Ups!",
+    "amount_label": "Monto",
+    "fee_label": "Cuota",
+    "time_label": "Tiempo",
+    "data_label": "Información",
+    "status_label": "Estado",
+    "from_label": "De",
+    "to_label": "A",
+    "destination_label": "Destino",
+    "details": "Detalles",
+    "transaction-details_label": "Mostrar más detalles"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Copiado!",
+      "ok_label": "Ok"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Código no compatible",
+      "message": "El código no parece valido. Confirma que es un código AirGap valido. Comprueba el código en {{otherApp.name}} usando el botón Relay.",
+      "relay_label": "Relay",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    },
+    "message-not-supported_alert": {
+      "header": "Operación no soportada",
+      "message": "Por favor usa {{otherApp.name}} para verifica el código. Haz click en el botón Relay.",
+      "relay_label": "Relay",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Ups!",
+      "message": "Deeplinking solo disponible en dispositivos móviles. ",
+      "ok": "Ok"
+    },
+    "app-not-found": {
+      "title": "Ups!",
+      "message": "Parece que no tienes la la App {{otherApp.name}} instalada en este dispositivo.",
+      "ok": "Ok"
+    },
+    "invalid": {
+      "title": "Ups!",
+      "message": "El deeplink no puede ser generado",
+      "ok": "Ok"
+    }
+  },
+  "qr-settings": {
+    "title": "Ajustes QR",
+    "paste-from-clipboard_label": "Pegar desde portapapeles",
+    "enable-new-serializer_label": "Permitir Serializer V3",
+    "page-time_label": "Velocidad del código QR",
+    "single-page-size_label": "Tamaño máximo de QR Sencillo",
+    "multi-page-size_label": "Tamaño máximo de QR Multiple",
+    "reset": "Resetear valores"
+  }
 }
