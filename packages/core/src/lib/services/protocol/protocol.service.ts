@@ -291,7 +291,7 @@ export class ProtocolService {
     return Object.keys(subProtocolsMap)
       .filter((key) => key.startsWith(mainIdentifier))
       .map((key) => Object.values(subProtocolsMap[key] ?? {}))
-      .reduce((flatten, next) => flatten.concat(next))
+      .reduce((flatten, next) => flatten.concat(next), [])
   }
 
   public async getNetworksForProtocol(
