@@ -1,8 +1,112 @@
 {
-  "from-to.type_label": "Transaktionstyp",
-  "from-to.amount_label": "Betrag",
-  "from-to.fee_label": "Gebühr",
-  "from-to.time_label": "Zeit",
-  "from-to.from_label": "Von",
-  "from-to.to_label": "Zu"
+  "from-to": {
+    "type_label": "Typ",
+    "amount_label": "Menge",
+    "total_amount_label": "Gesamtmenge",
+    "fee_label": "Gebühr",
+    "time_label": "Zeit",
+    "data_label": "Daten",
+    "status_label": "Status",
+    "from_label": "Aus",
+    "to_label": "Zu",
+    "destination_label": "Ziel",
+    "details": "Details anzeigen",
+    "transaction-details_label": "Zusätzliche Transaktionsdetails anzeigen",
+    "change-address": "Adresse ändern",
+    "verified": "verifiziert",
+    "notverified": "AirGap Vault kann Änderungsadresse nicht verifizieren",
+    "unknown-change-address": "nicht verifiziert"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Erfolgreich in Ihre Zwischenablage kopiert!",
+      "ok_label": "OK"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Inkompatibler Code",
+      "message": "Code konnte nicht analysiert werden. Bitte stellen Sie sicher, dass dies ein gültiger AirGap-Code ist. Sie können versuchen, diesen Code in {{otherApp.name}} zu verarbeiten, indem Sie unten die Schaltfläche „Relay“ verwenden.",
+      "relay_label": "Relais",
+      "copy_label": "Kopieren",
+      "cancel_label": "Stornieren"
+    },
+    "message-not-supported_alert": {
+      "header": "Vorgang wird nicht unterstützt",
+      "message": "Bitte verwenden Sie {{otherApp.name}}, um diesen Code zu verarbeiten. Klicken Sie dazu unten auf die Schaltfläche „Weiterleiten“.",
+      "relay_label": "Relais",
+      "copy_label": "Kopieren",
+      "cancel_label": "Stornieren"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Hoppla",
+      "message": "Deeplinking wird nur auf Mobilgeräten unterstützt.",
+      "ok": "OK"
+    },
+    "app-not-found": {
+      "title": "Hoppla",
+      "message": "Es sieht so aus, als ob Sie {{otherApp.name}} nicht auf diesem Gerät installiert haben.",
+      "ok": "OK"
+    },
+    "invalid": {
+      "title": "Hoppla",
+      "message": "Es sieht so aus, als ob der Deeplink nicht generiert werden konnte",
+      "ok": "OK"
+    }
+  },
+  "qr-settings": {
+    "title": "QR-Einstellungen",
+    "paste-from-clipboard_label": "Code aus der Zwischenablage einfügen",
+    "enable-new-serializer_label": "Serializer V3 aktivieren",
+    "page-time_label": "QR-Seitenzeit",
+    "single-page-size_label": "Maximale Größe eines einzelnen QR-Codes",
+    "multi-page-size_label": "Maximale Multi-QR-Größe",
+    "reset": "Werte zurücksetzen"
+  },
+  "isolated-modules-list": {
+    "empty": {
+      "header": "Keine Module installiert",
+      "description": "Tippen Sie auf das „+“-Symbol, um ein neues Modul aus Ihrem Telefonspeicher zu laden"
+    },
+    "install-date": "Installationsdatum: {{ date }}"
+  },
+  "isolated-modules-onboarding": {
+    "title": "Isolierte Module",
+    "content": {
+      "header": "Einführung isolierter Module",
+      "description": "Laden Sie Module von Drittanbietern in Ihren Tresor, um zusätzliche Funktionen hinzuzufügen.",
+      "note": "<strong>Bitte beachten:</strong> Die Installation von Modulen erfolgt auf eigenes Risiko. Die Funktionalität und Wartung dieser Module wird von Drittanbietern übernommen und steht in keiner Verbindung zu AirGap.",
+      "button_label": "Verstanden"
+    }
+  },
+  "isolated-modules-details": {
+    "manifest": {
+      "name": {
+        "label": "Modulname"
+      },
+      "version": {
+        "label": "Ausführung"
+      },
+      "author": {
+        "label": "Autor"
+      },
+      "public-key": {
+        "label": "Öffentlicher Schlüssel",
+        "not-verified_warning": "Es sieht so aus, als ob dieses Modul nicht mit diesem öffentlichen Schlüssel signiert wurde."
+      },
+      "description": {
+        "label": "Beschreibung"
+      },
+      "include": {
+        "label": "Dateien"
+      }
+    }
+  },
+  "isolated-modules-badges": {
+    "audited_label": "Geprüft",
+    "built-in_label": "Eingebaut",
+    "3rd-party_label": "Drittanbietermodul"
+  }
 }
