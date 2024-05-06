@@ -1,0 +1,112 @@
+{
+  "from-to": {
+    "type_label": "Taper",
+    "amount_label": "Montant",
+    "total_amount_label": "Montant total",
+    "fee_label": "Frais",
+    "time_label": "Temps",
+    "data_label": "Données",
+    "status_label": "Statut",
+    "from_label": "Depuis",
+    "to_label": "À",
+    "destination_label": "Destination",
+    "details": "Afficher les détails",
+    "transaction-details_label": "Afficher des détails supplémentaires sur la transaction",
+    "change-address": "changement d'adresse",
+    "verified": "vérifié",
+    "notverified": "AirGap Vault ne peut pas vérifier le changement d'adresse",
+    "unknown-change-address": "non vérifié"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Copié avec succès dans votre presse-papiers !",
+      "ok_label": "D'accord"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Code incompatible",
+      "message": "Impossible d'analyser le code. Veuillez vous assurer qu'il s'agit d'un code AirGap valide. Vous pouvez essayer de gérer ce code dans {{otherApp.name}} en utilisant le bouton \"Relais\" ci-dessous.",
+      "relay_label": "Relais",
+      "copy_label": "Copie",
+      "cancel_label": "Annuler"
+    },
+    "message-not-supported_alert": {
+      "header": "Opération non prise en charge",
+      "message": "Veuillez utiliser {{otherApp.name}} pour gérer ce code. Vous pouvez cliquer sur le bouton \"Relais\" ci-dessous pour ce faire.",
+      "relay_label": "Relais",
+      "copy_label": "Copie",
+      "cancel_label": "Annuler"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Oops",
+      "message": "Les liens profonds ne sont pris en charge que sur les appareils mobiles.",
+      "ok": "D'accord"
+    },
+    "app-not-found": {
+      "title": "Oops",
+      "message": "Il semble que {{otherApp.name}} n'est pas installé sur cet appareil.",
+      "ok": "D'accord"
+    },
+    "invalid": {
+      "title": "Oops",
+      "message": "Il semble que le lien profond n'ait pas pu être généré",
+      "ok": "D'accord"
+    }
+  },
+  "qr-settings": {
+    "title": "Paramètres QR",
+    "paste-from-clipboard_label": "Coller le code du presse-papier",
+    "enable-new-serializer_label": "Activer le sérialiseur V3",
+    "page-time_label": "Heure de la page QR",
+    "single-page-size_label": "Taille maximale QR unique",
+    "multi-page-size_label": "Taille maximale multi-QR",
+    "reset": "Réinitialiser les valeurs"
+  },
+  "isolated-modules-list": {
+    "empty": {
+      "header": "Aucun module installé",
+      "description": "Appuyez sur l'icône \"+\" pour charger un nouveau module depuis la mémoire de votre téléphone"
+    },
+    "install-date": "Date d'installation : {{ date }}"
+  },
+  "isolated-modules-onboarding": {
+    "title": "Modules isolés",
+    "content": {
+      "header": "Présentation des modules isolés",
+      "description": "Chargez des modules tiers dans votre coffre-fort pour ajouter des fonctionnalités supplémentaires.",
+      "note": "<strong>Veuillez noter :</strong> L'installation des modules se fait à vos propres risques. La fonctionnalité et la maintenance de ces modules sont gérées par des tiers et ne sont pas affiliés à AirGap.",
+      "button_label": "Compris"
+    }
+  },
+  "isolated-modules-details": {
+    "manifest": {
+      "name": {
+        "label": "Nom du module"
+      },
+      "version": {
+        "label": "Version"
+      },
+      "author": {
+        "label": "Auteur"
+      },
+      "public-key": {
+        "label": "Clé publique",
+        "not-verified_warning": "Il semble que ce module n'ait pas été signé par cette clé publique."
+      },
+      "description": {
+        "label": "Description"
+      },
+      "include": {
+        "label": "Des dossiers"
+      }
+    }
+  },
+  "isolated-modules-badges": {
+    "audited_label": "Vérifié",
+    "built-in_label": "Intégré",
+    "3rd-party_label": "Module tiers"
+  }
+}
