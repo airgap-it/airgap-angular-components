@@ -1,7 +1,112 @@
 {
-  "from-to.amount_label": "Monto",
-  "from-to.fee_label": "Cuota",
-  "from-to.time_label": "Tiempo",
-  "from-to.from_label": "De",
-  "from-to.to_label": "A"
+  "from-to": {
+    "type_label": "Tipo",
+    "amount_label": "Cantidad",
+    "total_amount_label": "Cantidad total",
+    "fee_label": "Tarifa",
+    "time_label": "Tiempo",
+    "data_label": "Datos",
+    "status_label": "Estado",
+    "from_label": "De",
+    "to_label": "A",
+    "destination_label": "Destino",
+    "details": "Mostrar detalles",
+    "transaction-details_label": "Mostrar detalles adicionales de la transacción",
+    "change-address": "cambiar dirección",
+    "verified": "verificado",
+    "notverified": "AirGap Vault no puede verificar el cambio de dirección",
+    "unknown-change-address": "No verificado"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "¡Copiado exitosamente a tu portapapeles!",
+      "ok_label": "De acuerdo"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "código incompatible",
+      "message": "No se pudo analizar el código. Asegúrese de que este sea un código AirGap válido. Puedes intentar manejar este código en {{otherApp.name}} usando el botón \"Retransmitir\" a continuación.",
+      "relay_label": "Relé",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    },
+    "message-not-supported_alert": {
+      "header": "Operación no compatible",
+      "message": "Utilice {{otherApp.name}} para manejar este código. Puede hacer clic en el botón \"Retransmitir\" a continuación para hacerlo.",
+      "relay_label": "Relé",
+      "copy_label": "Copiar",
+      "cancel_label": "Cancelar"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Ups",
+      "message": "Los enlaces profundos solo se admiten en dispositivos móviles.",
+      "ok": "De acuerdo"
+    },
+    "app-not-found": {
+      "title": "Ups",
+      "message": "Parece que no tienes {{otherApp.name}} instalado en este dispositivo.",
+      "ok": "De acuerdo"
+    },
+    "invalid": {
+      "title": "Ups",
+      "message": "Parece que no se pudo generar el enlace profundo.",
+      "ok": "De acuerdo"
+    }
+  },
+  "qr-settings": {
+    "title": "Configuración QR",
+    "paste-from-clipboard_label": "Pegar código del portapapeles",
+    "enable-new-serializer_label": "Habilitar serializador V3",
+    "page-time_label": "Hora de la página QR",
+    "single-page-size_label": "Tamaño máximo de QR único",
+    "multi-page-size_label": "Tamaño máximo de QR múltiple",
+    "reset": "Restablecer valores"
+  },
+  "isolated-modules-list": {
+    "empty": {
+      "header": "No hay módulos instalados",
+      "description": "Toque el ícono \"+\" para cargar un nuevo módulo desde el almacenamiento de su teléfono"
+    },
+    "install-date": "Fecha de instalación: {{ fecha }}"
+  },
+  "isolated-modules-onboarding": {
+    "title": "Módulos aislados",
+    "content": {
+      "header": "Presentación de módulos aislados",
+      "description": "Cargue módulos de terceros en su bóveda para agregar funciones adicionales.",
+      "note": "<strong>Tenga en cuenta:</strong> La instalación de módulos se realiza bajo su propio riesgo. La funcionalidad y el mantenimiento de estos módulos están a cargo de terceros y no están afiliados a AirGap.",
+      "button_label": "Comprendido"
+    }
+  },
+  "isolated-modules-details": {
+    "manifest": {
+      "name": {
+        "label": "Nombre del módulo"
+      },
+      "version": {
+        "label": "Versión"
+      },
+      "author": {
+        "label": "Autor"
+      },
+      "public-key": {
+        "label": "Llave pública",
+        "not-verified_warning": "Parece que este módulo no fue firmado por esta clave pública."
+      },
+      "description": {
+        "label": "Descripción"
+      },
+      "include": {
+        "label": "Archivos"
+      }
+    }
+  },
+  "isolated-modules-badges": {
+    "audited_label": "Auditado",
+    "built-in_label": "Incorporado",
+    "3rd-party_label": "Módulo de terceros"
+  }
 }

@@ -1,0 +1,112 @@
+{
+  "from-to": {
+    "type_label": "Тип",
+    "amount_label": "Количество",
+    "total_amount_label": "Общая сумма",
+    "fee_label": "Платеж",
+    "time_label": "Время",
+    "data_label": "Данные",
+    "status_label": "Статус",
+    "from_label": "От",
+    "to_label": "до",
+    "destination_label": "Место назначения",
+    "details": "Показать детали",
+    "transaction-details_label": "Показывать дополнительные сведения о транзакции",
+    "change-address": "сменить адрес",
+    "verified": "проверено",
+    "notverified": "AirGap Vault не может проверить измененный адрес",
+    "unknown-change-address": "не подтверждено"
+  },
+  "clipboard": {
+    "toast": {
+      "success_text": "Успешно скопировано в буфер обмена!",
+      "ok_label": "Ок"
+    }
+  },
+  "iac": {
+    "message-unknown_alert": {
+      "header": "Несовместимый код",
+      "message": "Не удалось разобрать код. Убедитесь, что это действительный код AirGap. Вы можете попробовать обработать этот код в {{otherApp.name}}, используя кнопку «Реле» ниже.",
+      "relay_label": "Реле",
+      "copy_label": "Копировать",
+      "cancel_label": "Отмена"
+    },
+    "message-not-supported_alert": {
+      "header": "Операция не поддерживается",
+      "message": "Используйте {{otherApp.name}} для обработки этого кода. Для этого вы можете нажать кнопку «Реле» ниже.",
+      "relay_label": "Реле",
+      "copy_label": "Копировать",
+      "cancel_label": "Отмена"
+    }
+  },
+  "deeplink": {
+    "not-supported-alert": {
+      "title": "Упс",
+      "message": "Диплинки поддерживается только на мобильных устройствах.",
+      "ok": "Ок"
+    },
+    "app-not-found": {
+      "title": "Упс",
+      "message": "Похоже, на вашем устройстве не установлено приложение {{otherApp.name}}.",
+      "ok": "Ок"
+    },
+    "invalid": {
+      "title": "Упс",
+      "message": "Похоже, что не удалось создать диплинк.",
+      "ok": "Ок"
+    }
+  },
+  "qr-settings": {
+    "title": "QR-настройки",
+    "paste-from-clipboard_label": "Вставить код из буфера обмена",
+    "enable-new-serializer_label": "Включить сериализатор V3",
+    "page-time_label": "Время QR-страницы",
+    "single-page-size_label": "Максимальный размер одного QR-кода",
+    "multi-page-size_label": "Максимальный размер мульти-QR",
+    "reset": "Сбросить значения"
+  },
+  "isolated-modules-list": {
+    "empty": {
+      "header": "Модули не установлены",
+      "description": "Нажмите значок «+», чтобы загрузить новый модуль из памяти телефона."
+    },
+    "install-date": "Дата Установки: {{ date }}"
+  },
+  "isolated-modules-onboarding": {
+    "title": "Изолированные модули",
+    "content": {
+      "header": "Знакомство с изолированными модулями",
+      "description": "Загрузите сторонние модули в свое хранилище, чтобы добавить дополнительные функции.",
+      "note": "<strong>Обратите внимание:</strong> Установка модулей осуществляется на ваш страх и риск. Функциональность и обслуживание этих модулей осуществляются третьими лицами и не связаны с AirGap.",
+      "button_label": "Понял"
+    }
+  },
+  "isolated-modules-details": {
+    "manifest": {
+      "name": {
+        "label": "Имя модуля"
+      },
+      "version": {
+        "label": "Версия"
+      },
+      "author": {
+        "label": "Автор"
+      },
+      "public-key": {
+        "label": "Открытый ключ",
+        "not-verified_warning": "Похоже, этот модуль не был подписан этим открытым ключом."
+      },
+      "description": {
+        "label": "Описание"
+      },
+      "include": {
+        "label": "Файлы"
+      }
+    }
+  },
+  "isolated-modules-badges": {
+    "audited_label": "Проверено",
+    "built-in_label": "Встроенный",
+    "3rd-party_label": "Сторонний модуль"
+  }
+}
