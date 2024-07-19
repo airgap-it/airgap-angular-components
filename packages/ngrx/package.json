@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@airgap/angular-core": "^0.0.42",
-    "@airgap/coinlib-core": "0.13.28-beta.5",
+    "@airgap/coinlib-core": "0.13.29",
     "@angular/common": "^16.1.0",
     "@angular/core": "^16.1.0",
     "@angular/forms": "^16.1.0",
