@@ -10,6 +10,9 @@ export class AccountSelectionComponent {
   public title: string | undefined
 
   @Input()
+  public labels: string[] = []
+
+  @Input()
   public heading: string | undefined
 
   @Input()
