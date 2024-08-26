@@ -5,10 +5,13 @@
       <airgap-currency-symbol [symbol]="protocolSymbol" [protocolIdentifier]="protocolIdentifier"></airgap-currency-symbol>
     </ion-avatar>
     <ion-label>
-      <h2>
-        <span class="font--weight__med">{{ protocolName }}</span>
-        {{ protocolSymbol }}
-      </h2>
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>
+          <span class="font--weight__med">{{ protocolName }}</span>
+          {{ protocolSymbol }}
+        </h2>
+        <p>{{ label }}</p>
+      </div>
       <p class="typography--mono">{{ wallet.receivingPublicAddress }}</p>
     </ion-label>
   </ion-item>
