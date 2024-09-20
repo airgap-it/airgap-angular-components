@@ -1,4 +1,4 @@
-import { Component, Input, EventEmitter, Output } from '@angular/core'
+import { Component, Input, EventEmitter, Output, SimpleChanges } from '@angular/core'
 import { AirGapWallet } from '@airgap/coinlib-core'
 @Component({
   selector: 'airgap-account-selection',
@@ -26,11 +26,29 @@ export class AccountSelectionComponent {
 
   public symbolFilter: string | undefined
 
+  public filteredWallets: AirGapWallet[] = []
+
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.wallets && changes.wallets.currentValue) {
+      // Handle when wallets input changes or is set initially
+      this.filteredWallets = [...this.wallets]
+    }
+  }
+
   public filterItems(event: Event): void {
     const value: unknown = this.isInputElement(event.target) ? event.target.value : undefined
     this.symbolFilter = this.isValidFilterQuery(value) ? value.trim().toLowerCase() : undefined
   }
 
+  public filterWallet(event: Event): void {
+    const value: unknown = this.isInputElement(event.target) ? event.target.value : undefined
+
+    this.filteredWallets = this.isValidFilterQuery(value)
+      ? this.wallets?.filter((wallet) => wallet.label?.trim().toLowerCase().startsWith(value.trim().toLowerCase())) || []
+      : this.wallets
+      ? [...this.wallets]
+      : []
+  }
   public selectAccount(wallet: AirGapWallet): void {
     this.walletSetEmitter.emit(wallet)
   }

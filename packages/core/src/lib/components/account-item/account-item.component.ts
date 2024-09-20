@@ -10,6 +10,9 @@ export class AccountItemComponent implements OnChanges {
   @Input()
   public wallet: AirGapWallet | undefined
 
+  @Input()
+  public label: string | undefined
+
   public address: string | undefined
 
   public protocolSymbol: string | undefined
