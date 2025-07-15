@@ -16,7 +16,8 @@ const modules = [
   new airgapCoinLib.astar.AstarModule(),
   new airgapCoinLib.icp.ICPModule(),
   new airgapCoinLib.optimism.OptimismModule(),
-  new airgapCoinLib.acurast.AcurastModule()
+  new airgapCoinLib.acurast.AcurastModule(),
+  new airgapCoinLib.stellar.StellarModule()
 ]
 
 const HEX_REGEX = new RegExp(`^(0x)?[0-9a-fA-F]*$`)
