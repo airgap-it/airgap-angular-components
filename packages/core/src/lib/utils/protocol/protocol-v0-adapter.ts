@@ -692,6 +692,7 @@ export async function convertTransactionDetailsV1ToV0(
 
       timestamp: tx.timestamp,
       changeAddressInfo: tx.changeAddressInfo,
+      displayFromTo: tx.displayFromTo,
 
       protocolIdentifier: protocolMetadata.identifier as ProtocolSymbols,
       network: networkV0,

@@ -10,6 +10,8 @@ import { GroestlcoinModule } from '@airgap/groestlcoin'
 import { ICPModule } from '@airgap/icp'
 import { CoreumModule } from '@airgap/coreum'
 import { AcurastModule } from '@airgap/acurast'
+import { StellarModule } from '@airgap/stellar'
+
 import {
   AirGapAnyProtocol,
   AirGapBlockExplorer,
@@ -84,7 +86,8 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new ICPModule(),
       new CoreumModule(),
       new OptimismModule(),
-      new AcurastModule()
+      new AcurastModule(),
+      new StellarModule()
     ]
   ) {
     super()

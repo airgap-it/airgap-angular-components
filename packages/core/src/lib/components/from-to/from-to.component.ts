@@ -23,6 +23,8 @@ export class FromToComponent {
   @Input()
   public hideNetwork: boolean = false
 
+  public displayFromTo: boolean = true
+
   public fromTransactions: { name?: string; address: string }[] = []
   public toTransactions: { name?: string; address: string }[] = []
 
@@ -42,6 +44,16 @@ export class FromToComponent {
   public labeled: [string, string][] = []
 
   constructor(private readonly clipboardService: ClipboardService) {}
+
+  public ngOnInit(): void {
+    if (this.transaction) {
+      this.displayFromTo = this.transaction.displayFromTo ?? true
+    }
+
+    if (!this.displayFromTo) {
+      this.displayDetails = true
+    }
+  }
 
   public ngOnChanges(): void {
     if (this.transaction) {
@@ -80,6 +92,12 @@ export class FromToComponent {
   public copyToClipboard(): void {
     if (this.transaction) {
       this.clipboardService.copyAndShowToast(JSON.stringify(this.transaction.transactionDetails))
+    }
+  }
+
+  public copyRawDataToClipboard(): void {
+    if (this.interactionData) {
+      this.clipboardService.copyAndShowToast(JSON.stringify(this.interactionData))
     }
   }
 }

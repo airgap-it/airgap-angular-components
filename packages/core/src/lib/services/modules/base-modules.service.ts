@@ -117,12 +117,12 @@ export abstract class BaseModulesService {
 
         const groupedProtocols: Record<string, LoadedProtocol> = await Promise.all(
           module.protocols.map(async (protocol: LoadedProtocol) => [await this.getProtocolKey(protocol.protocol, type), protocol])
-        ).then((pairs: [string, LoadedProtocol][]) =>
-          pairs.reduce(
+        ).then((pairs: [string, LoadedProtocol][]) => {
+          return pairs.reduce(
             (obj: Record<string, LoadedProtocol>, next: [string, LoadedProtocol]) => Object.assign(obj, { [next[0]]: next[1] }),
             {}
           )
-        )
+        })
 
         for (const { protocol, blockExplorer } of Object.values(groupedProtocols)) {
           if (isSubProtocol(protocol)) {
@@ -139,6 +139,7 @@ export abstract class BaseModulesService {
                 ? await adapter.protocolV1.getNetwork()
                 : undefined
             )
+
             if (!(mainKey in activeProtocols)) {
               const mainAdapter: ICoinProtocolAdapter = await createICoinProtocolAdapter(
                 groupedProtocols[mainKey].protocol,
