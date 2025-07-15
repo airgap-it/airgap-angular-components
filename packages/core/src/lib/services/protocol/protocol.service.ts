@@ -271,7 +271,6 @@ export class ProtocolService {
     const mainIdentifier = typeof mainProtocol === 'string' ? mainProtocol : await mainProtocol.getIdentifier()
     const targetNetwork: ProtocolNetwork | string | undefined = await this.subProtocolStore.getTargetNetwork(mainIdentifier, network)
     const protocolAndNetworkIdentifier: string = await this.subProtocolStore.getProtocolAndNetworkIdentifier(mainIdentifier, targetNetwork)
-
     const subProtocolsMap: SubProtocolsMap = await (activeOnly ? this.getActiveSubProtocols() : this.getSupportedSubProtocols())
 
     return Object.values(subProtocolsMap[protocolAndNetworkIdentifier] ?? {}).filter(
