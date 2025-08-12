@@ -1,5 +1,4 @@
 import { UREncoder } from '@ngraveio/bc-ur'
-import * as bip32 from 'bip32'
 import * as uuid from 'uuid'
 
 import { CryptoKeypath, PathComponent, CryptoHDKey } from '@keystonehq/bc-ur-registry'
@@ -9,17 +8,20 @@ import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { EthereumTransactionSignResponse } from '@airgap/ethereum'
 import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, MessageSignResponse } from '@airgap/serializer'
 
+// import * as ecc from 'tiny-secp256k1'
+import * as ecc from '@bitcoinerlab/secp256k1'
 
+import { BIP32Factory } from 'bip32'
 
 import { IACQrGenerator } from '../../iac/qr-generator'
 
 import { TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
 
-
 export class MetamaskGenerator extends IACQrGenerator {
   private encoder: UREncoder | undefined
 
   private data: CryptoHDKey | ETHSignature | undefined
+  private readonly bip32 = BIP32Factory(ecc)
 
   constructor() {
     super()
@@ -88,7 +90,7 @@ export class MetamaskGenerator extends IACQrGenerator {
 
   private async generateCryptoAccountMessage(data: IACMessageDefinitionObjectV3): Promise<CryptoHDKey> {
     const account = data.payload as AccountShareResponse
-    const extendedPublicKey = bip32.fromBase58(account.publicKey)
+    const extendedPublicKey = this.bip32.fromBase58(account.publicKey)
 
     const cryptoKeyPathComponents = []
     for (const component of account.derivationPath.split('/')) {
@@ -100,9 +102,9 @@ export class MetamaskGenerator extends IACQrGenerator {
 
     const cryptoHDKey = new CryptoHDKey({
       isMaster: false,
-      key: extendedPublicKey.publicKey,
-      chainCode: extendedPublicKey.chainCode,
-      origin: new CryptoKeypath(cryptoKeyPathComponents, extendedPublicKey.fingerprint), // TODO: Define which FP we use
+      key: Buffer.from(extendedPublicKey.publicKey),
+      chainCode: Buffer.from(extendedPublicKey.chainCode),
+      origin: new CryptoKeypath(cryptoKeyPathComponents, Buffer.from(extendedPublicKey.fingerprint)), // TODO: Define which FP we use
       parentFingerprint: Buffer.from(account.masterFingerprint),
       name: `AirGap - ${account.groupLabel}`
     })

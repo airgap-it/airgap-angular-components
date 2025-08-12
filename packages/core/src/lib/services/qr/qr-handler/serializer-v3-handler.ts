@@ -4,12 +4,13 @@ import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
 import * as rlp from '@ethereumjs/rlp'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
-import { BitcoinSegwitTransactionSignRequest } from '@airgap/bitcoin'
+import { BitcoinSegwitTransactionSignRequest, BitcoinTaprootTransactionSignRequest } from '@airgap/bitcoin'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { QRType } from '../../../../public-api'
 import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
+import * as bitcoinJS from 'bitcoinjs-lib'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'
@@ -152,9 +153,18 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   }
 
   private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
-    const payload: BitcoinSegwitTransactionSignRequest = {
+    const decodedPSBT = bitcoinJS.Psbt.fromHex(psbt)
+    const isTaproot = decodedPSBT.data.inputs.some((input) => input.tapBip32Derivation)
+
+    const payload = {
       transaction: { psbt },
       publicKey: ''
+    }
+
+    if (isTaproot) {
+      payload as BitcoinTaprootTransactionSignRequest
+    } else {
+      payload as BitcoinSegwitTransactionSignRequest
     }
 
     const ownRequestId: number = generateId(8)
@@ -166,7 +176,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       result: [
         {
           id: ownRequestId,
-          protocol: MainProtocolSymbols.BTC_SEGWIT,
+          protocol: isTaproot ? MainProtocolSymbols.BTC_TAPROOT : MainProtocolSymbols.BTC_SEGWIT,
           type: IACMessageType.TransactionSignRequest,
           payload
         }

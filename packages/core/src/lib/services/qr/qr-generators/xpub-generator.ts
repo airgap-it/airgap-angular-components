@@ -28,7 +28,10 @@ export class XPubGenerator extends IACQrGenerator {
     if (data.length === 1) {
       const element = data[0]
 
-      return element.protocol === MainProtocolSymbols.BTC_SEGWIT && [IACMessageType.AccountShareResponse].includes(element.type)
+      return (
+        (element.protocol === MainProtocolSymbols.BTC_SEGWIT || element.protocol === MainProtocolSymbols.BTC_TAPROOT) &&
+        [IACMessageType.AccountShareResponse].includes(element.type)
+      )
     }
 
     return false
