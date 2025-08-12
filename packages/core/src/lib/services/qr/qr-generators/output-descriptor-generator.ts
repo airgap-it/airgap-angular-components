@@ -28,7 +28,10 @@ export class OutputDescriptorGenerator extends IACQrGenerator {
     if (data.length === 1) {
       const element = data[0]
 
-      return element.protocol === MainProtocolSymbols.BTC_SEGWIT && [IACMessageType.AccountShareResponse].includes(element.type)
+      return (
+        (element.protocol === MainProtocolSymbols.BTC_SEGWIT || element.protocol === MainProtocolSymbols.BTC_TAPROOT) &&
+        [IACMessageType.AccountShareResponse].includes(element.type)
+      )
     }
 
     return false
@@ -53,6 +56,11 @@ export class OutputDescriptorGenerator extends IACQrGenerator {
 
     const dpWithoutPrefix = account.derivationPath.slice(1)
     const dpWithoutUnhardened = dpWithoutPrefix.slice(0, dpWithoutPrefix.lastIndexOf("'") + 1)
+
+    if (data.protocol === MainProtocolSymbols.BTC_TAPROOT) {
+      return `tr([${account.masterFingerprint}${dpWithoutUnhardened}]${account.publicKey}/0/*)`
+    }
+    // Default to SegWit
 
     return `wpkh([${account.masterFingerprint}${dpWithoutUnhardened}]${account.publicKey}/0/*)`
   }
