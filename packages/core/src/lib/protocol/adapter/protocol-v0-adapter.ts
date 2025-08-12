@@ -86,7 +86,7 @@ import BigNumber from 'bignumber.js'
 import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
 import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
 import { isTezosSaplingProtocol } from '@airgap/tezos'
-import { BitcoinSegwitProtocol, isBitcoinSegwitProtocol } from '@airgap/bitcoin'
+import { BitcoinSegwitProtocol, BitcoinTaprootProtocol, isBitcoinSegwitProtocol, isBitcoinTaprootProtocol } from '@airgap/bitcoin'
 import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
 import { supportsV1Delegation } from '../../utils/protocol/delegation'
 import {
@@ -628,9 +628,15 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       throw new Error('Method not supported, required inferface: Online.')
     }
 
+    const isSegwit = isBitcoinSegwitProtocol(this.protocolV1)
+    const isTaproot = isBitcoinTaprootProtocol(this.protocolV1)
+
     let transaction: UnsignedTransaction
-    if (isBitcoinSegwitProtocol(this.protocolV1)) {
-      transaction = await (this.protocolV1 as BitcoinSegwitProtocol).prepareTransactionWithPublicKey(
+    if (isSegwit || isTaproot) {
+      transaction = await (isSegwit
+        ? (this.protocolV1 as BitcoinSegwitProtocol)
+        : (this.protocolV1 as BitcoinTaprootProtocol)
+      ).prepareTransactionWithPublicKey(
         newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
         this.combineTransactionDetails(recipients, values),
         {
