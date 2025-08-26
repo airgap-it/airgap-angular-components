@@ -86,7 +86,14 @@ import BigNumber from 'bignumber.js'
 import { TransactionSignRequest, TransactionSignResponse, TransactionValidator } from '@airgap/serializer'
 import { AirGapDelegateProtocol } from '@airgap/module-kit/internal'
 import { isTezosSaplingProtocol } from '@airgap/tezos'
-import { BitcoinSegwitProtocol, BitcoinTaprootProtocol, isBitcoinSegwitProtocol, isBitcoinTaprootProtocol } from '@airgap/bitcoin'
+import {
+  BitcoinLegacyProtocol,
+  BitcoinSegwitProtocol,
+  BitcoinTaprootProtocol,
+  isBitcoinProtocol,
+  isBitcoinSegwitProtocol,
+  isBitcoinTaprootProtocol
+} from '@airgap/bitcoin'
 import { getProtocolOptionsByIdentifierLegacy } from '../../utils/protocol/protocol-options'
 import { supportsV1Delegation } from '../../utils/protocol/delegation'
 import {
@@ -630,12 +637,16 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
 
     const isSegwit = isBitcoinSegwitProtocol(this.protocolV1)
     const isTaproot = isBitcoinTaprootProtocol(this.protocolV1)
+    const isLegacy = isBitcoinProtocol(this.protocolV1) && !isSegwit && !isTaproot
 
     let transaction: UnsignedTransaction
-    if (isSegwit || isTaproot) {
+
+    if (isSegwit || isTaproot || isLegacy) {
       transaction = await (isSegwit
         ? (this.protocolV1 as BitcoinSegwitProtocol)
-        : (this.protocolV1 as BitcoinTaprootProtocol)
+        : isTaproot
+        ? (this.protocolV1 as unknown as BitcoinTaprootProtocol)
+        : (this.protocolV1 as unknown as BitcoinLegacyProtocol)
       ).prepareTransactionWithPublicKey(
         newExtendedPublicKey(extendedPublicKey, getBytesFormatV1FromV0(extendedPublicKey)),
         this.combineTransactionDetails(recipients, values),
