@@ -9,7 +9,8 @@ import {
   IACMessagesV2,
   IACMessageType,
   Serializer,
-  SerializerV3
+  SerializerV3,
+  Success
 } from '@airgap/serializer'
 
 import { parseIACUrl } from '../../utils/utils'
@@ -206,6 +207,8 @@ export class SerializerService {
   }
 
   private async deserializeV3(chunks: string): Promise<IACMessageDefinitionObjectV3[]> {
-    return this.serializerV3.deserialize(chunks)
+    return (await this.serializerV3.deserialize(chunks)).deserialize
+      .filter((md) => md.ok)
+      .map((md) => (md as Success<IACMessageDefinitionObjectV3>).value)
   }
 }
