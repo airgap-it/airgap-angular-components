@@ -10,7 +10,15 @@ import {
   BitcoinTaprootTransactionSignRequest
 } from '@airgap/bitcoin'
 import { MainProtocolSymbols, ProtocolSymbols } from '@airgap/coinlib-core'
-import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
+import {
+  IACMessageDefinitionObjectV3,
+  SerializerV3,
+  generateId,
+  IACMessageType,
+  MessageSignRequest,
+  Success,
+  Failure
+} from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { QRType } from '../../../../public-api'
 import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
@@ -130,7 +138,13 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
 
       const resultUr = bs58check.encode(this.combinedData)
 
-      return { result: await this.serializer.deserialize(resultUr), data: await this.getDataSingle() }
+      const result = (await this.serializer.deserialize(resultUr)).deserialize.map(
+        (md) => (md as Success<IACMessageDefinitionObjectV3>).value
+      )
+
+      const skippedProtocol = (await this.serializer.deserialize(resultUr)).skippedPayload.map((md) => (md as Failure<Error>).error)
+
+      return { result, data: await this.getDataSingle(), skippedProtocol }
     }
 
     return undefined

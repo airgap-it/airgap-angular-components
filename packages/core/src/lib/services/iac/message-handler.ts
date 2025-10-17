@@ -22,6 +22,7 @@ export interface IACMessageWrapper<T> {
   data: string
   // TODO: Instead of this, create an internal message for every protocol/message that can contain additional data, which is not in the serializer messages.
   context?: IACContext
+  skippedProtocol?: Error[]
 }
 
 @Injectable()

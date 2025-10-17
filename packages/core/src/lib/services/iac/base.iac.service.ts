@@ -1,5 +1,5 @@
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
-import { Inject, Injectable } from '@angular/core'
+import { inject, Inject, Injectable } from '@angular/core'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
@@ -8,6 +8,7 @@ import { SerializerV2Handler } from '../qr/qr-handler/serializer-v2-handler'
 import { DeeplinkService } from '../deeplink/deeplink.service'
 import { AppConfig, APP_CONFIG } from '../../config/app-config'
 import { IACMessageHandler, IACMessageTransport, IACHandlerStatus, IACMessageWrapper } from './message-handler'
+import { Platform } from '@ionic/angular'
 
 export type ScanAgainCallback = (progress?: number) => void
 
@@ -27,13 +28,15 @@ export abstract class BaseIACService {
     ) => Promise<boolean>
   }
 
+  // protected readonly platform = inject(Platform)
   constructor(
     protected readonly uiEventElementService: UiEventElementsService,
     protected readonly clipboard: ClipboardService,
     protected readonly isReady: Promise<void>,
     protected readonly customHandlers: IACMessageHandler<unknown>[],
     protected readonly deeplinkService: DeeplinkService,
-    @Inject(APP_CONFIG) protected readonly appConfig: AppConfig
+    @Inject(APP_CONFIG) protected readonly appConfig: AppConfig,
+    protected readonly platform: Platform
   ) {
     this.serializerMessageHandlers = {
       [IACMessageType.AccountShareRequest]: this.syncTypeNotSupportedAlert.bind(this),
@@ -51,6 +54,8 @@ export abstract class BaseIACService {
 
     this.handlers.push(...customHandlers)
   }
+
+  private iacMessageTypes: (IACMessageType | undefined)[] = []
 
   public async storeResult(
     message: IACMessageWrapper<unknown>,
@@ -84,6 +89,17 @@ export abstract class BaseIACService {
               const status: IACHandlerStatus = IACHandlerStatus.SUCCESS
               await handler.handleComplete()
               await this.resetHandlers()
+
+              if (result.skippedProtocol) {
+                if (
+                  result.skippedProtocol.length > 0 &&
+                  (this.platform.is('desktop') || this.platform.is('mobileweb') || this.platform.is('pwa'))
+                ) {
+                  this.uiEventElementService.showIsolatedModuleNotSupportOnWeb(result.skippedProtocol.length).catch
+                } else if (result.skippedProtocol.length > 0) {
+                  throw new Error('Cannot decode data')
+                }
+              }
 
               return this.storeResult(result, status, transport)
             } catch (e) {

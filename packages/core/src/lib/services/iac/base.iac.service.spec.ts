@@ -4,7 +4,7 @@ import { IACHandlerStatus, IACMessageTransport } from './message-handler'
 
 class TestIACService extends BaseIACService {
   constructor() {
-    super({} as any, {} as any, Promise.resolve(), [], {} as any, {} as any)
+    super({} as any, {} as any, Promise.resolve(), [], {} as any, {} as any, {} as any)
 
     this.serializerMessageHandlers[IACMessageType.AccountShareRequest] = this.defaultHandler.bind(this)
     this.serializerMessageHandlers[IACMessageType.AccountShareResponse] = this.defaultHandler.bind(this)
