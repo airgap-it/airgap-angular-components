@@ -1,5 +1,6 @@
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
-import { inject, Inject, Injectable } from '@angular/core'
+import { Inject, Injectable } from '@angular/core'
+import { Platform } from '@ionic/angular'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
@@ -8,7 +9,6 @@ import { SerializerV2Handler } from '../qr/qr-handler/serializer-v2-handler'
 import { DeeplinkService } from '../deeplink/deeplink.service'
 import { AppConfig, APP_CONFIG } from '../../config/app-config'
 import { IACMessageHandler, IACMessageTransport, IACHandlerStatus, IACMessageWrapper } from './message-handler'
-import { Platform } from '@ionic/angular'
 
 export type ScanAgainCallback = (progress?: number) => void
 
@@ -81,8 +81,10 @@ export abstract class BaseIACService {
       const handler = this.handlers[i]
       try {
         const canHandle = await handler.canHandle(data)
+
         if (canHandle) {
           const handlerStatus: IACHandlerStatus = await handler.receive(data)
+
           if (handlerStatus === IACHandlerStatus.SUCCESS) {
             try {
               const result: IACMessageWrapper<unknown> = await handler.getResult()
@@ -95,7 +97,7 @@ export abstract class BaseIACService {
                   result.skippedProtocol.length > 0 &&
                   (this.platform.is('desktop') || this.platform.is('mobileweb') || this.platform.is('pwa'))
                 ) {
-                  this.uiEventElementService.showIsolatedModuleNotSupportOnWeb(result.skippedProtocol.length).catch
+                  this.uiEventElementService.showIsolatedModuleNotSupportOnWeb(result.skippedProtocol.length).catch(console.error)
                 } else if (result.skippedProtocol.length > 0) {
                   throw new Error('Cannot decode data')
                 }

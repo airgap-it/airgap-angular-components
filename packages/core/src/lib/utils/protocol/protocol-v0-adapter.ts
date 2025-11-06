@@ -132,6 +132,7 @@ import {
   ProtocolBlockExplorerAdapter,
   ProtocolNetworkAdapter
 } from '../../protocol/adapter/protocol-v0-adapter'
+import { AcurastModule, AcurastProtocol, createAcurastProtocol } from '@airgap/acurast'
 
 // Network
 
@@ -396,6 +397,15 @@ export async function createV0KusamaProtocol(
 export async function createV0TezosProtocol(...args: Parameters<typeof createTezosProtocol>): Promise<ICoinProtocolAdapter<TezosProtocol>> {
   const protocol: TezosProtocol = createTezosProtocol(...args)
   const module: TezosModule = new TezosModule()
+
+  return createV0Protocol(protocol, module)
+}
+
+export async function createV0AcurastProtocol(
+  ...args: Parameters<typeof createAcurastProtocol>
+): Promise<ICoinProtocolAdapter<AcurastProtocol>> {
+  const protocol: AcurastProtocol = createAcurastProtocol(...args)
+  const module: AcurastModule = new AcurastModule()
 
   return createV0Protocol(protocol, module)
 }

@@ -202,11 +202,12 @@ export class IACQrComponent implements OnDestroy {
     if (this.activeGenerator) {
       try {
         await this.activeGenerator.create(this._messageDefinitionObjects, this.multiChunkSize, this.singleChunkSize)
+
         this.qrdata = await this.activeGenerator.nextPart()
+
         this.qrError = ''
         this.numberOfParts = await this.activeGenerator.getNumberOfParts()
       } catch (e) {
-        console.log('QR generation error', e)
         this.qrError = 'Message is not compatible with the selected QR code type. Please select another one.'
       }
     } else {
