@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { UiEventService } from '../ui-event/ui-event.service'
+import { alertController } from '@ionic/core'
 
 @Injectable({
   providedIn: 'root'
@@ -124,6 +125,19 @@ export class UiEventElementsService {
         {
           text: 'Open settings',
           handler: openSettingsHandler
+        }
+      ]
+    })
+  }
+
+  public async showIsolatedModuleNotSupportOnWeb(amount: number): Promise<void> {
+    await this.uiEventService.showTranslatedAlert({
+      header: `${amount} Protocol ignored`,
+      message: 'Some protocols are unavailable on the web wallet',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'cancel'
         }
       ]
     })

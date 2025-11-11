@@ -93,7 +93,9 @@ export class BCURTypesGenerator extends IACQrGenerator {
       const element = data[0]
 
       return (
-        (element.protocol === MainProtocolSymbols.BTC_SEGWIT || element.protocol === MainProtocolSymbols.BTC_TAPROOT) &&
+        (element.protocol === MainProtocolSymbols.BTC_SEGWIT ||
+          element.protocol === MainProtocolSymbols.BTC ||
+          element.protocol === MainProtocolSymbols.BTC_TAPROOT) &&
         [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse].includes(element.type)
       )
     }
@@ -138,6 +140,7 @@ export class BCURTypesGenerator extends IACQrGenerator {
     parentFingerprint.writeUInt32BE(extendedPublicKey.parentFingerprint, 0)
 
     const isTaproot = data.protocol === MainProtocolSymbols.BTC_TAPROOT
+    const isSegwit = data.protocol === MainProtocolSymbols.BTC_SEGWIT
 
     let scriptExpressions: ScriptExpression[] = []
 
@@ -145,8 +148,11 @@ export class BCURTypesGenerator extends IACQrGenerator {
       const TR = new ScriptExpression(409, 'tr')
       patchTags([409])
       scriptExpressions = [TR]
-    } else {
+    } else if (isSegwit) {
       scriptExpressions = [ScriptExpressions.WITNESS_PUBLIC_KEY_HASH]
+    } else {
+      //default to legacy
+      scriptExpressions = [ScriptExpressions.PUBLIC_KEY_HASH]
     }
 
     const cryptoAccount = new CryptoAccount(bufferFrom(account.masterFingerprint, 'hex'), [

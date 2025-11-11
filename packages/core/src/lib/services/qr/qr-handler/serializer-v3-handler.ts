@@ -4,9 +4,21 @@ import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
 import * as rlp from '@ethereumjs/rlp'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
-import { BitcoinSegwitTransactionSignRequest, BitcoinTaprootTransactionSignRequest } from '@airgap/bitcoin'
-import { MainProtocolSymbols } from '@airgap/coinlib-core'
-import { IACMessageDefinitionObjectV3, SerializerV3, generateId, IACMessageType, MessageSignRequest } from '@airgap/serializer'
+import {
+  BitcoinSegwitTransactionSignRequest,
+  BitcoinLegacyTransactionSignRequest,
+  BitcoinTaprootTransactionSignRequest
+} from '@airgap/bitcoin'
+import { MainProtocolSymbols, ProtocolSymbols } from '@airgap/coinlib-core'
+import {
+  IACMessageDefinitionObjectV3,
+  SerializerV3,
+  generateId,
+  IACMessageType,
+  MessageSignRequest,
+  Success,
+  Failure
+} from '@airgap/serializer'
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { QRType } from '../../../../public-api'
 import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
@@ -126,7 +138,13 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
 
       const resultUr = bs58check.encode(this.combinedData)
 
-      return { result: await this.serializer.deserialize(resultUr), data: await this.getDataSingle() }
+      const result = (await this.serializer.deserialize(resultUr)).deserialize.map(
+        (md) => (md as Success<IACMessageDefinitionObjectV3>).value
+      )
+
+      const skippedProtocol = (await this.serializer.deserialize(resultUr)).skippedPayload.map((md) => (md as Failure<Error>).error)
+
+      return { result, data: await this.getDataSingle(), skippedProtocol }
     }
 
     return undefined
@@ -155,6 +173,10 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
   private async convertPSBT(psbt: string): Promise<IACMessageWrapper<IACMessageDefinitionObjectV3[]>> {
     const decodedPSBT = bitcoinJS.Psbt.fromHex(psbt)
     const isTaproot = decodedPSBT.data.inputs.some((input) => input.tapBip32Derivation)
+    const isSegwit = decodedPSBT.data.inputs.some((input) => input.witnessUtxo !== undefined || input.witnessScript !== undefined)
+    // const isLegacy = !isTaproot && !isSegwit
+
+    let protocol: ProtocolSymbols
 
     const payload = {
       transaction: { psbt },
@@ -163,8 +185,13 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
 
     if (isTaproot) {
       payload as BitcoinTaprootTransactionSignRequest
-    } else {
+      protocol = MainProtocolSymbols.BTC_TAPROOT
+    } else if (isSegwit) {
       payload as BitcoinSegwitTransactionSignRequest
+      protocol = MainProtocolSymbols.BTC_SEGWIT
+    } else {
+      payload as BitcoinLegacyTransactionSignRequest
+      protocol = MainProtocolSymbols.BTC
     }
 
     const ownRequestId: number = generateId(8)
@@ -176,7 +203,7 @@ export class SerializerV3Handler implements IACMessageHandler<IACMessageDefiniti
       result: [
         {
           id: ownRequestId,
-          protocol: isTaproot ? MainProtocolSymbols.BTC_TAPROOT : MainProtocolSymbols.BTC_SEGWIT,
+          protocol,
           type: IACMessageType.TransactionSignRequest,
           payload
         }

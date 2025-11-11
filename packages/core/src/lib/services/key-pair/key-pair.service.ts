@@ -44,9 +44,11 @@ export class KeyPairService {
     } else {
       const privateKey: string = await protocol.getPrivateKeyFromMnemonic(mnemonic, derivationPath, password)
 
+      const publicKey: string = await protocol.getPublicKeyFromMnemonic(mnemonic, derivationPath, password)
+
       return this.isUnsignedTransaction(unsigned)
         ? protocol.signWithPrivateKey(privateKey, unsigned.transaction)
-        : protocol.signMessage(unsigned.message, { privateKey })
+        : protocol.signMessage(unsigned.message, { privateKey, publicKey })
     }
   }
 

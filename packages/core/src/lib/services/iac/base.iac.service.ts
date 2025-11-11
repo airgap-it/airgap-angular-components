@@ -1,5 +1,6 @@
 import { IACMessageDefinitionObjectV3, IACMessageType } from '@airgap/serializer'
 import { Inject, Injectable } from '@angular/core'
+import { Platform } from '@ionic/angular'
 import { UiEventElementsService } from '../ui-event-elements/ui-event-elements.service'
 import { ClipboardService } from '../clipboard/clipboard.service'
 import { SerializerV3Generator } from '../qr/qr-generators/serializer-v3-generator'
@@ -27,13 +28,15 @@ export abstract class BaseIACService {
     ) => Promise<boolean>
   }
 
+  // protected readonly platform = inject(Platform)
   constructor(
     protected readonly uiEventElementService: UiEventElementsService,
     protected readonly clipboard: ClipboardService,
     protected readonly isReady: Promise<void>,
     protected readonly customHandlers: IACMessageHandler<unknown>[],
     protected readonly deeplinkService: DeeplinkService,
-    @Inject(APP_CONFIG) protected readonly appConfig: AppConfig
+    @Inject(APP_CONFIG) protected readonly appConfig: AppConfig,
+    protected readonly platform: Platform
   ) {
     this.serializerMessageHandlers = {
       [IACMessageType.AccountShareRequest]: this.syncTypeNotSupportedAlert.bind(this),
@@ -51,6 +54,8 @@ export abstract class BaseIACService {
 
     this.handlers.push(...customHandlers)
   }
+
+  private iacMessageTypes: (IACMessageType | undefined)[] = []
 
   public async storeResult(
     message: IACMessageWrapper<unknown>,
@@ -76,14 +81,27 @@ export abstract class BaseIACService {
       const handler = this.handlers[i]
       try {
         const canHandle = await handler.canHandle(data)
+
         if (canHandle) {
           const handlerStatus: IACHandlerStatus = await handler.receive(data)
+
           if (handlerStatus === IACHandlerStatus.SUCCESS) {
             try {
               const result: IACMessageWrapper<unknown> = await handler.getResult()
               const status: IACHandlerStatus = IACHandlerStatus.SUCCESS
               await handler.handleComplete()
               await this.resetHandlers()
+
+              if (result.skippedProtocol) {
+                if (
+                  result.skippedProtocol.length > 0 &&
+                  (this.platform.is('desktop') || this.platform.is('mobileweb') || this.platform.is('pwa'))
+                ) {
+                  this.uiEventElementService.showIsolatedModuleNotSupportOnWeb(result.skippedProtocol.length).catch(console.error)
+                } else if (result.skippedProtocol.length > 0) {
+                  throw new Error('Cannot decode data')
+                }
+              }
 
               return this.storeResult(result, status, transport)
             } catch (e) {
