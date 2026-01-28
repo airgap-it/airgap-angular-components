@@ -16,6 +16,7 @@ const modules = [
   new airgapCoinLib.astar.AstarModule(),
   new airgapCoinLib.icp.ICPModule(),
   new airgapCoinLib.optimism.OptimismModule(),
+  new airgapCoinLib.bnb.BnbModule(),
   new airgapCoinLib.base.BaseModule(),
   new airgapCoinLib.acurast.AcurastModule(),
   new airgapCoinLib.stellar.StellarModule()

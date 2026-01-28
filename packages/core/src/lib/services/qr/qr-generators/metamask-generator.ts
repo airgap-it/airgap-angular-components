@@ -61,6 +61,7 @@ export class MetamaskGenerator extends IACQrGenerator {
       return (
         (element.protocol === MainProtocolSymbols.ETH ||
           element.protocol === MainProtocolSymbols.OPTIMISM ||
+          element.protocol === MainProtocolSymbols.BNB ||
           element.protocol === MainProtocolSymbols.BASE) &&
         [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse, IACMessageType.MessageSignResponse].includes(
           element.type
