@@ -63,6 +63,14 @@ import {
   OptimismModule,
   OptimismProtocol
 } from '@airgap/optimism'
+// eslint-disable-next-line import/no-extraneous-dependencies
+import {
+  createERC20Token as createBaseERC20Token,
+  createBaseProtocol,
+  ERC20Token as BaseERC20Token,
+  BaseModule,
+  BaseProtocol
+} from '@airgap/base'
 import { createKusamaProtocol, createPolkadotProtocol, KusamaProtocol, PolkadotModule, PolkadotProtocol } from '@airgap/polkadot'
 import {
   BTCTezProtocol,
@@ -132,6 +140,7 @@ import {
   ProtocolBlockExplorerAdapter,
   ProtocolNetworkAdapter
 } from '../../protocol/adapter/protocol-v0-adapter'
+// eslint-disable-next-line import/order
 import { AcurastModule, AcurastProtocol, createAcurastProtocol } from '@airgap/acurast'
 
 // Network
@@ -366,6 +375,13 @@ export async function createV0OptimismProtocol(
   return createV0Protocol(protocol, module)
 }
 
+export async function createV0BaseProtocol(...args: Parameters<typeof createBaseProtocol>): Promise<ICoinProtocolAdapter<BaseProtocol>> {
+  const protocol: BaseProtocol = createBaseProtocol(...args)
+  const module: BaseModule = new BaseModule()
+
+  return createV0Protocol(protocol, module)
+}
+
 export async function createV0OptimismERC20Token(
   ...args: Parameters<typeof createOptimismERC20Token>
 ): Promise<ICoinSubProtocolAdapter<OptimismERC20Token>> {
@@ -374,6 +390,16 @@ export async function createV0OptimismERC20Token(
   const module: OptimismModule = new OptimismModule()
 
   return createV0ERC20Token(erc20Token, optimismProtocol, module)
+}
+
+export async function createV0BaseERC20Token(
+  ...args: Parameters<typeof createBaseERC20Token>
+): Promise<ICoinSubProtocolAdapter<BaseERC20Token>> {
+  const erc20Token: BaseERC20Token = createBaseERC20Token(...args)
+  const baseProtocol: BaseProtocol = createBaseProtocol(args[1])
+  const module: BaseModule = new BaseModule()
+
+  return createV0ERC20Token(erc20Token, baseProtocol, module)
 }
 
 export async function createV0PolkadotProtocol(

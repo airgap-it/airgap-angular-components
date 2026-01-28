@@ -9,6 +9,7 @@ import { EthereumTransactionSignResponse } from '@airgap/ethereum'
 import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, MessageSignResponse } from '@airgap/serializer'
 
 // import * as ecc from 'tiny-secp256k1'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import * as ecc from '@bitcoinerlab/secp256k1'
 
 import { BIP32Factory } from 'bip32'
@@ -58,7 +59,9 @@ export class MetamaskGenerator extends IACQrGenerator {
       const element = data[0]
 
       return (
-        (element.protocol === MainProtocolSymbols.ETH || element.protocol === MainProtocolSymbols.OPTIMISM) &&
+        (element.protocol === MainProtocolSymbols.ETH ||
+          element.protocol === MainProtocolSymbols.OPTIMISM ||
+          element.protocol === MainProtocolSymbols.BASE) &&
         [IACMessageType.AccountShareResponse, IACMessageType.TransactionSignResponse, IACMessageType.MessageSignResponse].includes(
           element.type
         )
