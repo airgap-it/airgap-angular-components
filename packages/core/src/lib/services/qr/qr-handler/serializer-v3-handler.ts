@@ -22,6 +22,7 @@ import {
 import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../iac/message-handler'
 import { QRType } from '../../../../public-api'
 import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
+// eslint-disable-next-line import/order
 import * as bitcoinJS from 'bitcoinjs-lib'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
