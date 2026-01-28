@@ -33,6 +33,8 @@ import {
 import { MoonbeamModule } from '@airgap/moonbeam'
 import { OptimismModule } from '@airgap/optimism'
 // eslint-disable-next-line import/no-extraneous-dependencies
+import { BnbModule } from '@airgap/bnb'
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { BaseModule } from '@airgap/base'
 import { PolkadotModule } from '@airgap/polkadot'
 import { TezosModule } from '@airgap/tezos'
@@ -88,6 +90,7 @@ export class IsolatedModules extends WebPlugin implements IsolatedModulesPlugin 
       new ICPModule(),
       new CoreumModule(),
       new OptimismModule(),
+      new BnbModule(),
       new BaseModule(),
       new AcurastModule(),
       new StellarModule()

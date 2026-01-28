@@ -1,16 +1,11 @@
 {
-  "version": "0.0.61-beta.4",
+  "version": "0.0.61-beta.8",
   "command": {
     "publish": {
-      "ignoreChanges": [
-        "*.sh",
-        "*.md"
-      ]
+      "ignoreChanges": ["*.sh", "*.md"]
     },
     "version": {
-      "npmClientArgs": [
-        "--legacy-peer-deps"
-      ]
+      "npmClientArgs": ["--legacy-peer-deps"]
     }
   }
 }

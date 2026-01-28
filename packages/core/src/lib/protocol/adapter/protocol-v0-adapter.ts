@@ -1166,6 +1166,8 @@ export class ICoinProtocolAdapter<T extends AirGapAnyProtocol = AirGapAnyProtoco
       ? SubProtocolSymbols.ETH_ERC20
       : identifier.startsWith(SubProtocolSymbols.OPTIMISM_ERC20)
       ? SubProtocolSymbols.OPTIMISM_ERC20
+      : identifier.startsWith(SubProtocolSymbols.BNB_ERC20)
+      ? SubProtocolSymbols.BNB_ERC20
       : identifier.startsWith(SubProtocolSymbols.BASE_ERC20)
       ? SubProtocolSymbols.BASE_ERC20
       : identifier
