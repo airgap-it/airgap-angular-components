@@ -68,17 +68,41 @@ export class PermissionsService {
    * link to the settings.
    */
   public async userRequestsPermissions(permissions: PermissionTypes[]): Promise<void> {
-    let canRequestPermission: boolean = false
-    for (const p of permissions) {
-      canRequestPermission = (await this.canAskForPermission(p)) || canRequestPermission
-    }
-    if (canRequestPermission) {
+    if (this.platform.is('android')) {
+      // On Android, always try requesting permissions first.
+      // This handles one-time permissions ("Ask Every Time") where the status
+      // may be misreported as DENIED_ALWAYS after app restart.
       await this.requestPermissions(permissions)
+
+      // Check if permission was granted after the request
+      let granted: boolean = false
+      for (const p of permissions) {
+        if (p === PermissionTypes.CAMERA) {
+          granted = (await this.hasCameraPermission()) === PermissionStatus.GRANTED || granted
+        } else if (p === PermissionTypes.MICROPHONE) {
+          granted = (await this.hasMicrophonePermission()) === PermissionStatus.GRANTED || granted
+        }
+      }
+
+      if (!granted) {
+        await this.uiEventElementsService.showOpenSettingsAlert(() => {
+          // eslint-disable-next-line no-console
+          this.diagnostic.switchToSettings().catch(console.error)
+        })
+      }
     } else {
-      await this.uiEventElementsService.showOpenSettingsAlert(() => {
-        // eslint-disable-next-line no-console
-        this.diagnostic.switchToSettings().catch(console.error)
-      })
+      let canRequestPermission: boolean = false
+      for (const p of permissions) {
+        canRequestPermission = (await this.canAskForPermission(p)) || canRequestPermission
+      }
+      if (canRequestPermission) {
+        await this.requestPermissions(permissions)
+      } else {
+        await this.uiEventElementsService.showOpenSettingsAlert(() => {
+          // eslint-disable-next-line no-console
+          this.diagnostic.switchToSettings().catch(console.error)
+        })
+      }
     }
   }
 
