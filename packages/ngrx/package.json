@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.61",
+  "version": "0.0.62",
   "publishConfig": {
     "access": "public"
   },
@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@airgap/angular-core": "^0.0.60",
-    "@airgap/coinlib-core": "^0.13.45",
+    "@airgap/coinlib-core": "^0.13.46",
     "@angular/common": "^16.1.0",
     "@angular/core": "^16.1.0",
     "@angular/forms": "^16.1.0",
