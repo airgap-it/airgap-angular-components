@@ -13,8 +13,7 @@
     "test:lerna": "ng test core --watch=false",
     "lint": "npx eslint 'src/**/*.ts'",
     "lint:ci": "npx eslint 'src/**/*.ts' -f json -o ngrx_lintReport.json || true",
-    "lint:fix": "npx eslint 'src/**/*/ts' --fix",
-    "e2e": "ng e2e core"
+    "lint:fix": "npx eslint 'src/**/*/ts' --fix"
   },
   "dependencies": {
     "tslib": "^2.3.0"
