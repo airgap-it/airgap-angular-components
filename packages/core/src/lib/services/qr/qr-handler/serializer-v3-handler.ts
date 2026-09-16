@@ -1,8 +1,8 @@
 import { UR, URDecoder, UREncoder } from '@ngraveio/bc-ur'
-import * as bs58check from 'bs58check'
+import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2/index'
 import { CryptoKeypath, CryptoPSBT } from '@keystonehq/bc-ur-registry'
 import { EthSignRequest, DataType } from '@keystonehq/bc-ur-registry-eth'
-import * as rlp from '@ethereumjs/rlp'
+import * as rlp from '@airgap/coinlib-core/dependencies/src/rlp-2.2.3/index'
 import { Transaction, TransactionFactory } from '@ethereumjs/tx'
 import {
   BitcoinSegwitTransactionSignRequest,
@@ -23,7 +23,7 @@ import { IACHandlerStatus, IACMessageHandler, IACMessageWrapper } from '../../ia
 import { QRType } from '../../../../public-api'
 import { TEMP_BTC_REQUEST_IDS, TEMP_MM_REQUEST_IDS } from '../../../utils/utils'
 // eslint-disable-next-line import/order
-import * as bitcoinJS from 'bitcoinjs-lib'
+import * as bitcoinJS from '@airgap/coinlib-core/dependencies/src/bitcoinjs-lib-6.1.7/src/index'
 
 export class SerializerV3Handler implements IACMessageHandler<IACMessageDefinitionObjectV3[]> {
   public readonly name: string = 'SerializerV3Handler'

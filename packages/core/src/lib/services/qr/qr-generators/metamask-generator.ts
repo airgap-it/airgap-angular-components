@@ -10,9 +10,9 @@ import { AccountShareResponse, IACMessageDefinitionObjectV3, IACMessageType, Mes
 
 // import * as ecc from 'tiny-secp256k1'
 // eslint-disable-next-line import/no-extraneous-dependencies
-import * as ecc from '@bitcoinerlab/secp256k1'
+import * as ecc from '@airgap/coinlib-core/dependencies/src/@bitcoinerlab/secp256k1-1.2.0/src/index'
 
-import { BIP32Factory } from 'bip32'
+import { BIP32Factory } from '@airgap/coinlib-core/dependencies/src/bip32-5.0.1/src/index'
 
 import { IACQrGenerator } from '../../iac/qr-generator'
 

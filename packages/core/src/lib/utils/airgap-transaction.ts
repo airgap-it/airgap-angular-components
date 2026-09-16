@@ -1,5 +1,5 @@
 import { IAirGapTransaction } from '@airgap/coinlib-core'
-import BigNumber from 'bignumber.js'
+import BigNumber from '@airgap/coinlib-core/dependencies/src/bignumber.js-9.0.0/bignumber'
 
 import { flattened } from './array'
 

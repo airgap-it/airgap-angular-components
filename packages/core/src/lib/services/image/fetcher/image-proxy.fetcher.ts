@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import axios, { AxiosResponse } from '@airgap/coinlib-core/dependencies/src/axios-0.33.0/index'
 import { ImageFetcher } from '../image.service'
 
 interface ApiResponseBase {
