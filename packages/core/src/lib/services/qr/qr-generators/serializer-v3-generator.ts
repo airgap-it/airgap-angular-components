@@ -1,6 +1,6 @@
 import { IACMessageDefinitionObjectV3, SerializerV3 } from '@airgap/serializer'
 import { UR, UREncoder } from '@ngraveio/bc-ur'
-import * as bs58check from 'bs58check'
+import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2/index'
 
 import { IACQrGenerator } from '../../iac/qr-generator'
 

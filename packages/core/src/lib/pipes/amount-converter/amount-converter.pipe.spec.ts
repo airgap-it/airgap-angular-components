@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BigNumber from 'bignumber.js'
+import BigNumber from '@airgap/coinlib-core/dependencies/src/bignumber.js-9.0.0/bignumber'
 import { MainProtocolSymbols } from '@airgap/coinlib-core'
 import { TestBed, waitForAsync } from '@angular/core/testing'
 import { ProtocolService } from '../../services/protocol/protocol.service'

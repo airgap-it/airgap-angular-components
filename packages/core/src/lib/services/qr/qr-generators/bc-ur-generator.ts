@@ -1,10 +1,10 @@
 /* eslint-disable max-classes-per-file */
 import { UREncoder } from '@ngraveio/bc-ur'
-import * as bs58check from 'bs58check'
+import * as bs58check from '@airgap/coinlib-core/dependencies/src/bs58check-2.1.2/index'
 // import * as ecc from 'tiny-secp256k1'
-import * as ecc from '@bitcoinerlab/secp256k1'
+import * as ecc from '@airgap/coinlib-core/dependencies/src/@bitcoinerlab/secp256k1-1.2.0/src/index'
 
-import { BIP32Factory } from 'bip32'
+import { BIP32Factory } from '@airgap/coinlib-core/dependencies/src/bip32-5.0.1/src/index'
 // import ecc from 'tiny-secp256k1'
 
 import {

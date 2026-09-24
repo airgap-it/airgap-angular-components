@@ -1,0 +1,8 @@
+node_modules
+packages/*/node_modules
+packages/*/dist
+dist
+.git
+.angular
+coverage
+*.lintReport.json

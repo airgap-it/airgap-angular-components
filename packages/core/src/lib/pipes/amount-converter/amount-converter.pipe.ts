@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core'
 // eslint-disable-next-line @typescript-eslint/naming-convention
-import BigNumber from 'bignumber.js'
+import BigNumber from '@airgap/coinlib-core/dependencies/src/bignumber.js-9.0.0/bignumber'
 import { ICoinProtocol, ProtocolNetwork, ProtocolSymbols } from '@airgap/coinlib-core'
 import { ProtocolService } from '../../services/protocol/protocol.service'
 
