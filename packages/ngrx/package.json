@@ -1,6 +1,6 @@
 {
   "name": "@airgap/angular-ngrx",
-  "version": "0.0.62",
+  "version": "0.1.0",
   "publishConfig": {
     "access": "public"
   },
@@ -13,15 +13,14 @@
     "test:lerna": "ng test ngrx --watch=false",
     "lint": "npx eslint 'src/**/*.ts'",
     "lint:ci": "npx eslint 'src/**/*.ts' -f json -o ngrx_lintReport.json || true",
-    "lint:fix": "npx eslint 'src/**/*/ts' --fix",
-    "e2e": "ng e2e ngrx"
+    "lint:fix": "npx eslint 'src/**/*/ts' --fix"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@airgap/angular-core": "^0.0.60",
-    "@airgap/coinlib-core": "^0.13.46",
+    "@airgap/angular-core": "^0.1.0",
+    "@airgap/coinlib-core": "^0.14.0",
     "@angular/common": "^16.1.0",
     "@angular/core": "^16.1.0",
     "@angular/forms": "^16.1.0",

@@ -5,7 +5,7 @@ module.exports = {
     node: true
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', '@typescript-eslint/tslint', 'prefer-arrow', 'import'],
+  plugins: ['@typescript-eslint', 'prefer-arrow', 'import'],
   extends: ['plugin:@typescript-eslint/recommended', 'prettier', 'plugin:prettier/recommended'],
   rules: {
     '@typescript-eslint/adjacent-overload-signatures': 'error',
@@ -202,42 +202,18 @@ module.exports = {
     'use-isnan': 'error',
     'valid-typeof': 'off',
     yoda: 'error',
-    '@typescript-eslint/tslint/config': [
-      'warn',
-      {
-        rules: {
-          ban: [true, 'fit', 'fdescribe', 'xit', 'xdescribe'],
-          encoding: true,
-          'import-blacklist': [true, 'rxjs/Rx', 'lodash'],
-          'jsdoc-format': true,
-          'match-default-export-name': true,
-          'no-boolean-literal-compare': true,
-          'no-dynamic-delete': true,
-          'no-inferred-empty-object-type': true,
-          'no-mergeable-namespace': true,
-          'no-reference-import': true,
-          'no-unnecessary-callback-wrapper': true,
-          'prefer-conditional-expression': true,
-          'prefer-method-signature': true,
-          'prefer-switch': false,
-          'prefer-while': true,
-          'return-undefined': true,
-          'switch-final-break': true,
-          typedef: [
-            false,
-            'call-signature',
-            'arrow-call-signature',
-            'parameter',
-            'arrow-parameter',
-            'property-declaration',
-            'variable-declaration',
-            'member-variable-declaration',
-            'object-destructuring',
-            'array-destructuring'
-          ]
-        }
-      }
-    ],
+    // Replaces the rules that used to run through @typescript-eslint/tslint/config.
+    // Kept at 'warn', the severity the bridged tslint rules had.
+    // Dropped for lack of an equivalent: encoding, jsdoc-format, match-default-export-name,
+    // no-inferred-empty-object-type, no-mergeable-namespace,
+    // no-unnecessary-callback-wrapper, prefer-conditional-expression, prefer-while,
+    // return-undefined, switch-final-break.
+    'no-restricted-globals': ['warn', 'fit', 'fdescribe', 'xit', 'xdescribe'],
+    'no-restricted-imports': ['warn', { paths: ['rxjs/Rx', 'lodash'] }],
+    '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
+    '@typescript-eslint/no-dynamic-delete': 'warn',
+    '@typescript-eslint/triple-slash-reference': 'warn',
+    '@typescript-eslint/method-signature-style': ['warn', 'method'],
     'no-implicit-coercion': 'error'
   }
 }
