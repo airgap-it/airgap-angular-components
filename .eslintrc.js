@@ -204,7 +204,7 @@ module.exports = {
     yoda: 'error',
     // Replaces the rules that used to run through @typescript-eslint/tslint/config.
     // Kept at 'warn', the severity the bridged tslint rules had.
-    // Dropped for lack of an equivalent: encoding, match-default-export-name,
+    // Dropped for lack of an equivalent: encoding, jsdoc-format, match-default-export-name,
     // no-inferred-empty-object-type, no-mergeable-namespace,
     // no-unnecessary-callback-wrapper, prefer-conditional-expression, prefer-while,
     // return-undefined, switch-final-break.
