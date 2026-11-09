@@ -33,8 +33,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # --ignore-scripts: no dependency lifecycle script runs. Karma needs the Chromium that
+      # puppeteer's own install script downloads, so that one is run explicitly.
       - name: 🔧 Install dependencies
-        run: npm ci --legacy-peer-deps --no-audit --no-fund
+        run: |
+          npm ci --legacy-peer-deps --no-audit --no-fund --ignore-scripts
+          node node_modules/puppeteer/install.js
 
       # Same order as the Dockerfile and the GitLab unit job: ngrx builds against the built core.
       - name: 🏗️ Build
