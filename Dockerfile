@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:24
 
 # Chrome needs these to run the bundled Chromium that Puppeteer installs.
 # See https://crbug.com/795759
